@@ -16,6 +16,7 @@ public class EnemySpawner : MonoBehaviour
     {
         Enemy enemy = Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity);
         enemyPrefab.correctCommand = (CommandType)Random.Range(0, 4);
+        enemy.UpdateCommanedText();
         player.SetEnemy(enemy);
     }
 

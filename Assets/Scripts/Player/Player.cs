@@ -7,28 +7,28 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.A))
+        if(Input.GetKeyDown(KeyCode.LeftArrow))
         {
            if( enemy.Check(CommandType.Left))
             {
                 spawner.StartSpawn();
             }
         }
-        else if (Input.GetKeyDown(KeyCode.D))
+        else if (Input.GetKeyDown(KeyCode.RightArrow))
         {
            if( enemy.Check(CommandType.Right))
             {
                 spawner.StartSpawn();
             }
         }
-        else if (Input.GetKeyDown(KeyCode.W))
+        else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             if(enemy.Check(CommandType.Up))
             {
                 spawner.StartSpawn();
             }   
         }
-        else if (Input.GetKeyDown(KeyCode.S))
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
            if (enemy.Check(CommandType.Down))
             {

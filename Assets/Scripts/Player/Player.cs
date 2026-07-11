@@ -7,6 +7,11 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (enemy == null)
+        {
+            return;
+        }
+
         if(Input.GetKeyDown(KeyCode.LeftArrow))
         {
            if( enemy.Check(CommandType.Left))

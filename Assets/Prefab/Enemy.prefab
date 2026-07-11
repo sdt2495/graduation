@@ -105,7 +105,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa37e2711d4617d4db41d01647e6a924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  correctCommand: 1
   textMeshPro: {fileID: 3241699686174329427}
 --- !u!1 &3599964758595178842
 GameObject:
@@ -340,7 +339,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0.03768444, y: 0, z: 0.028696775, w: 0}
+  m_margin: {x: -0.76816845, y: 0, z: -0.8391454, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

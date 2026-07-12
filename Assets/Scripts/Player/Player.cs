@@ -1,9 +1,11 @@
+using System.Collections;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     [SerializeField] private Enemy enemy;
     [SerializeField] private EnemySpawner spawner;
+    [SerializeField] private SpriteRenderer renderer;
 
     private void Update()
     {
@@ -11,39 +13,58 @@ public class Player : MonoBehaviour
         {
             return;
         }
-
+        
         if(Input.GetKeyDown(KeyCode.LeftArrow))
         {
-           if( enemy.Check(CommandType.Left))
-            {
-                spawner.StartSpawn();
-            }
+            CheckCommaned(CommandType.Left);
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        else if(Input.GetKeyDown(KeyCode.RightArrow))
         {
-           if( enemy.Check(CommandType.Right))
-            {
-                spawner.StartSpawn();
-            }
+            CheckCommaned(CommandType.Right);
         }
-        else if (Input.GetKeyDown(KeyCode.UpArrow))
+        else if(Input.GetKeyDown(KeyCode.UpArrow))
         {
-            if(enemy.Check(CommandType.Up))
-            {
-                spawner.StartSpawn();
-            }   
+            CheckCommaned(CommandType.Up);
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        else if( Input.GetKeyDown(KeyCode.DownArrow))
         {
-           if (enemy.Check(CommandType.Down))
-            {
-                spawner.StartSpawn();
-            }
+            CheckCommaned(CommandType.Down);
         }
     }
 
     public void SetEnemy(Enemy newEnemy)
     {
         enemy = newEnemy;
+    }
+
+    private void CheckCommaned(CommandType command)
+    {
+        CheckResult result = enemy.Check(command);
+
+        switch (result)
+        {
+            case CheckResult.Success:
+                // è¨Ç≥Ç¢âÊñ óhÇÍ
+                CameraShake.instance.Shake(0.08f, 0.05f);
+                break;
+
+            case CheckResult.Complete:
+                // ëÂÇ´Ç¢âÊñ óhÇÍ
+                CameraShake.instance.Shake(0.18f, 0.2f);
+                spawner.StartSpawn();
+                break;
+
+            case CheckResult.Miss:
+                // ê‘ì_ñ≈
+                StartCoroutine(FlashRed());
+                break;
+        }
+    }
+
+    private IEnumerator FlashRed()
+    {
+        renderer.color = Color.red;
+        yield return new WaitForSeconds(0.1f);
+        renderer.color = Color.white;
     }
 }

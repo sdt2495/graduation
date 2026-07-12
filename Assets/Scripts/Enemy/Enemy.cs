@@ -11,6 +11,14 @@ public enum CommandType
     Right
 }
 
+public enum CheckResult
+{
+    Success,   // “r’†¬Œ÷
+    Complete,  // ‘S•”¬Œ÷
+    Miss       // ¸”s
+}
+
+
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private TMPro.TextMeshProUGUI textMeshPro;
@@ -22,21 +30,25 @@ public class Enemy : MonoBehaviour
     /// </summary>
     /// <param name="inputcommaned"></param>
     /// <returns></returns>
-    public bool Check(CommandType inputcommaned)
+    public CheckResult Check(CommandType inputcommaned)
     {
-       if(inputcommaned == commaneds[currentIndex])
+        if (inputcommaned == commaneds[currentIndex])
         {
             currentIndex++;
             UpdateCommanedText();
 
-            // ‘S•”“ü—Í‚Å‚«‚½
-            if(currentIndex >= commaneds.Count)
+            // ‘S¬Œ÷
+            if (currentIndex >= commaneds.Count)
             {
-                return true;
+                return CheckResult.Complete;
             }
-            return false;
+
+            // “r’†¬Œ÷
+            return CheckResult.Success;
         }
-        return false;
+
+        // ƒ~ƒX
+        return CheckResult.Miss;
     }
 
     public void SetRandomCommands()
@@ -44,7 +56,7 @@ public class Enemy : MonoBehaviour
         commaneds.Clear();
         currentIndex = 0;
 
-        int count = Random.Range(2, 4);
+        int count = Random.Range(1, 4);
 
         for(int i = 0; i < count; i++)
         {

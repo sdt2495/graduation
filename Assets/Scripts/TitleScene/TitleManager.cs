@@ -11,8 +11,6 @@ public class TitleManager : MonoBehaviour
     [Header("TitleSEManager")]
     [SerializeField] private TitleSEManager titleSEManager; // タイトルでのSEを再生するスクリプト
 
-
-
     #region ボタン (仮)
 
     /// <summary>

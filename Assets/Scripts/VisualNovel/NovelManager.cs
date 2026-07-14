@@ -5,24 +5,41 @@ using UnityEngine.EventSystems;
 /// <summary>
 /// ノベルゲーム全体の進行を管理するクラス
 /// </summary>
-
-// CSVの中身
-// line[0] = ID
-// line[1] = 名前
-// line[2] = セリフ
 public class NovelManager : MonoBehaviour
 {
-    [Header("CSVReader")]
-    [SerializeField] private CSVReader csvReader;            // CSVを読み込むスクリプト
+    #region CSV列番号 (あとでcsvReaderに移動してください)
+    private const int COL_ID = 0;        // ID
+    private const int COL_SPEAKER = 1;   // 発言者
+    private const int COL_MESSAGE = 2;   // セリフ
+
+    private const int COL_CHARACTER = 3; // 立ち絵:表示画像
+    private const int COL_POSITION = 4;  // 立ち絵:表示位置
+    private const int COL_FLIP = 5;      // 立ち絵:反転
+
+    private const int COL_VOICE = 6;     // VOICE再生
+    private const int COL_SE = 7;        // SE再生
+    private const int COL_BGM = 8;       // BGM再生
+    #endregion
+
+    [Header("csvReader")]
+    [SerializeField] private CSVReader csvReader;                    // CSVを読み込むスクリプト
 
     [Header("TextTyper")]
-    [SerializeField] private TextTyper textTyper;            // 一文字ずつ表示するスクリプト
+    [SerializeField] private TextTyper textTyper;                    // 一文字ずつ表示するスクリプト
 
-    [Header("NovelSEManager")]
-    [SerializeField] private NovelSEManager seManager;       // SEを再生するスクリプト
+    [Header("NovelSystemSEManager")]
+    [SerializeField] private NovelSystemSEManager systemSEManager;   // システムSEを再生するスクリプト
 
     [Header("BackLogManager")]
-    [SerializeField] private BackLogManager backLogManager;  // ログを遡るスクリプト
+    [SerializeField] private BackLogManager backLogManager;          // ログを遡るスクリプト
+
+    [Header("NovelVoiceManager")]
+    [SerializeField] private NovelVoiceManager voiceManager;         // 音声を再生するスクリプト
+
+    [Header("NovelSEManager")]
+    [SerializeField] private NovelSEManager seManager;                // SEを再生するスクリプト
+
+
 
     [Header("──────────────────────────────")]
     [Header("名前表示")]
@@ -44,6 +61,8 @@ public class NovelManager : MonoBehaviour
     [Header("──────────────────────────────")]
     [Header("オートモード")]
     [SerializeField] private float autoWaitTime = 1.5f;  // オートモード待機時間
+    [Header("音声の終了を待つか？")]
+    [SerializeField] private bool waitVoiceEnd = true;
 
 
     private float autoTimer = 0f;        // オートモードタイマー
@@ -52,6 +71,8 @@ public class NovelManager : MonoBehaviour
     private int currentLine = 0;         // 現在読んでいる行番号
 
     private bool messageVisible = true;  // ウィンドウの表示
+
+    private bool waitingVoice = false;   // 音声待ち
 
     #region プロパティ
     public bool IsAutoMode => playMode == PlayMode.Auto;
@@ -192,6 +213,24 @@ public class NovelManager : MonoBehaviour
         if ((!IsAutoMode && !IsSkipMode) || !autoWaiting)
             return;
 
+        // Auto時のみボイス待ち
+        if (IsAutoMode && waitVoiceEnd)
+        {
+            if (voiceManager != null && voiceManager.IsPlayingVoice)
+            {
+                waitingVoice = true;
+                return;
+            }
+
+
+            // ボイス終了した瞬間
+            if (waitingVoice)
+            {
+                waitingVoice = false;
+                autoTimer = 0f;
+            }
+        }
+
         // タイマーを進める
         autoTimer += Time.deltaTime;
 
@@ -238,9 +277,9 @@ public class NovelManager : MonoBehaviour
         }
 
         // 次の文章へ進むSE
-        if (seManager != null)
+        if (systemSEManager != null)
         {
-            seManager.PlayNextLineSE();
+            systemSEManager.PlayNextLineSE();
         }
         // 現在の行を表示
         DisplayCurrentLine();
@@ -257,18 +296,25 @@ public class NovelManager : MonoBehaviour
 
 
         // 発言者を表示
-        ShowSpeaker(line[1]);
+        ShowSpeaker(line[COL_SPEAKER]);
         // セリフを表示
-        ShowMessage(line[2]);
+        ShowMessage(line[COL_MESSAGE]);
+
+        // ボイス再生
+        voiceManager.PlayVoice(line[COL_VOICE]);
+        // SE再生
+        seManager.PlaySE(line[COL_SE]);
+        
+
         // デバッグを表示
-        Debug.Log(line[0] + " : " + line[1] + " : " + line[2]);
+        Debug.Log(line[COL_ID] + " : " + line[COL_SPEAKER] + " : " + line[COL_MESSAGE]);
 
 
         // 次の行へ
         currentLine++;
 
         // こういうこと？
-        backLogManager.AddLog(line[1], line[2]);
+        backLogManager.AddLog(line[COL_SPEAKER], line[COL_MESSAGE]);
     }
     #endregion
 
@@ -334,9 +380,9 @@ public class NovelManager : MonoBehaviour
         UpdateButtonView();
 
         // Auto切替SE
-        if (seManager != null)
+        if (systemSEManager != null)
         {
-            seManager.PlayAutoSE(enable);
+            systemSEManager.PlayAutoSE(enable);
         }
 
         // オートON時かつ、すでに文字送り終了
@@ -366,9 +412,9 @@ public class NovelManager : MonoBehaviour
         UpdateButtonView();
 
         // Skip切替SE
-        if (seManager != null)
+        if (systemSEManager != null)
         {
-            seManager.PlaySkipSE(enable);
+            systemSEManager.PlaySkipSE(enable);
         }
 
         if (enable)

@@ -3,12 +3,13 @@ using UnityEngine;
 /// <summary>
 /// ノベルゲーム用SE管理クラス
 /// </summary>
-/// 
-[RequireComponent(typeof(AudioSource))]
-public class NovelSEManager : MonoBehaviour
+public class NovelSystemSEManager : MonoBehaviour
 {
+    [Header("AudioSource (システムSE)")]
+    [SerializeField] private AudioSource audioSource;
+
     [Header("SE音量")]
-    [SerializeField][Range(0f, 1f)] private float seVolume = 1f;
+    [SerializeField][Range(0f, 1f)] private float systemVolume = 1f;
 
     [Space(5)]
 
@@ -26,12 +27,12 @@ public class NovelSEManager : MonoBehaviour
     [SerializeField] private AudioClip skipOnSE;
     [SerializeField] private AudioClip skipOffSE;
 
-    private AudioSource audioSource;
 
-    private void Start()
-    {
-        audioSource = GetComponent<AudioSource>();
-    }
+    [Header("決定")]
+    [SerializeField] private AudioClip decideSE;
+
+    [Header("キャンセル")]
+    [SerializeField] private AudioClip cancelSE;
 
     #region SE呼び出し関数
     /// <summary>
@@ -39,7 +40,7 @@ public class NovelSEManager : MonoBehaviour
     /// </summary>
     public void PlayTextSE()
     {
-        PlaySE(textSE);
+        PlaySystemSE(textSE);
     }
 
     /// <summary>
@@ -47,7 +48,7 @@ public class NovelSEManager : MonoBehaviour
     /// </summary>
     public void PlayNextLineSE()
     {
-        PlaySE(nextLineSE);
+        PlaySystemSE(nextLineSE);
     }
 
     /// <summary>
@@ -57,11 +58,11 @@ public class NovelSEManager : MonoBehaviour
     {
         if (enable)
         {
-            PlaySE(autoOnSE);
+            PlaySystemSE(autoOnSE);
         }
         else
         {
-            PlaySE(autoOffSE);
+            PlaySystemSE(autoOffSE);
         }
     }
 
@@ -72,25 +73,40 @@ public class NovelSEManager : MonoBehaviour
     {
         if (enable)
         {
-            PlaySE(skipOnSE);
+            PlaySystemSE(skipOnSE);
         }
         else
         {
-            PlaySE(skipOffSE);
+            PlaySystemSE(skipOffSE);
         }
     }
+    #endregion
+
+    #region UI
+
+    public void PlayDecideSE()
+    {
+        PlaySystemSE(decideSE);
+    }
+
+
+    public void PlayCancelSE()
+    {
+        PlaySystemSE(cancelSE);
+    }
+
     #endregion
 
     /// <summary>
     /// 実際のSE再生処理
     /// </summary>
-    void PlaySE(AudioClip clip)
+    void PlaySystemSE(AudioClip clip)
     {
         // SEが設定されていなければ終了
         if (clip == null)
             return;
 
         // AudioSourceで再生
-        audioSource.PlayOneShot(clip, seVolume);
+        audioSource.PlayOneShot(clip, systemVolume);
     }
 }

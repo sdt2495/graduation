@@ -2,9 +2,8 @@ using UnityEngine;
 
 public class NovelVoiceManager : MonoBehaviour
 {
-    [Header("AudioSource (SE)")]
+    [Header("AudioSource (‰¹º)")]
     [SerializeField] private AudioSource voiceSource;
-
 
     public bool IsPlayingVoice => voiceSource.isPlaying; // ‰¹º‚ªÄ¶’†‚©
 

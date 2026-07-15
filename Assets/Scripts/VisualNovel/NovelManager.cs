@@ -19,26 +19,41 @@ public class NovelManager : MonoBehaviour
     private const int COL_VOICE = 6;     // VOICE再生
     private const int COL_SE = 7;        // SE再生
     private const int COL_BGM = 8;       // BGM再生
+    private const int COL_AMBIENT = 9;   // 環境音再生
+
+    private const int COL_BG = 10;       // BG画像
+    private const int COL_CG = 11;       // CG画像
     #endregion
 
     [Header("csvReader")]
-    [SerializeField] private CSVReader csvReader;                    // CSVを読み込むスクリプト
+    [SerializeField] private CSVReader csvReader;                        // CSVを読み込むスクリプト
 
     [Header("TextTyper")]
-    [SerializeField] private TextTyper textTyper;                    // 一文字ずつ表示するスクリプト
+    [SerializeField] private TextTyper textTyper;                        // 一文字ずつ表示するスクリプト
 
     [Header("NovelSystemSEManager")]
-    [SerializeField] private NovelSystemSEManager systemSEManager;   // システムSEを再生するスクリプト
+    [SerializeField] private NovelSystemSEManager systemSEManager;       // システムSEを再生するスクリプト
 
     [Header("BackLogManager")]
-    [SerializeField] private BackLogManager backLogManager;          // ログを遡るスクリプト
+    [SerializeField] private BackLogManager backLogManager;              // ログを遡るスクリプト
 
     [Header("NovelVoiceManager")]
-    [SerializeField] private NovelVoiceManager voiceManager;         // 音声を再生するスクリプト
+    [SerializeField] private NovelVoiceManager voiceManager;             // 音声を再生するスクリプト
 
     [Header("NovelSEManager")]
-    [SerializeField] private NovelSEManager seManager;                // SEを再生するスクリプト
+    [SerializeField] private NovelSEManager seManager;                   // SEを再生するスクリプト
+    
+    [Header("NovelBGMManager")]
+    [SerializeField] private NovelBGMManager bgmManager;                 // BGMを再生するスクリプト
 
+    [Header("NovelAmbientManager")]
+    [SerializeField] private NovelAmbientManager ambientManager;         // 環境音を再生するスクリプト
+
+    [Header("NovelBackgroundManager")]
+    [SerializeField] private NovelBackgroundManager backgroundManager;   // BGを表示するスクリプト
+
+    [Header("NovelCGManager")]
+    [SerializeField] private NovelCGManager cgManager;                   // CGを表示するスクリプト
 
 
     [Header("──────────────────────────────")]
@@ -47,6 +62,9 @@ public class NovelManager : MonoBehaviour
 
     [Header("Messageウィンドウ")]
     [SerializeField] private GameObject messageWindow;   // メッセージウィンドウ
+
+    [Header("次へマーク")]
+    [SerializeField] private GameObject nextMark;
 
     [Header("ボタン")]
     [SerializeField] private UnityEngine.UI.Button autoButton;
@@ -59,10 +77,15 @@ public class NovelManager : MonoBehaviour
     [SerializeField] private Color activeButtonColor = Color.green;
 
     [Header("──────────────────────────────")]
-    [Header("オートモード")]
+    [Header("オートモード待機時間")]
     [SerializeField] private float autoWaitTime = 1.5f;  // オートモード待機時間
+
     [Header("音声の終了を待つか？")]
     [SerializeField] private bool waitVoiceEnd = true;
+    
+    [Header("──────────────────────────────")]
+    [Header("スキップモード待機時間")]
+    [SerializeField] private float skipWaitTime = 0.1f;  // スキップモード待機時間
 
 
     private float autoTimer = 0f;        // オートモードタイマー
@@ -103,7 +126,7 @@ public class NovelManager : MonoBehaviour
     private PlayMode playMode = PlayMode.Normal;     // 現在のモード
     #endregion
 
-    #region イベント登録
+    #region イベント登録 +α
     void Start()
     {
         // イベント登録 (TextTyperの終了イベントを受け取る)
@@ -111,6 +134,12 @@ public class NovelManager : MonoBehaviour
 
         // ボタン表示更新
         UpdateButtonView();
+
+        if (nextMark != null)
+        {
+            //「次へ」アイコン非表示
+            nextMark.SetActive(false);
+        }
     }
     void OnDestroy()
     {
@@ -123,6 +152,17 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void OnTypingFinished()
     {
+        // Auto・Skip中は表示しない
+        if (!IsAutoMode && !IsSkipMode)
+        {
+            if (nextMark != null)
+            {
+                //「次へ」アイコン表示
+                nextMark.SetActive(true);
+            }
+        }
+
+        // 待機開始
         BeginNextLineWait();
     }
     #endregion
@@ -222,7 +262,6 @@ public class NovelManager : MonoBehaviour
                 return;
             }
 
-
             // ボイス終了した瞬間
             if (waitingVoice)
             {
@@ -234,8 +273,8 @@ public class NovelManager : MonoBehaviour
         // タイマーを進める
         autoTimer += Time.deltaTime;
 
-        // スキップモード中なら0f、falseならautoWaitTime (条件 ? 条件がtrueの場合 : 条件がfalseの場合)
-        float waitTime = playMode == PlayMode.Skip ? 0f : autoWaitTime;
+        // スキップモード中なら skipWaitTime、falseならautoWaitTime (条件 ? 条件がtrueの場合 : 条件がfalseの場合)
+        float waitTime = playMode == PlayMode.Skip ? skipWaitTime : autoWaitTime;
 
         // 待機時間を超えたら
         if (autoTimer >= waitTime)
@@ -259,6 +298,13 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void AdvanceMessage()
     {
+        //（ShowMessage()でも消えるので必須ではありませんが、クリックした瞬間に消したいならこちらがおすすめです。）
+        if (nextMark != null)
+        {
+            //「次へ」アイコン非表示
+            nextMark.SetActive(false);
+        }
+
         // 文字送り中なら全文表示
         if (textTyper.IsTyping)
         {
@@ -277,10 +323,8 @@ public class NovelManager : MonoBehaviour
         }
 
         // 次の文章へ進むSE
-        if (systemSEManager != null)
-        {
-            systemSEManager.PlayNextLineSE();
-        }
+        systemSEManager?.PlayNextLineSE();
+        
         // 現在の行を表示
         DisplayCurrentLine();
     }
@@ -301,10 +345,19 @@ public class NovelManager : MonoBehaviour
         ShowMessage(line[COL_MESSAGE]);
 
         // ボイス再生
-        voiceManager.PlayVoice(line[COL_VOICE]);
+        voiceManager?.PlayVoice(line[COL_VOICE]);
         // SE再生
-        seManager.PlaySE(line[COL_SE]);
-        
+        seManager?.PlaySE(line[COL_SE]);
+        // BGM再生
+        bgmManager?.PlayBGM(line[COL_BGM]);
+        // 環境音再生
+        ambientManager?.PlayAmbient(line[COL_AMBIENT]);
+
+        // BG表示
+        backgroundManager?.ChangeBackground(line[COL_BG]);
+        // CG表示
+        cgManager?.ShowCG(line[COL_CG]);
+
 
         // デバッグを表示
         Debug.Log(line[COL_ID] + " : " + line[COL_SPEAKER] + " : " + line[COL_MESSAGE]);
@@ -343,6 +396,12 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void ShowMessage(string message)
     {
+        if (nextMark != null)
+        {
+            //「次へ」アイコン非表示
+            nextMark.SetActive(false);
+        }
+
         // スキップモード
         if (IsSkipMode)
         {
@@ -380,10 +439,7 @@ public class NovelManager : MonoBehaviour
         UpdateButtonView();
 
         // Auto切替SE
-        if (systemSEManager != null)
-        {
-            systemSEManager.PlayAutoSE(enable);
-        }
+        systemSEManager?.PlayAutoSE(enable);
 
         // オートON時かつ、すでに文字送り終了
         if (enable && !textTyper.IsTyping)
@@ -412,10 +468,7 @@ public class NovelManager : MonoBehaviour
         UpdateButtonView();
 
         // Skip切替SE
-        if (systemSEManager != null)
-        {
-            systemSEManager.PlaySkipSE(enable);
-        }
+        systemSEManager?.PlaySkipSE(enable);
 
         if (enable)
         {
@@ -511,10 +564,24 @@ public class NovelManager : MonoBehaviour
     void SetMessageWindow(bool enable)
     {
         messageVisible = enable;
+
         // ウィンドウ非表示
         if (messageWindow != null)
         {
             messageWindow.SetActive(enable);
+        }
+
+        // SE再生
+        if (systemSEManager != null)
+        {
+            if (enable)
+            {
+                systemSEManager.PlayMessageShowSE();
+            }
+            else
+            {
+                systemSEManager.PlayMessageHideSE();
+            }
         }
 
         // 表示した時はオート待機をリセット
@@ -536,6 +603,9 @@ public class NovelManager : MonoBehaviour
         // 状態変更
         state = NovelState.BackLog;
 
+        // SE再生
+        systemSEManager?.PlayBackLogOpenSE();
+
         // バックログを開く
         backLogManager.Open();
     }
@@ -547,6 +617,9 @@ public class NovelManager : MonoBehaviour
     {
         // 状態変更
         state = NovelState.Normal;
+        
+        // SE再生
+        systemSEManager?.PlayBackLogCloseSE();
 
         // バックログを閉じる
         backLogManager.Close();

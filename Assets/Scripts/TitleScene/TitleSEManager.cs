@@ -8,6 +8,8 @@ public class TitleSEManager : MonoBehaviour
     [Header("Œˆ’èSE")]
     [SerializeField] private AudioClip decisionSE;
 
+    // SEonnryou‚±‚¤‚à‚­‚ÍH
+
     /// <summary>
     /// Œˆ’èSE‚ğÄ¶
     /// </summary>

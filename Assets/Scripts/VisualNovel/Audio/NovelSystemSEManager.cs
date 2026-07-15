@@ -8,12 +8,12 @@ public class NovelSystemSEManager : MonoBehaviour
     [Header("AudioSource (システムSE)")]
     [SerializeField] private AudioSource audioSource;
 
-    [Header("SE音量")]
+    [Header("SE音量 (AudioMixserあるので不要?)")]
     [SerializeField][Range(0f, 1f)] private float systemVolume = 1f;
 
     [Space(5)]
 
-    [Header("文字送りSE")]
+    [Header("文字送りSE (処理作ってない)")]
     [SerializeField] private AudioClip textSE;
 
     [Header("次の行へ進むSE")]
@@ -27,14 +27,21 @@ public class NovelSystemSEManager : MonoBehaviour
     [SerializeField] private AudioClip skipOnSE;
     [SerializeField] private AudioClip skipOffSE;
 
+    [Header("バックログ")]
+    [SerializeField] private AudioClip backLogOpenSE;
+    [SerializeField] private AudioClip backLogCloseSE;
 
-    [Header("決定")]
+    [Header("ウィンドウ表示切替")]
+    [SerializeField] private AudioClip messageShowSE;
+    [SerializeField] private AudioClip messageHideSE;
+
+
+    [Header("決定 / キャンセル")]
     [SerializeField] private AudioClip decideSE;
-
-    [Header("キャンセル")]
     [SerializeField] private AudioClip cancelSE;
 
     #region SE呼び出し関数
+
     /// <summary>
     /// 文字送り時SE
     /// </summary>
@@ -51,6 +58,7 @@ public class NovelSystemSEManager : MonoBehaviour
         PlaySystemSE(nextLineSE);
     }
 
+
     /// <summary>
     /// Auto切替SE
     /// </summary>
@@ -65,7 +73,6 @@ public class NovelSystemSEManager : MonoBehaviour
             PlaySystemSE(autoOffSE);
         }
     }
-
     /// <summary>
     /// Skip切替SE
     /// </summary>
@@ -80,21 +87,54 @@ public class NovelSystemSEManager : MonoBehaviour
             PlaySystemSE(skipOffSE);
         }
     }
-    #endregion
 
-    #region UI
 
+    /// <summary>
+    /// バックログを開くSE
+    /// </summary>
+    public void PlayBackLogOpenSE()
+    {
+        PlaySystemSE(backLogOpenSE);
+    }
+    /// <summary>
+    /// バックログを閉じるSE
+    /// </summary>
+    public void PlayBackLogCloseSE()
+    {
+        PlaySystemSE(backLogCloseSE);
+    }
+
+
+    /// <summary>
+    /// メッセージウィンドウ表示SE
+    /// </summary>
+    public void PlayMessageShowSE()
+    {
+        PlaySystemSE(messageShowSE);
+    }
+    /// <summary>
+    /// メッセージウィンドウ非表示SE
+    /// </summary>
+    public void PlayMessageHideSE()
+    {
+        PlaySystemSE(messageHideSE);
+    }
+
+
+    /// <summary>
+    /// 決定SE
+    /// </summary>
     public void PlayDecideSE()
     {
         PlaySystemSE(decideSE);
     }
-
-
+    /// <summary>
+    /// キャンセルSE
+    /// </summary>
     public void PlayCancelSE()
     {
         PlaySystemSE(cancelSE);
     }
-
     #endregion
 
     /// <summary>

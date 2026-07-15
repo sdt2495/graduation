@@ -257,11 +257,11 @@ Transform:
   m_GameObject: {fileID: 96696689}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -960, y: -540, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1230822243}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &246363163
 GameObject:
@@ -433,11 +433,11 @@ Transform:
   m_GameObject: {fileID: 502320253}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 960, y: 540, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1230822243}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &502320255
 MonoBehaviour:
@@ -451,7 +451,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d29998b68e5025a4ab1d0fe064feab7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConfigManager
-  configSEManager: {fileID: 0}
+  configSEManager: {fileID: 96696691}
   masterSlider: {fileID: 1793675946197673037}
   bgmSlider: {fileID: 1292668090}
   systemSESlider: {fileID: 2074897191}
@@ -988,6 +988,8 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 502320254}
+  - {fileID: 96696692}
   - {fileID: 246363164}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1676,7 +1678,5 @@ SceneRoots:
   m_Roots:
   - {fileID: 519420032}
   - {fileID: 619394802}
-  - {fileID: 502320254}
-  - {fileID: 96696692}
   - {fileID: 1230822243}
   - {fileID: 1077422835}

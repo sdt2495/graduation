@@ -24,7 +24,11 @@ public class NovelBGMManager : MonoBehaviour
         // ƒ‹[ƒvÄ¶
         sourceA.loop = true;
         sourceB.loop = true;
-        
+
+        // •Ğ•û‚ÍÁ‰¹
+        sourceA.volume = bgmVolume;
+        sourceB.volume = 0f;
+
         currentSource = sourceA;
     }
 
@@ -52,7 +56,7 @@ public class NovelBGMManager : MonoBehaviour
         AudioClip clip = Resources.Load<AudioClip>("BGM/" + bgmName);
 
 
-        if (clip != null)
+        if (clip == null)
         {
             Debug.LogWarning("BGM‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñ : " + bgmName);
         }

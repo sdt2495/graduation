@@ -1,28 +1,31 @@
 ﻿using UnityEngine;
 using TMPro;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 /// <summary>
 /// ノベルゲーム全体の進行を管理するクラス
 /// </summary>
 public class NovelManager : MonoBehaviour
 {
-    #region CSV列番号 (あとでcsvReaderに移動してください)
-    private const int COL_ID = 0;        // ID
-    private const int COL_SPEAKER = 1;   // 発言者
-    private const int COL_MESSAGE = 2;   // セリフ
+    #region CSV列番号 (あとでcsvReaderに移動?)
+    private const int COL_ID = 0;            // ID
+    private const int COL_SPEAKER = 1;       // 発言者
+    private const int COL_MESSAGE = 2;       // セリフ
 
-    private const int COL_CHARACTER = 3; // 立ち絵:表示画像
-    private const int COL_POSITION = 4;  // 立ち絵:表示位置
-    private const int COL_FLIP = 5;      // 立ち絵:反転
+    private const int COL_CHARACTER = 3;     // 立ち絵:表示画像
+    private const int COL_POSITION = 4;      // 立ち絵:表示位置
+    private const int COL_FLIP = 5;          // 立ち絵:反転
 
-    private const int COL_VOICE = 6;     // VOICE再生
-    private const int COL_SE = 7;        // SE再生
-    private const int COL_BGM = 8;       // BGM再生
-    private const int COL_AMBIENT = 9;   // 環境音再生
+    private const int COL_VOICE = 6;         // VOICE再生
+    private const int COL_SE = 7;            // SE再生
+    private const int COL_BGM = 8;           // BGM再生
+    private const int COL_AMBIENT = 9;       // 環境音再生
 
-    private const int COL_BG = 10;       // BG画像
-    private const int COL_CG = 11;       // CG画像
+    private const int COL_BG = 10;           // BG画像
+    private const int COL_BG_EFFECT = 11;    // BG画像_演出
+    private const int COL_CG = 12;           // CG画像
+    private const int COL_CG_EFFECT = 13;    // CG画像_演出
     #endregion
 
     [Header("csvReader")]
@@ -60,8 +63,12 @@ public class NovelManager : MonoBehaviour
     [Header("名前表示")]
     [SerializeField] private TextMeshProUGUI nameText;   // 発言者の名前
 
-    [Header("Messageウィンドウ")]
-    [SerializeField] private GameObject messageWindow;   // メッセージウィンドウ
+    [Header("メッセージUI (全体)")]
+    [SerializeField] private GameObject messageUI;   // メッセージUIまとめて
+
+    [Header("ウィンドウの枠")]
+    [SerializeField] private Image messageWindowImage;
+    [SerializeField, Range(0f, 1f)] private float messageWindowAlpha = 0.7f;
 
     [Header("次へマーク")]
     [SerializeField] private GameObject nextMark;
@@ -129,6 +136,9 @@ public class NovelManager : MonoBehaviour
     #region イベント登録 +α
     void Start()
     {
+        // メッセージウィンドウ透明度設定
+        SetMessageWindowAlpha();
+
         // イベント登録 (TextTyperの終了イベントを受け取る)
         textTyper.OnTypingFinished += OnTypingFinished;
 
@@ -204,7 +214,7 @@ public class NovelManager : MonoBehaviour
         // [!] 操作キーは仮 //
 
         // [左クリック]
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.DownArrow))
+        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.DownArrow) || Input.mouseScrollDelta.y < 0)
         {
             // ウィンドウ非表示中なら表示だけする
             if (!messageVisible)
@@ -229,7 +239,7 @@ public class NovelManager : MonoBehaviour
         }
 
         // [スペース] ウィンドウ非表示
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(1))
         {
             OnClickMessageWindowButton();
         }
@@ -353,10 +363,30 @@ public class NovelManager : MonoBehaviour
         // 環境音再生
         ambientManager?.PlayAmbient(line[COL_AMBIENT]);
 
+        // BG表示の方法を取得　(誤字ならInstance表示)
+        if (!System.Enum.TryParse(line[COL_BG_EFFECT], true, out TransitionType bgTransition))
+        {
+            bgTransition = TransitionType.Instant;
+        }
         // BG表示
-        backgroundManager?.ChangeBackground(line[COL_BG]);
+        backgroundManager?.ChangeBackground(line[COL_BG], bgTransition);
+
+        // CG表示の方法を取得　(誤字ならInstance表示)
+        if (!System.Enum.TryParse(line[COL_CG_EFFECT], true, out TransitionType cgTransition))
+        {
+            cgTransition = TransitionType.Instant;
+        }
         // CG表示
-        cgManager?.ShowCG(line[COL_CG]);
+        if (line[COL_CG] == "NONE")
+        {
+            // 非表示
+            cgManager?.HideCG(cgTransition);
+        }
+        else
+        {
+            // 表示
+            cgManager?.ShowCG(line[COL_CG], cgTransition);
+        }
 
 
         // デバッグを表示
@@ -532,9 +562,9 @@ public class NovelManager : MonoBehaviour
     #endregion
 
 
-    #region ウィンドウの表示切替
+    #region メッセージUIの表示切替
     /// <summary>
-    /// メッセージウィンドウ表示切替入力処理
+    /// メッセージUI表示切替入力処理
     /// </summary>
     void HandleMessageInput()
     {
@@ -558,6 +588,7 @@ public class NovelManager : MonoBehaviour
         }
     }
 
+
     /// <summary>
     /// Messageウィンドウの表示切替
     /// </summary>
@@ -566,9 +597,9 @@ public class NovelManager : MonoBehaviour
         messageVisible = enable;
 
         // ウィンドウ非表示
-        if (messageWindow != null)
+        if (messageUI != null)
         {
-            messageWindow.SetActive(enable);
+            messageUI.SetActive(enable);
         }
 
         // SE再生
@@ -589,6 +620,21 @@ public class NovelManager : MonoBehaviour
         {
             autoTimer = 0f;
         }
+    }
+
+
+
+    /// <summary>
+    /// メッセージウィンドウ(枠のみ)の透明度設定
+    /// </summary>
+    void SetMessageWindowAlpha()
+    {
+        if (messageWindowImage == null)
+            return;
+
+        Color color = messageWindowImage.color;
+        color.a = messageWindowAlpha;
+        messageWindowImage.color = color;
     }
     #endregion
 
@@ -630,7 +676,7 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void UpdateBackLogInput()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(1))
         {
             // バックログを閉じる
             CloseBackLog();

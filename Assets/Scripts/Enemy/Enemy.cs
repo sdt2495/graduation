@@ -21,7 +21,6 @@ public enum CheckResult
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] private TMPro.TextMeshProUGUI textMeshPro;
     private List<CommandType> commaneds = new List<CommandType>();
     private int currentIndex = 0;
 
@@ -35,7 +34,6 @@ public class Enemy : MonoBehaviour
         if (inputcommaned == commaneds[currentIndex])
         {
             currentIndex++;
-            UpdateCommanedText();
 
             // ëSê¨å˜
             if (currentIndex >= commaneds.Count)
@@ -62,32 +60,12 @@ public class Enemy : MonoBehaviour
         {
             commaneds.Add((CommandType)Random.Range(0, 4));
         }
-
-        UpdateCommanedText();
     }
 
+    public List<CommandType> GetCommands() { return commaneds; }
 
-    public void UpdateCommanedText()
+    public int GetCurrentIndex()
     {
-        textMeshPro.text = "";
-
-        foreach (var command in commaneds)
-        {
-            switch (command)
-            {
-                case CommandType.Up:
-                    textMeshPro.text += "Å™";
-                    break;
-                case CommandType.Down:
-                    textMeshPro.text += "Å´";
-                    break;
-                case CommandType.Left:
-                    textMeshPro.text += "Å©";
-                    break;
-                case CommandType.Right:
-                    textMeshPro.text += "Å®";
-                    break;
-            }
-        }
+        return currentIndex;
     }
 }

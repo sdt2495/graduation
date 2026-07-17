@@ -9,24 +9,34 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("EnemySpawnPoint")]
     [SerializeField] private Transform battlePoint;
-    [SerializeField] private Transform nextPoint1;
-    [SerializeField] private Transform nextPoint2;
+    [SerializeField] private Transform nextPoint;
+
+    [Header("コマンドUI")]
+    [SerializeField] private CommandUI commandUI;
+
+    [Header("Wave")]
+    [SerializeField] private WaveUI waveUI;
+    [SerializeField] private int maxWave = 10;
+    private int currrentWave = 1;
 
     private Enemy battleEnemy;
-    private Enemy nextEnemy1;
-    private Enemy nextEnemy2;
+    private Enemy nextEnemy;
 
     private void Start()
     {
         // Enemyを生成
         battleEnemy = SpawnEnemy(battlePoint);
-        nextEnemy1 = SpawnEnemy(nextPoint1);
-        nextEnemy2 = SpawnEnemy(nextPoint2);
+        nextEnemy = SpawnEnemy(nextPoint);
 
         UpdateEnemyView();
 
         // Playerにバトル中のEnemyを渡す
         player.SetEnemy(battleEnemy);
+
+        commandUI.UpdateCommanedText(battleEnemy, nextEnemy);
+
+        battleEnemy.GetCurrentIndex();
+        waveUI.UpdateWave(currrentWave, maxWave);
     }
 
     /// <summary>
@@ -39,7 +49,6 @@ public class EnemySpawner : MonoBehaviour
         Enemy enemy = Instantiate(enemyPrefab, point.position, Quaternion.identity);
 
         enemy.SetRandomCommands();
-        enemy.UpdateCommanedText();
 
         return enemy;
     }
@@ -49,13 +58,16 @@ public class EnemySpawner : MonoBehaviour
         Destroy(battleEnemy.gameObject);
 
         // Enemyを次のEnemyへ変更
-        battleEnemy = nextEnemy1;
-        nextEnemy1 = nextEnemy2;
-        nextEnemy2 = SpawnEnemy(nextPoint2);
+        battleEnemy = nextEnemy;
+        nextEnemy = SpawnEnemy(nextPoint);
 
         UpdateEnemyView();
 
         player.SetEnemy(battleEnemy);
+        commandUI.UpdateCommanedText(battleEnemy, nextEnemy);
+
+        currrentWave++;
+        waveUI.UpdateWave(currrentWave, maxWave);
     }
 
     public void StartSpawn()
@@ -70,12 +82,11 @@ public class EnemySpawner : MonoBehaviour
     {
         // Positionを変更
         battleEnemy.transform.position = battlePoint.position;
-        nextEnemy1.transform.position = nextPoint1.position;
+        nextEnemy.transform.position = nextPoint.position;
 
         // Scaleを変更
         battleEnemy.transform.localScale = Vector3.one;
-        nextEnemy1.transform.localScale = Vector3.one * 0.8f;
-        nextEnemy2.transform.localScale = Vector3.one * 0.6f;
+        nextEnemy.transform.localScale = Vector3.one * 0.8f;
     }
 
     /// <summary>

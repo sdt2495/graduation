@@ -413,8 +413,8 @@ public class NovelManager : MonoBehaviour
         // 次の行へ
         currentLine++;
 
-        // こういうこと？
-        backLogManager.AddLog(line[COL_SPEAKER], line[COL_MESSAGE]);
+        // バックログにログを追加
+        backLogManager.AddLog(line[COL_SPEAKER], line[COL_MESSAGE], line[COL_VOICE]);
     }
     #endregion
 

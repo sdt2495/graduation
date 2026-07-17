@@ -8,6 +8,9 @@ public class BackLogManager : MonoBehaviour
     [Header("バックログパネル")]
     [SerializeField] private GameObject backLogPanel;
 
+    [Header("Voice")]
+    [SerializeField] private NovelVoiceManager voiceManager;
+
     [Header("──────────────────────────────")]
     [SerializeField] private ScrollRect scrollRect;
     [SerializeField] private Transform content;
@@ -20,9 +23,9 @@ public class BackLogManager : MonoBehaviour
     /// <summary>
     /// ログ追加
     /// </summary>
-    public void AddLog(string speaker, string message)
+    public void AddLog(string speaker, string message, string voice)
     {
-        logs.Add(new BackLogData(speaker, message));
+        logs.Add(new BackLogData(speaker, message, voice));
     }
 
     /// <summary>
@@ -89,8 +92,9 @@ public class BackLogManager : MonoBehaviour
         foreach (BackLogData log in logs)
         {
             BackLogEntry entry = Instantiate(entryPrefab, content);
-
-            entry.Set(log);
+            
+            // ログとVoiceManagerを引き渡し
+            entry.Set(log, voiceManager);
         }
     }
 

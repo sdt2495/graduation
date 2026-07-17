@@ -11,17 +11,17 @@ public class BackLogData
 
     public string Speaker { get; } // 発言者
     public string Message { get; } // セリフ
+    public string Voice { get; }   // 音声
 
     #endregion
 
     /// <summary>
     /// コンストラクタ (初期化)
     /// </summary>
-    public BackLogData(string speaker, string message)
+    public BackLogData(string speaker, string message, string voice)
     {
         Speaker = speaker;
         Message = message;
-
-
+        Voice = voice;
     }
 }

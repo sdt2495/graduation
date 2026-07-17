@@ -11,6 +11,9 @@ public class NovelBackgroundManager : MonoBehaviour
     [Header("背景Image")]
     [SerializeField] private Image backgroundImage;
 
+    [Header("NovelManager")]
+    [SerializeField] private NovelManager novelManager;
+
     [Header("──────────────────────────────")]
     [Header("切替時間")]
     [SerializeField] private float transitionTime = 0.5f;
@@ -84,6 +87,8 @@ public class NovelBackgroundManager : MonoBehaviour
         {
             StopCoroutine(transitionCoroutine);
         }
+        // 演出開始 (ウィンドウUI非表示)
+        novelManager?.BeginTransition();
         // 新しい演出開始
         transitionCoroutine = StartCoroutine(routine);
     }
@@ -114,6 +119,9 @@ public class NovelBackgroundManager : MonoBehaviour
         Color color = backgroundImage.color;
         color.a = 1f;
         backgroundImage.color = color;
+
+        // 演出終了 (ウィンドウUI表示)
+        novelManager?.EndTransition();
     }
 
     /// <summary>
@@ -145,6 +153,8 @@ public class NovelBackgroundManager : MonoBehaviour
         backgroundImage.color = color;
 
         transitionCoroutine = null;
+        // 演出終了 (ウィンドウUI表示)
+        novelManager?.EndTransition();
     }
 
     /// <summary>
@@ -179,6 +189,8 @@ public class NovelBackgroundManager : MonoBehaviour
         backgroundImage.type = Image.Type.Simple;
 
         transitionCoroutine = null;
+        // 演出終了 (ウィンドウUI表示)
+        novelManager?.EndTransition();
     }
     #endregion
 }

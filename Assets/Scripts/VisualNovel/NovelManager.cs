@@ -9,54 +9,59 @@ using UnityEngine.UI;
 public class NovelManager : MonoBehaviour
 {
     #region CSV列番号 (あとでcsvReaderに移動?)
-    private const int COL_ID = 0;            // ID
-    private const int COL_SPEAKER = 1;       // 発言者
-    private const int COL_MESSAGE = 2;       // セリフ
+    private const int COL_ID = 0;                // ID
+    private const int COL_SPEAKER = 1;           // 発言者
+    private const int COL_MESSAGE = 2;           // セリフ
 
-    private const int COL_CHARACTER = 3;     // 立ち絵:表示画像
-    private const int COL_POSITION = 4;      // 立ち絵:表示位置
-    private const int COL_FLIP = 5;          // 立ち絵:反転
+    private const int COL_CHARACTER = 3;         // 立ち絵:表示画像
+    private const int COL_POSITION = 4;          // 立ち絵:表示位置
+    private const int COL_FLIP = 5;              // 立ち絵:反転
 
-    private const int COL_VOICE = 6;         // VOICE再生
-    private const int COL_SE = 7;            // SE再生
-    private const int COL_BGM = 8;           // BGM再生
-    private const int COL_AMBIENT = 9;       // 環境音再生
+    private const int COL_VOICE = 6;             // VOICE再生
+    private const int COL_SE = 7;                // SE再生
+    private const int COL_BGM = 8;               // BGM再生
+    private const int COL_AMBIENT = 9;           // 環境音再生
 
-    private const int COL_BG = 10;           // BG画像
-    private const int COL_BG_EFFECT = 11;    // BG画像_演出
-    private const int COL_CG = 12;           // CG画像
-    private const int COL_CG_EFFECT = 13;    // CG画像_演出
+    private const int COL_BG = 10;               // BG画像
+    private const int COL_BG_EFFECT = 11;        // BG画像_演出
+    private const int COL_CG = 12;               // CG画像
+    private const int COL_CG_EFFECT = 13;        // CG画像_演出
+    private const int COL_SCREEN = 14;           // 画面エフェクト色
+    private const int COL_SCREEN_EFFECT = 15;    // 画面エフェクト演出
     #endregion
 
     [Header("csvReader")]
-    [SerializeField] private CSVReader csvReader;                        // CSVを読み込むスクリプト
-
+    [SerializeField] private CSVReader csvReader;                            // CSVを読み込むスクリプト
+    // ★ テキスト ★
     [Header("TextTyper")]
-    [SerializeField] private TextTyper textTyper;                        // 一文字ずつ表示するスクリプト
+    [SerializeField] private TextTyper textTyper;                            // 一文字ずつ表示するスクリプト
 
     [Header("NovelSystemSEManager")]
-    [SerializeField] private NovelSystemSEManager systemSEManager;       // システムSEを再生するスクリプト
+    [SerializeField] private NovelSystemSEManager systemSEManager;           // システムSEを再生するスクリプト
 
     [Header("BackLogManager")]
-    [SerializeField] private BackLogManager backLogManager;              // ログを遡るスクリプト
-
+    [SerializeField] private BackLogManager backLogManager;                  // ログを遡るスクリプト
+    // ★オーディオ ★
     [Header("NovelVoiceManager")]
-    [SerializeField] private NovelVoiceManager voiceManager;             // 音声を再生するスクリプト
+    [SerializeField] private NovelVoiceManager voiceManager;                 // 音声を再生するスクリプト
 
     [Header("NovelSEManager")]
-    [SerializeField] private NovelSEManager seManager;                   // SEを再生するスクリプト
+    [SerializeField] private NovelSEManager seManager;                       // SEを再生するスクリプト
     
     [Header("NovelBGMManager")]
-    [SerializeField] private NovelBGMManager bgmManager;                 // BGMを再生するスクリプト
+    [SerializeField] private NovelBGMManager bgmManager;                     // BGMを再生するスクリプト
 
     [Header("NovelAmbientManager")]
-    [SerializeField] private NovelAmbientManager ambientManager;         // 環境音を再生するスクリプト
-
+    [SerializeField] private NovelAmbientManager ambientManager;             // 環境音を再生するスクリプト
+    // ★イメージ ★
     [Header("NovelBackgroundManager")]
-    [SerializeField] private NovelBackgroundManager backgroundManager;   // BGを表示するスクリプト
+    [SerializeField] private NovelBackgroundManager backgroundManager;       // BGを表示するスクリプト
 
     [Header("NovelCGManager")]
-    [SerializeField] private NovelCGManager cgManager;                   // CGを表示するスクリプト
+    [SerializeField] private NovelCGManager cgManager;                       // CGを表示するスクリプト
+
+    [Header("NovelScreenEffectManager")]
+    [SerializeField] private NovelScreenEffectManager screenEffectManager;   // スクリーンエフェクトを表示するスクリプト
 
 
     [Header("──────────────────────────────")]
@@ -104,10 +109,13 @@ public class NovelManager : MonoBehaviour
 
     private bool waitingVoice = false;   // 音声待ち
 
+    private int transitionCount = 0;     // 現在実行中の演出数
+
     #region プロパティ
     public bool IsAutoMode => playMode == PlayMode.Auto;
     public bool IsSkipMode => playMode == PlayMode.Skip;
     #endregion
+
 
     #region 状態遷移
 
@@ -133,6 +141,7 @@ public class NovelManager : MonoBehaviour
     private PlayMode playMode = PlayMode.Normal;     // 現在のモード
     #endregion
 
+
     #region イベント登録 +α
     void Start()
     {
@@ -145,11 +154,8 @@ public class NovelManager : MonoBehaviour
         // ボタン表示更新
         UpdateButtonView();
 
-        if (nextMark != null)
-        {
-            //「次へ」アイコン非表示
-            nextMark.SetActive(false);
-        }
+        //「次へ」アイコン
+        UpdateNextMark();
     }
     void OnDestroy()
     {
@@ -162,15 +168,8 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void OnTypingFinished()
     {
-        // Auto・Skip中は表示しない
-        if (!IsAutoMode && !IsSkipMode)
-        {
-            if (nextMark != null)
-            {
-                //「次へ」アイコン表示
-                nextMark.SetActive(true);
-            }
-        }
+        //「次へ」アイコン
+        UpdateNextMark();
 
         // 待機開始
         BeginNextLineWait();
@@ -197,6 +196,7 @@ public class NovelManager : MonoBehaviour
         }
 
     }
+
 
     #region Updateを分割
 
@@ -308,12 +308,8 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void AdvanceMessage()
     {
-        //（ShowMessage()でも消えるので必須ではありませんが、クリックした瞬間に消したいならこちらがおすすめです。）
-        if (nextMark != null)
-        {
-            //「次へ」アイコン非表示
-            nextMark.SetActive(false);
-        }
+        //「次へ」アイコン
+        UpdateNextMark();
 
         // 文字送り中なら全文表示
         if (textTyper.IsTyping)
@@ -363,7 +359,7 @@ public class NovelManager : MonoBehaviour
         // 環境音再生
         ambientManager?.PlayAmbient(line[COL_AMBIENT]);
 
-        // BG表示の方法を取得　(誤字ならInstance表示)
+        // BG表示の方法を取得 (誤字ならInstance表示)
         if (!System.Enum.TryParse(line[COL_BG_EFFECT], true, out TransitionType bgTransition))
         {
             bgTransition = TransitionType.Instant;
@@ -371,7 +367,7 @@ public class NovelManager : MonoBehaviour
         // BG表示
         backgroundManager?.ChangeBackground(line[COL_BG], bgTransition);
 
-        // CG表示の方法を取得　(誤字ならInstance表示)
+        // CG表示の方法を取得 (誤字ならInstance表示)
         if (!System.Enum.TryParse(line[COL_CG_EFFECT], true, out TransitionType cgTransition))
         {
             cgTransition = TransitionType.Instant;
@@ -386,6 +382,27 @@ public class NovelManager : MonoBehaviour
         {
             // 表示
             cgManager?.ShowCG(line[COL_CG], cgTransition);
+        }
+
+        // 画面エフェクト表示の方法を取得 (誤字ならInstance表示)
+        if (!System.Enum.TryParse(line[COL_SCREEN_EFFECT], true, out TransitionType screenTransition))
+        {
+            screenTransition = TransitionType.Instant;
+        }
+        // 画面エフェクト表示
+        switch (line[COL_SCREEN])
+        {
+            case "BLACK":
+                screenEffectManager?.Show(Color.black, screenTransition);
+                break;
+
+            case "WHITE":
+                screenEffectManager?.Show(Color.white, screenTransition);
+                break;
+
+            case "NONE":
+                screenEffectManager?.Hide(screenTransition);
+                break;
         }
 
 
@@ -426,11 +443,8 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void ShowMessage(string message)
     {
-        if (nextMark != null)
-        {
-            //「次へ」アイコン非表示
-            nextMark.SetActive(false);
-        }
+        //「次へ」アイコン
+        UpdateNextMark();
 
         // スキップモード
         if (IsSkipMode)
@@ -468,6 +482,9 @@ public class NovelManager : MonoBehaviour
         // ボタン表示更新
         UpdateButtonView();
 
+        //「次へ」アイコン
+        UpdateNextMark();
+
         // Auto切替SE
         systemSEManager?.PlayAutoSE(enable);
 
@@ -496,6 +513,9 @@ public class NovelManager : MonoBehaviour
 
         // ボタン表示更新
         UpdateButtonView();
+
+        //「次へ」アイコン
+        UpdateNextMark();
 
         // Skip切替SE
         systemSEManager?.PlaySkipSE(enable);
@@ -563,6 +583,7 @@ public class NovelManager : MonoBehaviour
 
 
     #region メッセージUIの表示切替
+
     /// <summary>
     /// メッセージUI表示切替入力処理
     /// </summary>
@@ -602,6 +623,9 @@ public class NovelManager : MonoBehaviour
             messageUI.SetActive(enable);
         }
 
+        //「次へ」アイコン (一応)
+        UpdateNextMark();
+
         // SE再生
         if (systemSEManager != null)
         {
@@ -623,6 +647,44 @@ public class NovelManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// 演出開始
+    /// </summary>
+    public void BeginTransition()
+    {
+        // 現在実行中の演出数+１
+        transitionCount++;
+
+        if (messageUI != null)
+        {
+            // メッセージUI非表示
+            messageUI.SetActive(false);
+        }
+    }
+    /// <summary>
+    /// 演出終了
+    /// </summary>
+    public void EndTransition()
+    {
+        // 現在実行中の演出数-１
+        transitionCount--;
+        // マイナス防止
+        if (transitionCount < 0)
+        {
+            transitionCount = 0;
+        }
+
+        // 全演出終了
+        if (transitionCount == 0)
+        {
+            if (messageUI != null)
+            {
+                // メッセージUI表示
+                messageUI.SetActive(true);
+            }
+        }
+    }
+
 
     /// <summary>
     /// メッセージウィンドウ(枠のみ)の透明度設定
@@ -635,6 +697,29 @@ public class NovelManager : MonoBehaviour
         Color color = messageWindowImage.color;
         color.a = messageWindowAlpha;
         messageWindowImage.color = color;
+    }
+    #endregion
+
+
+    #region「次へ」アイコン(NextMark)の表示切替
+
+    /// <summary>
+    ///「次へ」アイコンの表示更新
+    /// </summary>
+    void UpdateNextMark()
+    {
+        if (nextMark == null)
+            return;
+
+        // 表示する条件 (全てtrueなら表示)
+        bool visible =
+            !textTyper.IsTyping &&   // 文字送り終了
+            !IsAutoMode &&           // Autoじゃない
+            !IsSkipMode &&           // Skipじゃない
+            messageVisible;          // メッセージウィンドウ表示中
+
+        //「次へ」アイコンの表示
+        nextMark.SetActive(visible);
     }
     #endregion
 

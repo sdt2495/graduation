@@ -10,22 +10,25 @@ public class NovelCGManager : MonoBehaviour
     // ★MEMO：イベントCGが表示されたら、立ち絵を自動で隠すようにすると、市販ノベルゲームに近い挙動になります！（まだ）
 
     [Header("CG Image")]
-    [SerializeField] private Image cgImage;
-
-    [Header("NovelManager")]
-    [SerializeField] private NovelManager novelManager;
+    [SerializeField] private Image cgImageA;
+    [SerializeField] private Image cgImageB;
 
     [Header("──────────────────────────────")]
     [Header("切替時間")]
     [SerializeField] private float transitionTime = 0.5f;
 
+    private Image currentImage; // 現在表示してるImage
+    private Image nextImage;    // 次に表示するImage
 
-    private Coroutine transitionCoroutine;     // 実行中の演出
 
     private void Awake()
     {
-        // 非表示
-        cgImage.gameObject.SetActive(false);
+        // Aを現在の画像として使用
+        currentImage = cgImageA;
+        nextImage = cgImageB;
+        // 初期状態
+        cgImageA.gameObject.SetActive(false);
+        cgImageB.gameObject.SetActive(false);
     }
 
 
@@ -34,43 +37,84 @@ public class NovelCGManager : MonoBehaviour
     /// <summary>
     /// CG表示
     /// </summary>
-    public void ShowCG(string cgName, TransitionType transition)
+    public IEnumerator ShowCG(string cgName, TransitionType transition)
     {
         // 空欄なら何もしない
         if (string.IsNullOrEmpty(cgName))
-            return;
+            yield break;
 
+        // CG読み込み
         Sprite sprite = Resources.Load<Sprite>("CG/" + cgName);
 
         if (sprite == null)
         {
             Debug.LogWarning("CGが見つかりません : " + cgName);
-            return;
+            yield break;
         }
 
-        // CG表示
+        // 現在CGが表示されているか
+        bool isShowingCG = currentImage.gameObject.activeSelf;
+
+
+
+        // CGが表示されていない
+        if (!isShowingCG)
+        {
+            SetImage(nextImage, sprite);
+
+            switch (transition)
+            {
+                case TransitionType.Instant:
+                    SetAlpha(nextImage, 1f);
+                    break;
+
+                case TransitionType.Fade:
+                    yield return FadeIn(nextImage);
+                    break;
+
+                case TransitionType.Clock:
+                    yield return ClockIn(nextImage);
+                    break;
+            }
+            SwapImages();
+            yield break;
+        }
+
+
+        // CGがすでに表示されている
+        SetImage(nextImage, sprite);
+
         switch (transition)
         {
             case TransitionType.Instant:
-                ShowInstant(sprite);
+                SetAlpha(nextImage, 1f);
+                currentImage.gameObject.SetActive(false);
                 break;
 
             case TransitionType.Fade:
-                StartTransition(FadeIn(sprite));
+                // Fadeを指定した場合、CG表示中なら自動的にクロスフェード
+                yield return CrossFade();
                 break;
 
             case TransitionType.Clock:
-                StartTransition(ClockIn(sprite));
+                // 時計ワイプの場合は現在CGを消してから表示
+                yield return ClockIn(nextImage);
+                currentImage.gameObject.SetActive(false);
                 break;
         }
+        SwapImages();
     }
 
 
     /// <summary>
     /// CGを消す
     /// </summary>
-    public void HideCG(TransitionType transition)
+    public IEnumerator HideCG(TransitionType transition)
     {
+        // CGが表示されていなければ何もしない
+        if (!currentImage.gameObject.activeSelf)
+            yield break;
+
         switch (transition)
         {
             case TransitionType.Instant:
@@ -78,11 +122,11 @@ public class NovelCGManager : MonoBehaviour
                 break;
 
             case TransitionType.Fade:
-                StartTransition(FadeOut());
+                yield return FadeOut();
                 break;
 
             case TransitionType.Clock:
-                StartTransition(ClockOut());
+                yield return ClockOut();
                 break;
         }
     }
@@ -92,31 +136,48 @@ public class NovelCGManager : MonoBehaviour
     #region 共通処理
 
     /// <summary>
-    /// 演出開始
+    /// ImageにCGを設定
     /// </summary>
-    void StartTransition(IEnumerator routine)
+    void SetImage(Image image, Sprite sprite)
     {
-        // 演出中なら停止
-        if (transitionCoroutine != null)
-        {
-            StopCoroutine(transitionCoroutine);
-        }
-        // 演出開始 (ウィンドウUI非表示)
-        novelManager?.BeginTransition();
-        // 新しい演出開始
-        transitionCoroutine = StartCoroutine(routine);
+        image.sprite = sprite;
+        image.gameObject.SetActive(true);
+
+        SetAlpha(image, 1f);
+
+        // Filled状態を解除
+        image.type = Image.Type.Simple;
     }
 
     /// <summary>
-    /// 背景画像を設定
+    /// Imageの透明度を設定
     /// </summary>
-    void SetCG(Sprite sprite)
+    void SetAlpha(Image image, float alpha)
     {
-        cgImage.sprite = sprite;
-        cgImage.gameObject.SetActive(true);
+        Color color = image.color;
+        color.a = alpha;
+        image.color = color;
+    }
 
-        // 色を初期化
-        cgImage.color = Color.white;
+    /// <summary>
+    /// 現在画像と次画像を入れ替える
+    /// </summary>
+    void SwapImages()
+    {
+        Image temp = currentImage;
+
+        currentImage = nextImage;
+        nextImage = temp;
+    }
+
+    /// <summary>
+    /// CGを完全に消す
+    /// </summary>
+    void ClearImage(Image image)
+    {
+        image.sprite = null;
+        image.gameObject.SetActive(false);
+        SetAlpha(image, 1f);
     }
     #endregion
 
@@ -124,89 +185,82 @@ public class NovelCGManager : MonoBehaviour
     #region 演出処理 (表示)
 
     /// <summary>
-    /// 一瞬で表示
-    /// </summary>
-    void ShowInstant(Sprite sprite)
-    {
-        // 画像を設定
-        SetCG(sprite);
-        // 一瞬で表示
-        Color color = cgImage.color;
-        color.a = 1f;
-        cgImage.color = color;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
-    }
-
-
-    /// <summary>
     /// フェードイン
     /// </summary>
-    IEnumerator FadeIn(Sprite sprite)
+    IEnumerator FadeIn(Image image)
     {
-        // 画像を設定
-        SetCG(sprite);
-
-        // 透明状態から開始
-        Color color = cgImage.color;
-        color.a = 0f;
-        cgImage.color = color;
-
-        // 徐々に不透明にする
+        // 画像を透明にして設定
+        SetAlpha(image, 0f);
+        // 徐々に不透明
         float time = 0f;
         while (time < transitionTime)
         {
             time += Time.deltaTime;
-
-            color.a = Mathf.Lerp(0f, 1f, time / transitionTime);
-            cgImage.color = color;
+            float rate = Mathf.Clamp01(time / transitionTime);
+            SetAlpha(image, rate);
 
             yield return null;
         }
-        // 表示完了
-        color.a = 1f;
-        cgImage.color = color;
+        // 完全に不透明
+        SetAlpha(image, 1f);
+    }
 
-        transitionCoroutine = null;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+    /// <summary>
+    /// クロスフェード
+    /// 現在のCGを表示したまま、新しいCGを重ねて表示する
+    /// </summary>
+    IEnumerator CrossFade()
+    {
+        // 変更後画像を透明にする
+        SetAlpha(nextImage, 0f);
+
+        // 徐々に不透明
+        float time = 0f;
+        while (time < transitionTime)
+        {
+            time += Time.deltaTime;
+            float rate = Mathf.Clamp01(time / transitionTime);
+            // 現在のCG
+            SetAlpha(currentImage, 1f - rate);
+            // 次のCG
+            SetAlpha(nextImage, rate);
+
+            yield return null;
+        }
+        // 完了
+        SetAlpha(currentImage, 0f);
+        SetAlpha(nextImage, 1f);
+
+        currentImage.gameObject.SetActive(false);
     }
 
 
     /// <summary>
-    /// 時計回り
+    /// 時計回りに表示
     /// </summary>
-    IEnumerator ClockIn(Sprite sprite)
+    IEnumerator ClockIn(Image image)
     {
-        // 画像を設定
-        SetCG(sprite);
-
         // 画像タイプを"塗りつぶし"に変更
-        cgImage.type = Image.Type.Filled;
-        cgImage.fillMethod = Image.FillMethod.Radial360;
-        cgImage.fillOrigin = 2;
-        cgImage.fillClockwise = true;
-        // 塗りつぶし０から開始
-        cgImage.fillAmount = 0f;
+        image.type = Image.Type.Filled;
+        image.fillMethod = Image.FillMethod.Radial360;
+        image.fillOrigin = 2;
+        image.fillClockwise = true;
+        image.fillAmount = 0f;
 
-        // 徐々に塗りつぶす
+        // 徐々に塗りつぶし
         float time = 0f;
         while (time < transitionTime)
         {
             time += Time.deltaTime;
-
-            cgImage.fillAmount = Mathf.Lerp(0f, 1f, time / transitionTime);
+            float rate = Mathf.Clamp01(time / transitionTime);
+            image.fillAmount = rate;
 
             yield return null;
         }
-        // 塗りつぶし完了
-        cgImage.fillAmount = 1f;
+        // 完全に塗りつぶし
+        image.fillAmount = 1f;
         // 画像タイプを"シンプル"に変更
-        cgImage.type = Image.Type.Simple;
-
-        transitionCoroutine = null;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+        image.type = Image.Type.Simple;
     }
     #endregion
 
@@ -218,80 +272,56 @@ public class NovelCGManager : MonoBehaviour
     /// </summary>
     void HideInstant()
     {
-        cgImage.sprite = null;
-        cgImage.gameObject.SetActive(false);
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+        ClearImage(currentImage);
     }
-
 
     /// <summary>
     /// フェードアウト
     /// </summary>
     IEnumerator FadeOut()
     {
-        Color color = cgImage.color;
-
         // 徐々に透明
         float time = 0f;
         while (time < transitionTime)
         {
             time += Time.deltaTime;
-
-            color.a = Mathf.Lerp(1f, 0f, time / transitionTime);
-            cgImage.color = color;
+            float rate = Mathf.Clamp01(time / transitionTime);
+            SetAlpha(currentImage, 1f - rate);
 
             yield return null;
         }
-
-        // フェードアウト完了
-        color.a = 0f;
-        cgImage.color = color;
-
-        // 完全に消す
-        cgImage.sprite = null;
-        cgImage.gameObject.SetActive(false);
-
-        transitionCoroutine = null;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+        // CG画像を非表示
+        ClearImage(currentImage);
     }
 
-
     /// <summary>
-    /// 時計回り
+    /// 時計回りに消す
     /// </summary>
     IEnumerator ClockOut()
     {
         // 画像タイプを"塗りつぶし"に変更
-        cgImage.type = Image.Type.Filled;
-        cgImage.fillMethod = Image.FillMethod.Radial360;
-        cgImage.fillOrigin = 2;
-        cgImage.fillClockwise = false;
+        currentImage.type = Image.Type.Filled;
+        currentImage.fillMethod = Image.FillMethod.Radial360;
+        currentImage.fillOrigin = 2;
+        currentImage.fillClockwise = false;
+        currentImage.fillAmount = 1f;
 
-        // 徐々に逆に塗りつぶす
+        // 徐々に逆に塗りつぶされる
         float time = 0f;
         while (time < transitionTime)
         {
             time += Time.deltaTime;
-
-            cgImage.fillAmount = Mathf.Lerp(1f, 0f, time / transitionTime);
+            float rate = Mathf.Clamp01(time / transitionTime);
+            currentImage.fillAmount = 1f - rate;
 
             yield return null;
         }
+        // 完全に逆に塗りつぶされる
+        currentImage.fillAmount = 0f;
 
-        // 逆塗りつぶし完了
-        cgImage.fillAmount = 0f;
-        // 完全に消す
-        cgImage.sprite = null;
-        cgImage.gameObject.SetActive(false);
-
+        ClearImage(currentImage);
         // 画像タイプを"シンプル"に変更
-        cgImage.type = Image.Type.Simple;
-
-        transitionCoroutine = null;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+        currentImage.type = Image.Type.Simple;
     }
     #endregion
 }

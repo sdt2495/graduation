@@ -2,6 +2,7 @@
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections;
 
 /// <summary>
 /// ノベルゲーム全体の進行を管理するクラス
@@ -100,16 +101,17 @@ public class NovelManager : MonoBehaviour
     [SerializeField] private float skipWaitTime = 0.1f;  // スキップモード待機時間
 
 
-    private float autoTimer = 0f;        // オートモードタイマー
-    private bool autoWaiting = false;    // オートタイマーが動いているか
+    private float autoTimer = 0f;            // オートモードタイマー
+    private bool autoWaiting = false;        // オートタイマーが動いているか
 
-    private int currentLine = 0;         // 現在読んでいる行番号
+    private int currentLine = 0;             // 現在読んでいる行番号
 
-    private bool messageVisible = true;  // ウィンドウの表示
+    private bool messageVisible = true;      // ウィンドウの表示
 
-    private bool waitingVoice = false;   // 音声待ち
+    private bool waitingVoice = false;       // 音声待ち
 
-    private int transitionCount = 0;     // 現在実行中の演出数
+    private bool isDisplayingLine = false;   //
+
 
     #region プロパティ
     public bool IsAutoMode => playMode == PlayMode.Auto;
@@ -205,11 +207,6 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void UpdateInput()
     {
-        // UIクリック中はゲーム側の入力を受け付けない
-        if (EventSystem.current.IsPointerOverGameObject())
-        {
-            return;
-        }
 
         // [!] 操作キーは仮 //
 
@@ -308,6 +305,10 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void AdvanceMessage()
     {
+        // 演出処理中なら進めない
+        if (isDisplayingLine)
+            return;
+
         //「次へ」アイコン
         UpdateNextMark();
 
@@ -330,25 +331,35 @@ public class NovelManager : MonoBehaviour
 
         // 次の文章へ進むSE
         systemSEManager?.PlayNextLineSE();
-        
+
         // 現在の行を表示
-        DisplayCurrentLine();
+        StartCoroutine(DisplayCurrentLine());
     }
 
 
     /// <summary>
     /// 現在の行を表示する
     /// </summary>
-    void DisplayCurrentLine()
+    IEnumerator DisplayCurrentLine()
     {
+        isDisplayingLine = true;
+
         // 現在の行を取得
         string[] line = csvReader.GetLine(currentLine);
 
+        // 演出前のメッセージUI表示状態を保存
+        bool messageWasVisible = messageVisible;
+        // 演出があるか確認
+        bool hasEffect =
+            !string.IsNullOrEmpty(line[COL_BG]) ||
+            !string.IsNullOrEmpty(line[COL_CG]) ||
+            !string.IsNullOrEmpty(line[COL_SCREEN]);
+        // 演出中はメッセージUIを非表示
+        if (hasEffect)
+        {
+            messageUI.SetActive(false);
+        }
 
-        // 発言者を表示
-        ShowSpeaker(line[COL_SPEAKER]);
-        // セリフを表示
-        ShowMessage(line[COL_MESSAGE]);
 
         // ボイス再生
         voiceManager?.PlayVoice(line[COL_VOICE]);
@@ -359,13 +370,18 @@ public class NovelManager : MonoBehaviour
         // 環境音再生
         ambientManager?.PlayAmbient(line[COL_AMBIENT]);
 
+
+
         // BG表示の方法を取得 (誤字ならInstance表示)
         if (!System.Enum.TryParse(line[COL_BG_EFFECT], true, out TransitionType bgTransition))
         {
             bgTransition = TransitionType.Instant;
         }
-        // BG表示
-        backgroundManager?.ChangeBackground(line[COL_BG], bgTransition);
+        // BG表示 (演出が終わるまで待つ)
+        if (!string.IsNullOrEmpty(line[COL_BG]))
+        {
+            yield return backgroundManager?.ChangeBackground(line[COL_BG], bgTransition);
+        }
 
         // CG表示の方法を取得 (誤字ならInstance表示)
         if (!System.Enum.TryParse(line[COL_CG_EFFECT], true, out TransitionType cgTransition))
@@ -375,13 +391,19 @@ public class NovelManager : MonoBehaviour
         // CG表示
         if (line[COL_CG] == "NONE")
         {
-            // 非表示
-            cgManager?.HideCG(cgTransition);
+            if (cgManager != null)
+            {
+                // CG非表示
+                yield return cgManager.HideCG(cgTransition);
+            }
         }
-        else
+        else if (!string.IsNullOrEmpty(line[COL_CG]))
         {
-            // 表示
-            cgManager?.ShowCG(line[COL_CG], cgTransition);
+            if (cgManager != null)
+            {
+                // CG表示
+                yield return cgManager.ShowCG(line[COL_CG], cgTransition);
+            }
         }
 
         // 画面エフェクト表示の方法を取得 (誤字ならInstance表示)
@@ -389,32 +411,69 @@ public class NovelManager : MonoBehaviour
         {
             screenTransition = TransitionType.Instant;
         }
-        // 画面エフェクト表示
+        // 画面エフェクト
         switch (line[COL_SCREEN])
         {
             case "BLACK":
-                screenEffectManager?.Show(Color.black, screenTransition);
+                // 暗転 (演出が終わるまで待つ)
+                if (screenEffectManager != null)
+                {
+                    yield return screenEffectManager.Show(Color.black, screenTransition);
+                }
                 break;
 
             case "WHITE":
-                screenEffectManager?.Show(Color.white, screenTransition);
+                // ホワイトアウト (演出が終わるまで待つ)
+                if (screenEffectManager != null)
+                {
+                    yield return screenEffectManager.Show(Color.white, screenTransition);
+                }
                 break;
 
             case "NONE":
-                screenEffectManager?.Hide(screenTransition);
+                // 暗転解除 (演出が終わるまで待つ)
+                if (screenEffectManager != null)
+                {
+                    yield return screenEffectManager.Hide(screenTransition);
+                }
                 break;
         }
 
+        // 演出終了後、演出前の状態に戻す
+        if (hasEffect && messageWasVisible)
+        {
+            messageUI.SetActive(true);
+        }
 
         // デバッグを表示
         Debug.Log(line[COL_ID] + " : " + line[COL_SPEAKER] + " : " + line[COL_MESSAGE]);
 
+        // 現在の行にセリフがあるか確認
+        bool hasMessage = !string.IsNullOrEmpty(line[COL_MESSAGE]);
+
+        // セリフがある場合
+        if (hasMessage)
+        {
+            // 発言者を表示
+            ShowSpeaker(line[COL_SPEAKER]);
+            // セリフを表示
+            ShowMessage(line[COL_MESSAGE]);
+
+            // バックログにログを追加
+            backLogManager.AddLog(line[COL_SPEAKER], line[COL_MESSAGE], line[COL_VOICE]);
+        }
 
         // 次の行へ
         currentLine++;
 
-        // バックログにログを追加
-        backLogManager.AddLog(line[COL_SPEAKER], line[COL_MESSAGE], line[COL_VOICE]);
+        // 演出処理終了
+        isDisplayingLine = false;
+
+        // セリフがない行なら自動的に次の行へ
+        if (!hasMessage)
+        {
+            AdvanceMessage();
+        }
     }
     #endregion
 
@@ -443,9 +502,6 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void ShowMessage(string message)
     {
-        //「次へ」アイコン
-        UpdateNextMark();
-
         // スキップモード
         if (IsSkipMode)
         {
@@ -457,6 +513,8 @@ public class NovelManager : MonoBehaviour
             // セリフを一文字ずつ表示
             textTyper.StartTyping(message);  // csvの3列目を読んでる
         }
+        //「次へ」アイコン更新
+        UpdateNextMark();
     }
     #endregion
 
@@ -643,45 +701,6 @@ public class NovelManager : MonoBehaviour
         if (enable)
         {
             autoTimer = 0f;
-        }
-    }
-
-
-    /// <summary>
-    /// 演出開始
-    /// </summary>
-    public void BeginTransition()
-    {
-        // 現在実行中の演出数+１
-        transitionCount++;
-
-        if (messageUI != null)
-        {
-            // メッセージUI非表示
-            messageUI.SetActive(false);
-        }
-    }
-    /// <summary>
-    /// 演出終了
-    /// </summary>
-    public void EndTransition()
-    {
-        // 現在実行中の演出数-１
-        transitionCount--;
-        // マイナス防止
-        if (transitionCount < 0)
-        {
-            transitionCount = 0;
-        }
-
-        // 全演出終了
-        if (transitionCount == 0)
-        {
-            if (messageUI != null)
-            {
-                // メッセージUI表示
-                messageUI.SetActive(true);
-            }
         }
     }
 

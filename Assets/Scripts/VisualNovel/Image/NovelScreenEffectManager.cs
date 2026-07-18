@@ -7,62 +7,67 @@ public class NovelScreenEffectManager : MonoBehaviour
     [Header("Screen Effect Image")]
     [SerializeField] private Image effectImage;
 
-    [Header("NovelManager")]
-    [SerializeField] private NovelManager novelManager;
-
     [Header("──────────────────────────────")]
     [Header("切替時間")]
     [SerializeField] private float transitionTime = 0.5f;
 
-
-    private Coroutine transitionCoroutine;
-
     private void Awake()
     {
+        // 非表示
         effectImage.gameObject.SetActive(false);
     }
 
 
     #region 表示・非表示
+
     /// <summary>
-    /// 暗転表示 (演出方法と色)
+    /// 画面エフェクト表示
     /// </summary>
-    public void Show(Color color, TransitionType transition)
+    public IEnumerator Show(Color color, TransitionType transition)
     {
-        // 演出方法分岐
         switch (transition)
         {
+            // 一瞬で表示
             case TransitionType.Instant:
-                ShowInstant(color);
+                yield return ShowInstant(color);
                 break;
 
+
+            // フェードイン
             case TransitionType.Fade:
-                StartTransition(FadeIn(color));
+                yield return FadeIn(color);
                 break;
 
+
+            // 時計ワイプ
             case TransitionType.Clock:
-                StartTransition(ClockIn(color));
+                yield return ClockIn(color);
                 break;
         }
     }
 
     /// <summary>
-    /// 暗転解除 (演出方法のみ)
+    /// 画面エフェクト非表示
     /// </summary>
-    public void Hide(TransitionType transition)
+    public IEnumerator Hide(TransitionType transition)
     {
         switch (transition)
         {
+            // 一瞬で非表示
             case TransitionType.Instant:
-                HideInstant();
+                yield return HideInstant();
                 break;
 
+
+            // フェードアウト
             case TransitionType.Fade:
-                StartTransition(FadeOut());
+                yield return FadeOut();
                 break;
 
+
+            // 時計ワイプ解除
             case TransitionType.Clock:
-                StartTransition(ClockOut());
+                yield return ClockOut();
                 break;
         }
     }
@@ -72,27 +77,13 @@ public class NovelScreenEffectManager : MonoBehaviour
     #region 共通処理
 
     /// <summary>
-    /// 演出開始
-    /// </summary>
-    void StartTransition(IEnumerator routine)
-    {
-        // 演出中なら停止
-        if (transitionCoroutine != null)
-        {
-            StopCoroutine(transitionCoroutine);
-        }
-        // 演出開始 (ウィンドウUI非表示)
-        novelManager?.BeginTransition();
-        // 新しい演出開始
-        transitionCoroutine = StartCoroutine(routine);
-    }
-
-    /// <summary>
     /// 画面色を設定
     /// </summary>
     void SetScreenColor(Color color)
     {
+        // 表示
         effectImage.gameObject.SetActive(true);
+        // 色を設定
         effectImage.color = color;
     }
     #endregion
@@ -103,18 +94,15 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// <summary>
     /// 一瞬で表示
     /// </summary>
-    void ShowInstant(Color color)
+    IEnumerator ShowInstant(Color color)
     {
-        // 演出開始 (ウィンドウUI非表示)
-        novelManager?.BeginTransition();
         // 色を設定
         SetScreenColor(color);
-        // 一瞬で表示
+        // 完全に不透明
         color.a = 1f;
         effectImage.color = color;
 
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+        yield return null;
     }
 
 
@@ -128,12 +116,12 @@ public class NovelScreenEffectManager : MonoBehaviour
         // 透明状態から開始
         color.a = 0f;
         effectImage.color = color;
+
         // 徐々に不透明
         float time = 0f;
         while (time < transitionTime)
         {
             time += Time.deltaTime;
-
             color.a = Mathf.Lerp(0f, 1f, time / transitionTime);
             effectImage.color = color;
 
@@ -142,10 +130,6 @@ public class NovelScreenEffectManager : MonoBehaviour
         // 完全に不透明
         color.a = 1f;
         effectImage.color = color;
-
-        transitionCoroutine = null;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
     }
 
 
@@ -156,12 +140,13 @@ public class NovelScreenEffectManager : MonoBehaviour
     {
         // 色を設定
         SetScreenColor(color);
-        // 画像タイプを"塗りつぶし"に変更
+
+        // 画像タイプを「塗りつぶし」に変更
         effectImage.type = Image.Type.Filled;
         effectImage.fillMethod = Image.FillMethod.Radial360;
         effectImage.fillOrigin = 2;
         effectImage.fillClockwise = true;
-        // 塗りつぶし０から開始
+        // 塗りつぶし0から開始
         effectImage.fillAmount = 0f;
 
         // 徐々に塗りつぶす
@@ -169,20 +154,14 @@ public class NovelScreenEffectManager : MonoBehaviour
         while (time < transitionTime)
         {
             time += Time.deltaTime;
-
             effectImage.fillAmount = Mathf.Lerp(0f, 1f, time / transitionTime);
 
             yield return null;
         }
-
         // 完全に塗りつぶし
         effectImage.fillAmount = 1f;
-        // 画像タイプを"シンプル"に変更
+        // 画像タイプを「シンプル」に戻す
         effectImage.type = Image.Type.Simple;
-
-        transitionCoroutine = null;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
     }
     #endregion
 
@@ -192,18 +171,16 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// <summary>
     /// 一瞬で非表示
     /// </summary>
-    void HideInstant()
+    IEnumerator HideInstant()
     {
-        // 演出開始 (ウィンドウUI非表示)
-        novelManager?.BeginTransition();
-        // 一瞬で非表示
+        // 完全に透明
         Color color = effectImage.color;
         color.a = 0f;
         effectImage.color = color;
-        // 完全に透明
+        // 非表示
         effectImage.gameObject.SetActive(false);
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+
+        yield return null;
     }
 
 
@@ -219,21 +196,17 @@ public class NovelScreenEffectManager : MonoBehaviour
         while (time < transitionTime)
         {
             time += Time.deltaTime;
-
             color.a = Mathf.Lerp(1f, 0f, time / transitionTime);
             effectImage.color = color;
 
             yield return null;
         }
-
         // 完全に透明
         color.a = 0f;
         effectImage.color = color;
-        effectImage.gameObject.SetActive(false);
 
-        transitionCoroutine = null;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+        // 非表示
+        effectImage.gameObject.SetActive(false);
     }
 
 
@@ -242,31 +215,29 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// </summary>
     IEnumerator ClockOut()
     {
-        // 画像タイプを"塗りつぶし"に変更
+        // 画像タイプを「塗りつぶし」に変更
         effectImage.type = Image.Type.Filled;
         effectImage.fillMethod = Image.FillMethod.Radial360;
         effectImage.fillOrigin = 2;
         effectImage.fillClockwise = false;
 
-        // 徐々に逆塗りつぶす
+        // 徐々に逆塗りつぶし
         float time = 0f;
         while (time < transitionTime)
         {
             time += Time.deltaTime;
-
             effectImage.fillAmount = Mathf.Lerp(1f, 0f, time / transitionTime);
 
             yield return null;
         }
         // 完全に逆塗りつぶし
         effectImage.fillAmount = 0f;
+        // 非表示
         effectImage.gameObject.SetActive(false);
-        // 画像タイプを"シンプル"に変更
-        effectImage.type = Image.Type.Simple;
 
-        transitionCoroutine = null;
-        // 演出終了 (ウィンドウUI表示)
-        novelManager?.EndTransition();
+        // 画像タイプを「シンプル」に戻す
+        effectImage.type = Image.Type.Simple;
     }
+
     #endregion
 }

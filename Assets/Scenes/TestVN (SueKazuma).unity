@@ -1209,7 +1209,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u30E1\u30E2\uFF1A\n\u7ACB\u3061\u7D75\n\u4ED6\u306ECSV\u30D5\u30A1\u30A4\u30EB\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\n\u65E2\u8AAD\nCG\u306E\u4ED5\u69D8\u3001\u9055\u3046\u6C17\u304C\u3059\u308B\n\n\u30D0\u30B0:\n\u30C6\u30AD\u30B9\u30C8\u306E\u4E0A\u306E\u30AF\u30EA\u30C3\u30AF\u3082\u7121\u52B9\u5316\n\u30DC\u30BF\u30F3\u4E0A\u3060\u3068\u30AD\u30FC\u64CD\u4F5C\u3082\u3082\u3046\u52B9\u679C\u3055\u308C\u308B"
+  m_text: "\u30E1\u30E2\uFF1A\n\u7ACB\u3061\u7D75\n\u4ED6\u306ECSV\u30D5\u30A1\u30A4\u30EB\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\n\u65E2\u8AAD\n\u30B9\u30AD\u30C3\u30D7\u3067\u6697\u8EE2\u306F\u4E00\u77AC\n\n\u30D0\u30B0:\n\u30C6\u30AD\u30B9\u30C8\u306E\u4E0A\u306E\u30AF\u30EA\u30C3\u30AF\u3082\u7121\u52B9\u5316\n\u30DC\u30BF\u30F3\u4E0A\u3060\u3068\u30AD\u30FC\u64CD\u4F5C\u3082\u3082\u3046\u52B9\u679C\u3055\u308C\u308B"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
@@ -2242,7 +2242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NovelSEManager
   audioSource: {fileID: 432833247}
-  seVolume: 1
+  seVolume: 0.5
 --- !u!114 &1042294295
 MonoBehaviour:
   m_ObjectHideFlags: 0

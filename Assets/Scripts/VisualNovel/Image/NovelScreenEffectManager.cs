@@ -23,8 +23,12 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// <summary>
     /// 画面エフェクト表示
     /// </summary>
-    public IEnumerator Show(Color color, TransitionType transition)
+    public IEnumerator Show(Color color, TransitionType transition, float? customTransitionTime = null)
     {
+        // 演出時間 (CSVに時間指定があればそれを使用,空欄ならInspectorのデフォルト値を使用)
+        // ※customTransitionTime が null なら transitionTime。null でなければ customTransitionTime。
+        float duration = customTransitionTime ?? transitionTime;
+
         switch (transition)
         {
             // 一瞬で表示
@@ -32,16 +36,14 @@ public class NovelScreenEffectManager : MonoBehaviour
                 yield return ShowInstant(color);
                 break;
 
-
             // フェードイン
             case TransitionType.Fade:
-                yield return FadeIn(color);
+                yield return FadeIn(color, duration);
                 break;
-
 
             // 時計ワイプ
             case TransitionType.Clock:
-                yield return ClockIn(color);
+                yield return ClockIn(color, duration);
                 break;
         }
     }
@@ -49,8 +51,13 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// <summary>
     /// 画面エフェクト非表示
     /// </summary>
-    public IEnumerator Hide(TransitionType transition)
+    public IEnumerator Hide(TransitionType transition, float? customTransitionTime = null)
     {
+        // 演出時間 (CSVに時間指定があればそれを使用,空欄ならInspectorのデフォルト値を使用)
+        // ※customTransitionTime が null なら transitionTime。null でなければ customTransitionTime。
+        float duration = customTransitionTime ?? transitionTime;
+
+        // 演出
         switch (transition)
         {
             // 一瞬で非表示
@@ -58,16 +65,14 @@ public class NovelScreenEffectManager : MonoBehaviour
                 yield return HideInstant();
                 break;
 
-
             // フェードアウト
             case TransitionType.Fade:
-                yield return FadeOut();
+                yield return FadeOut(duration);
                 break;
-
 
             // 時計ワイプ解除
             case TransitionType.Clock:
-                yield return ClockOut();
+                yield return ClockOut(duration);
                 break;
         }
     }
@@ -109,7 +114,7 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// <summary>
     /// フェードイン
     /// </summary>
-    IEnumerator FadeIn(Color color)
+    IEnumerator FadeIn(Color color, float duration)
     {
         // 色を設定
         SetScreenColor(color);
@@ -119,10 +124,10 @@ public class NovelScreenEffectManager : MonoBehaviour
 
         // 徐々に不透明
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            color.a = Mathf.Lerp(0f, 1f, time / transitionTime);
+            color.a = Mathf.Lerp(0f, 1f, time / duration);
             effectImage.color = color;
 
             yield return null;
@@ -136,7 +141,7 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// <summary>
     /// 時計ワイプ
     /// </summary>
-    IEnumerator ClockIn(Color color)
+    IEnumerator ClockIn(Color color, float duration)
     {
         // 色を設定
         SetScreenColor(color);
@@ -151,10 +156,10 @@ public class NovelScreenEffectManager : MonoBehaviour
 
         // 徐々に塗りつぶす
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            effectImage.fillAmount = Mathf.Lerp(0f, 1f, time / transitionTime);
+            effectImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
 
             yield return null;
         }
@@ -187,16 +192,16 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// <summary>
     /// フェードアウト
     /// </summary>
-    IEnumerator FadeOut()
+    IEnumerator FadeOut(float duration)
     {
         Color color = effectImage.color;
 
         // 徐々に透明
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            color.a = Mathf.Lerp(1f, 0f, time / transitionTime);
+            color.a = Mathf.Lerp(1f, 0f, time / duration);
             effectImage.color = color;
 
             yield return null;
@@ -213,7 +218,7 @@ public class NovelScreenEffectManager : MonoBehaviour
     /// <summary>
     /// 時計ワイプ解除
     /// </summary>
-    IEnumerator ClockOut()
+    IEnumerator ClockOut(float duration)
     {
         // 画像タイプを「塗りつぶし」に変更
         effectImage.type = Image.Type.Filled;
@@ -223,10 +228,10 @@ public class NovelScreenEffectManager : MonoBehaviour
 
         // 徐々に逆塗りつぶし
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            effectImage.fillAmount = Mathf.Lerp(1f, 0f, time / transitionTime);
+            effectImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
 
             yield return null;
         }

@@ -23,12 +23,17 @@ public class NovelManager : MonoBehaviour
     private const int COL_BGM = 8;               // BGM再生
     private const int COL_AMBIENT = 9;           // 環境音再生
 
-    private const int COL_BG = 10;               // BG画像
-    private const int COL_BG_EFFECT = 11;        // BG画像_演出
-    private const int COL_CG = 12;               // CG画像
-    private const int COL_CG_EFFECT = 13;        // CG画像_演出
-    private const int COL_SCREEN = 14;           // 画面エフェクト色
-    private const int COL_SCREEN_EFFECT = 15;    // 画面エフェクト演出
+    private const int COL_BG = 10;               // BG_画像
+    private const int COL_BG_EFFECT = 11;        // BG_演出
+    private const int COL_BG_TIME = 12;          // BG_時間
+
+    private const int COL_CG = 13;               // CG_画像
+    private const int COL_CG_EFFECT = 14;        // CG_演出
+    private const int COL_CG_TIME = 15;          // CG_時間
+
+    private const int COL_SCREEN = 16;           // 画面エフェクト_色
+    private const int COL_SCREEN_EFFECT = 17;    // 画面エフェクト_演出
+    private const int COL_SCREEN_TIME = 18;      // 画面エフェクト_時間
     #endregion
 
     [Header("csvReader")]
@@ -211,7 +216,23 @@ public class NovelManager : MonoBehaviour
         // [!] 操作キーは仮 //
 
         // [左クリック]
-        if (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.DownArrow) || Input.mouseScrollDelta.y < 0)
+        if (Input.GetMouseButtonDown(0))
+        {
+            // ボタンをクリックした場合は何もしない
+            if (IsPointerOverButton())
+                return;
+
+            // ウィンドウ非表示中なら表示だけする
+            if (!messageVisible)
+            {
+                SetMessageWindow(true);
+                return;
+            }
+            // メッセージを進める
+            AdvanceMessage();
+        }
+        // [Enter / ↓ / マウスホイール下]
+        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.DownArrow) || Input.mouseScrollDelta.y < 0)
         {
             // ウィンドウ非表示中なら表示だけする
             if (!messageVisible)
@@ -295,6 +316,44 @@ public class NovelManager : MonoBehaviour
         }
     }
 
+
+    /// <summary>
+    /// マウスカーソルの位置にButtonがあるか確認
+    /// </summary>
+    bool IsPointerOverButton()
+    {
+        // EventSystemが存在しない場合
+        if (EventSystem.current == null)
+            return false;
+
+        // マウス位置を取得
+        PointerEventData pointerData = new PointerEventData(EventSystem.current)
+        {
+            position = Input.mousePosition
+        };
+
+        // Raycast結果を格納するリスト
+        var results = new System.Collections.Generic.List<RaycastResult>();
+
+        // マウス位置にあるUIをすべて取得
+        EventSystem.current.RaycastAll(pointerData, results);
+
+        // RaycastされたUIを確認
+        foreach (RaycastResult result in results)
+        {
+            // 自分自身または親にButtonがあるか確認
+            Button button = result.gameObject.GetComponentInParent<Button>();
+
+            // Buttonが見つかった
+            if (button != null)
+            {
+                return true;
+            }
+        }
+
+        // Buttonはなかった
+        return false;
+    }
     #endregion
 
 
@@ -371,30 +430,38 @@ public class NovelManager : MonoBehaviour
         ambientManager?.PlayAmbient(line[COL_AMBIENT]);
 
 
-
         // BG表示の方法を取得 (誤字ならInstance表示)
         if (!System.Enum.TryParse(line[COL_BG_EFFECT], true, out TransitionType bgTransition))
         {
             bgTransition = TransitionType.Instant;
         }
+        // BG演出時間を取得 (nullも入れられるfloat型)
+        float? bgTime = ParseTransitionTime(line[COL_BG_TIME]);
+        // BG演出時間が0秒ならInstant
+        CheckInstantTransition(line[COL_BG_TIME], ref bgTransition);
         // BG表示 (演出が終わるまで待つ)
         if (!string.IsNullOrEmpty(line[COL_BG]))
         {
-            yield return backgroundManager?.ChangeBackground(line[COL_BG], bgTransition);
+            yield return backgroundManager?.ChangeBackground(line[COL_BG], bgTransition, bgTime);
         }
+
 
         // CG表示の方法を取得 (誤字ならInstance表示)
         if (!System.Enum.TryParse(line[COL_CG_EFFECT], true, out TransitionType cgTransition))
         {
             cgTransition = TransitionType.Instant;
         }
+        // CG演出時間を取得 (nullも入れられるfloat型)
+        float? cgTime = ParseTransitionTime(line[COL_CG_TIME]);
+        // CG演出時間が0秒ならInstant
+        CheckInstantTransition(line[COL_CG_TIME], ref cgTransition);
         // CG表示
         if (line[COL_CG] == "NONE")
         {
             if (cgManager != null)
             {
                 // CG非表示
-                yield return cgManager.HideCG(cgTransition);
+                yield return cgManager.HideCG(cgTransition, cgTime);
             }
         }
         else if (!string.IsNullOrEmpty(line[COL_CG]))
@@ -402,7 +469,7 @@ public class NovelManager : MonoBehaviour
             if (cgManager != null)
             {
                 // CG表示
-                yield return cgManager.ShowCG(line[COL_CG], cgTransition);
+                yield return cgManager.ShowCG(line[COL_CG], cgTransition, cgTime);
             }
         }
 
@@ -411,30 +478,34 @@ public class NovelManager : MonoBehaviour
         {
             screenTransition = TransitionType.Instant;
         }
+        // 画面エフェクト時間を取得 (nullも入れられるfloat型)
+        float? screenTime = ParseTransitionTime(line[COL_SCREEN_TIME]);
+        // 画面エフェクト時間が0秒ならInstant
+        CheckInstantTransition(line[COL_SCREEN_TIME], ref screenTransition);
         // 画面エフェクト
         switch (line[COL_SCREEN])
         {
             case "BLACK":
-                // 暗転 (演出が終わるまで待つ)
+                // 暗転
                 if (screenEffectManager != null)
                 {
-                    yield return screenEffectManager.Show(Color.black, screenTransition);
+                    yield return screenEffectManager.Show(Color.black, screenTransition, screenTime);
                 }
                 break;
 
             case "WHITE":
-                // ホワイトアウト (演出が終わるまで待つ)
+                // ホワイトアウト
                 if (screenEffectManager != null)
                 {
-                    yield return screenEffectManager.Show(Color.white, screenTransition);
+                    yield return screenEffectManager.Show(Color.white, screenTransition, screenTime);
                 }
                 break;
 
             case "NONE":
-                // 暗転解除 (演出が終わるまで待つ)
+                // 暗転解除
                 if (screenEffectManager != null)
                 {
-                    yield return screenEffectManager.Hide(screenTransition);
+                    yield return screenEffectManager.Hide(screenTransition, screenTime);
                 }
                 break;
         }
@@ -473,6 +544,51 @@ public class NovelManager : MonoBehaviour
         if (!hasMessage)
         {
             AdvanceMessage();
+        }
+    }
+
+    /// <summary>
+    /// CSVから演出時間を取得
+    /// 空欄・不正な値ならnullを返す
+    /// </summary>
+    float? ParseTransitionTime(string value)
+    {
+        // 空欄ならデフォルト値を使用
+        if (string.IsNullOrEmpty(value))
+            return null;
+        // 数値に変換できた場合
+        if (float.TryParse(value, out float time))
+        {
+            // 0秒未満は不正なのでデフォルト値を使用
+            if (time >= 0f)
+            {
+                return time;
+            }
+        }
+        // 不正な値
+        Debug.LogWarning("演出時間が不正です : " + value);
+
+        return null;
+    }
+
+
+    /// <summary>
+    /// 演出時間が0秒なら即時表示(Instant)に変更
+    /// </summary>
+    void CheckInstantTransition(string timeValue, ref TransitionType transition)
+    {
+        // 時間が空欄なら何もしない
+        if (string.IsNullOrEmpty(timeValue))
+            return;
+
+        // 数値に変換できないなら何もしない
+        if (!float.TryParse(timeValue, out float time))
+            return;
+
+        // 0秒なら即時表示
+        if (time == 0f)
+        {
+            transition = TransitionType.Instant;
         }
     }
     #endregion

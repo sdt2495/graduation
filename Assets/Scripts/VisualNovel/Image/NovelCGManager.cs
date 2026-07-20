@@ -37,7 +37,7 @@ public class NovelCGManager : MonoBehaviour
     /// <summary>
     /// CG表示
     /// </summary>
-    public IEnumerator ShowCG(string cgName, TransitionType transition)
+    public IEnumerator ShowCG(string cgName, TransitionType transition, float? customTransitionTime = null)
     {
         // 空欄なら何もしない
         if (string.IsNullOrEmpty(cgName))
@@ -45,17 +45,18 @@ public class NovelCGManager : MonoBehaviour
 
         // CG読み込み
         Sprite sprite = Resources.Load<Sprite>("CG/" + cgName);
-
         if (sprite == null)
         {
             Debug.LogWarning("CGが見つかりません : " + cgName);
             yield break;
         }
 
+        // 演出時間 (CSVに時間指定があればそれを使用,空欄ならInspectorのデフォルト値を使用)
+        // ※customTransitionTime が null なら transitionTime。null でなければ customTransitionTime。
+        float time = customTransitionTime ?? transitionTime;
+
         // 現在CGが表示されているか
         bool isShowingCG = currentImage.gameObject.activeSelf;
-
-
 
         // CGが表示されていない
         if (!isShowingCG)
@@ -69,21 +70,21 @@ public class NovelCGManager : MonoBehaviour
                     break;
 
                 case TransitionType.Fade:
-                    yield return FadeIn(nextImage);
+                    yield return FadeIn(nextImage, time);
                     break;
 
                 case TransitionType.Clock:
-                    yield return ClockIn(nextImage);
+                    yield return ClockIn(nextImage, time);
                     break;
             }
             SwapImages();
             yield break;
         }
 
-
         // CGがすでに表示されている
         SetImage(nextImage, sprite);
 
+        // 演出の出し方
         switch (transition)
         {
             case TransitionType.Instant:
@@ -93,12 +94,12 @@ public class NovelCGManager : MonoBehaviour
 
             case TransitionType.Fade:
                 // Fadeを指定した場合、CG表示中なら自動的にクロスフェード
-                yield return CrossFade();
+                yield return CrossFade(time);
                 break;
 
             case TransitionType.Clock:
                 // 時計ワイプの場合は現在CGを消してから表示
-                yield return ClockIn(nextImage);
+                yield return ClockIn(nextImage, time);
                 currentImage.gameObject.SetActive(false);
                 break;
         }
@@ -109,11 +110,15 @@ public class NovelCGManager : MonoBehaviour
     /// <summary>
     /// CGを消す
     /// </summary>
-    public IEnumerator HideCG(TransitionType transition)
+    public IEnumerator HideCG(TransitionType transition, float? customTransitionTime = null)
     {
         // CGが表示されていなければ何もしない
         if (!currentImage.gameObject.activeSelf)
             yield break;
+
+        // 演出時間 (CSVに時間指定があればそれを使用,空欄ならInspectorのデフォルト値を使用)
+        // ※customTransitionTime が null なら transitionTime。null でなければ customTransitionTime。
+        float time = customTransitionTime ?? transitionTime;
 
         switch (transition)
         {
@@ -122,11 +127,11 @@ public class NovelCGManager : MonoBehaviour
                 break;
 
             case TransitionType.Fade:
-                yield return FadeOut();
+                yield return FadeOut(time);
                 break;
 
             case TransitionType.Clock:
-                yield return ClockOut();
+                yield return ClockOut(time);
                 break;
         }
     }
@@ -187,16 +192,16 @@ public class NovelCGManager : MonoBehaviour
     /// <summary>
     /// フェードイン
     /// </summary>
-    IEnumerator FadeIn(Image image)
+    IEnumerator FadeIn(Image image, float duration)
     {
         // 画像を透明にして設定
         SetAlpha(image, 0f);
         // 徐々に不透明
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            float rate = Mathf.Clamp01(time / transitionTime);
+            float rate = Mathf.Clamp01(time / duration);
             SetAlpha(image, rate);
 
             yield return null;
@@ -209,17 +214,17 @@ public class NovelCGManager : MonoBehaviour
     /// クロスフェード
     /// 現在のCGを表示したまま、新しいCGを重ねて表示する
     /// </summary>
-    IEnumerator CrossFade()
+    IEnumerator CrossFade(float duration)
     {
         // 変更後画像を透明にする
         SetAlpha(nextImage, 0f);
 
         // 徐々に不透明
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            float rate = Mathf.Clamp01(time / transitionTime);
+            float rate = Mathf.Clamp01(time / duration);
             // 現在のCG
             SetAlpha(currentImage, 1f - rate);
             // 次のCG
@@ -238,7 +243,7 @@ public class NovelCGManager : MonoBehaviour
     /// <summary>
     /// 時計回りに表示
     /// </summary>
-    IEnumerator ClockIn(Image image)
+    IEnumerator ClockIn(Image image, float duration)
     {
         // 画像タイプを"塗りつぶし"に変更
         image.type = Image.Type.Filled;
@@ -249,10 +254,10 @@ public class NovelCGManager : MonoBehaviour
 
         // 徐々に塗りつぶし
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            float rate = Mathf.Clamp01(time / transitionTime);
+            float rate = Mathf.Clamp01(time / duration);
             image.fillAmount = rate;
 
             yield return null;
@@ -278,14 +283,14 @@ public class NovelCGManager : MonoBehaviour
     /// <summary>
     /// フェードアウト
     /// </summary>
-    IEnumerator FadeOut()
+    IEnumerator FadeOut(float duration)
     {
         // 徐々に透明
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            float rate = Mathf.Clamp01(time / transitionTime);
+            float rate = Mathf.Clamp01(time / duration);
             SetAlpha(currentImage, 1f - rate);
 
             yield return null;
@@ -297,7 +302,7 @@ public class NovelCGManager : MonoBehaviour
     /// <summary>
     /// 時計回りに消す
     /// </summary>
-    IEnumerator ClockOut()
+    IEnumerator ClockOut(float duration)
     {
         // 画像タイプを"塗りつぶし"に変更
         currentImage.type = Image.Type.Filled;
@@ -308,10 +313,10 @@ public class NovelCGManager : MonoBehaviour
 
         // 徐々に逆に塗りつぶされる
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            float rate = Mathf.Clamp01(time / transitionTime);
+            float rate = Mathf.Clamp01(time / duration);
             currentImage.fillAmount = 1f - rate;
 
             yield return null;

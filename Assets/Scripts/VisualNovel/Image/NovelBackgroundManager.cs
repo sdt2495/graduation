@@ -21,7 +21,7 @@ public class NovelBackgroundManager : MonoBehaviour
     /// <summary>
     /// 背景変更
     /// </summary>
-    public IEnumerator ChangeBackground(string bgName, TransitionType transition)
+    public IEnumerator ChangeBackground(string bgName, TransitionType transition, float? customTransitionTime = null)
     {
         // 空欄なら変更しない
         if (string.IsNullOrEmpty(bgName))
@@ -43,6 +43,10 @@ public class NovelBackgroundManager : MonoBehaviour
             yield break;
         }
 
+        // 演出時間 (CSVに時間指定があればそれを使用,空欄ならInspectorのデフォルト値を使用)
+        // ※customTransitionTime が null なら transitionTime。null でなければ customTransitionTime。
+        float time = customTransitionTime ?? transitionTime;
+
         // 変更演出分岐
         switch (transition)
         {
@@ -51,11 +55,11 @@ public class NovelBackgroundManager : MonoBehaviour
                 break;
 
             case TransitionType.Fade:
-                yield return Fade(sprite);
+                yield return Fade(sprite, time);
                 break;
 
             case TransitionType.Clock:
-                yield return Clock(sprite);
+                yield return Clock(sprite, time);
                 break;
         }
     }
@@ -131,7 +135,7 @@ public class NovelBackgroundManager : MonoBehaviour
     /// <summary>
     /// フェード
     /// </summary>
-    IEnumerator Fade(Sprite sprite)
+    IEnumerator Fade(Sprite sprite, float duration)
     {
         // 次の背景に設定
         SetNextBackground(sprite);
@@ -143,10 +147,10 @@ public class NovelBackgroundManager : MonoBehaviour
 
         // 徐々に表示
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            color.a = Mathf.Lerp(0f, 1f, time / transitionTime);
+            color.a = Mathf.Lerp(0f, 1f, time / duration);
             nextBackgroundImage.color = color;
 
             yield return null;
@@ -163,7 +167,7 @@ public class NovelBackgroundManager : MonoBehaviour
     /// <summary>
     /// 時計回り
     /// </summary>
-    IEnumerator Clock(Sprite sprite)
+    IEnumerator Clock(Sprite sprite, float duration)
     {
         // 次の背景に設定
         SetNextBackground(sprite);
@@ -178,10 +182,10 @@ public class NovelBackgroundManager : MonoBehaviour
 
         // 徐々に表示
         float time = 0f;
-        while (time < transitionTime)
+        while (time < duration)
         {
             time += Time.deltaTime;
-            nextBackgroundImage.fillAmount = Mathf.Lerp(0f, 1f, time / transitionTime);
+            nextBackgroundImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
 
             yield return null;
         }

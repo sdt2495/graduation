@@ -14,26 +14,28 @@ public class NovelManager : MonoBehaviour
     private const int COL_SPEAKER = 1;           // 発言者
     private const int COL_MESSAGE = 2;           // セリフ
 
-    private const int COL_CHARACTER = 3;         // 立ち絵:表示画像
-    private const int COL_POSITION = 4;          // 立ち絵:表示位置
-    private const int COL_FLIP = 5;              // 立ち絵:反転
-
-    private const int COL_VOICE = 6;             // VOICE再生
-    private const int COL_SE = 7;                // SE再生
-    private const int COL_BGM = 8;               // BGM再生
-    private const int COL_AMBIENT = 9;           // 環境音再生
-
-    private const int COL_BG = 10;               // BG_画像
-    private const int COL_BG_EFFECT = 11;        // BG_演出
-    private const int COL_BG_TIME = 12;          // BG_時間
-
-    private const int COL_CG = 13;               // CG_画像
-    private const int COL_CG_EFFECT = 14;        // CG_演出
-    private const int COL_CG_TIME = 15;          // CG_時間
-
-    private const int COL_SCREEN = 16;           // 画面エフェクト_色
-    private const int COL_SCREEN_EFFECT = 17;    // 画面エフェクト_演出
-    private const int COL_SCREEN_TIME = 18;      // 画面エフェクト_時間
+    private const int COL_VOICE = 3;             // VOICE再生
+    // 立ち絵
+    private const int COL_LEFT = 4;              // 左
+    private const int COL_CENTER = 5;            // 中央
+    private const int COL_RIGHT = 6;             // 右
+    private const int COL_MESSAGE_LEFT = 7;      // メッセージウィンドウ左
+    // オーディオ
+    private const int COL_SE = 8;                // SE再生
+    private const int COL_BGM = 9;               // BGM再生
+    private const int COL_AMBIENT = 10;          // 環境音再生
+    // 背景
+    private const int COL_BG = 11;               // BG画像
+    private const int COL_BG_EFFECT = 12;        // BG演出
+    private const int COL_BG_TIME = 13;          // BG時間
+    // CG
+    private const int COL_CG = 14;               // CG画像
+    private const int COL_CG_EFFECT = 15;        // CG演出
+    private const int COL_CG_TIME = 16;          // CG時間
+    // 画面エフェクト
+    private const int COL_SCREEN = 17;           // 画面エフェクト色
+    private const int COL_SCREEN_EFFECT = 18;    // 画面エフェクト演出
+    private const int COL_SCREEN_TIME = 19;      // 画面エフェクト時間
     #endregion
 
     [Header("csvReader")]
@@ -47,6 +49,9 @@ public class NovelManager : MonoBehaviour
 
     [Header("BackLogManager")]
     [SerializeField] private BackLogManager backLogManager;                  // ログを遡るスクリプト
+    // ★キャラクター ★
+    [Header("NovelCharacterManager")]
+    [SerializeField] private NovelCharacterManager characterManager;         // 立ち絵を表示するスクリプト
     // ★オーディオ ★
     [Header("NovelVoiceManager")]
     [SerializeField] private NovelVoiceManager voiceManager;                 // 音声を再生するスクリプト
@@ -445,6 +450,12 @@ public class NovelManager : MonoBehaviour
             yield return backgroundManager?.ChangeBackground(line[COL_BG], bgTransition, bgTime);
         }
 
+        // 立ち絵表示
+        if (characterManager != null)
+        {
+            // 立ち絵は演出なしで即座に切り替える
+            characterManager.UpdateCharacters(line[COL_LEFT], line[COL_CENTER], line[COL_RIGHT], line[COL_MESSAGE_LEFT]);
+        }
 
         // CG表示の方法を取得 (誤字ならInstance表示)
         if (!System.Enum.TryParse(line[COL_CG_EFFECT], true, out TransitionType cgTransition))

@@ -66,17 +66,24 @@ public class NovelCGManager : MonoBehaviour
             switch (transition)
             {
                 case TransitionType.Instant:
+                    // 即座に表示
                     SetAlpha(nextImage, 1f);
+
                     break;
 
                 case TransitionType.Fade:
+                    // 透明からフェードイン
                     yield return FadeIn(nextImage, time);
+
                     break;
 
                 case TransitionType.Clock:
+                    // 時計ワイプ (最初から完全に表示)
+                    SetAlpha(nextImage, 1f);
                     yield return ClockIn(nextImage, time);
                     break;
             }
+            //// 現在画像と次画像を入れ替える
             SwapImages();
             yield break;
         }
@@ -88,21 +95,28 @@ public class NovelCGManager : MonoBehaviour
         switch (transition)
         {
             case TransitionType.Instant:
+                // 新しいCGを即座に表示
                 SetAlpha(nextImage, 1f);
+                // 古いCGを非表示
                 currentImage.gameObject.SetActive(false);
                 break;
 
             case TransitionType.Fade:
-                // Fadeを指定した場合、CG表示中なら自動的にクロスフェード
-                yield return CrossFade(time);
+                // 新しいCGを古いCGの上に重ねる
+                yield return FadeInOver(nextImage, time);
                 break;
 
             case TransitionType.Clock:
-                // 時計ワイプの場合は現在CGを消してから表示
+                // 新しいCGを完全表示
+                SetAlpha(nextImage, 1f);
+                // 時計ワイプ
                 yield return ClockIn(nextImage, time);
+                // 古いCGを非表示
                 currentImage.gameObject.SetActive(false);
+
                 break;
         }
+        // 現在画像と次画像を入れ替える
         SwapImages();
     }
 
@@ -147,8 +161,6 @@ public class NovelCGManager : MonoBehaviour
     {
         image.sprite = sprite;
         image.gameObject.SetActive(true);
-
-        SetAlpha(image, 1f);
 
         // Filled状態を解除
         image.type = Image.Type.Simple;
@@ -210,32 +222,53 @@ public class NovelCGManager : MonoBehaviour
         SetAlpha(image, 1f);
     }
 
-    /// <summary>
-    /// クロスフェード
-    /// 現在のCGを表示したまま、新しいCGを重ねて表示する
-    /// </summary>
-    IEnumerator CrossFade(float duration)
-    {
-        // 変更後画像を透明にする
-        SetAlpha(nextImage, 0f);
 
-        // 徐々に不透明
+    /// <summary>
+    /// 上からフェードイン
+    /// 現在のCGを表示したまま、新しいCGを上から重ねて表示する
+    /// </summary>
+    /// <summary>
+    /// 上からフェードイン
+    /// 現在のCGを表示したまま、新しいCGを上から重ねて表示する
+    /// </summary>
+    IEnumerator FadeInOver(Image image, float duration)
+    {
+        // 新しいCGを表示
+        image.gameObject.SetActive(true);
+
+        // 新しいCGを現在のCGより前面にする
+        image.transform.SetAsLastSibling();
+
+        // 新しいCGを完全に透明にする
+        SetAlpha(image, 0f);
+        // 現在のCGは完全に表示したまま
+        SetAlpha(currentImage, 1f);
+
+        // 0秒以下なら即時表示
+        if (duration <= 0f)
+        {
+            SetAlpha(image, 1f);
+            currentImage.gameObject.SetActive(false);
+            yield break;
+        }
+
+        // フェード開始
         float time = 0f;
         while (time < duration)
         {
             time += Time.deltaTime;
             float rate = Mathf.Clamp01(time / duration);
-            // 現在のCG
-            SetAlpha(currentImage, 1f - rate);
-            // 次のCG
-            SetAlpha(nextImage, rate);
+            // 古いCGは最後まで表示
+            SetAlpha(currentImage, 1f);
+            // 新しいCGだけ徐々に表示
+            SetAlpha(image, rate);
 
             yield return null;
         }
-        // 完了
-        SetAlpha(currentImage, 0f);
-        SetAlpha(nextImage, 1f);
 
+        // 最終状態
+        SetAlpha(image, 1f);
+        // 古いCGを非表示
         currentImage.gameObject.SetActive(false);
     }
 
@@ -245,6 +278,9 @@ public class NovelCGManager : MonoBehaviour
     /// </summary>
     IEnumerator ClockIn(Image image, float duration)
     {
+        // CG自体は完全に表示
+        SetAlpha(image, 1f);
+
         // 画像タイプを"塗りつぶし"に変更
         image.type = Image.Type.Filled;
         image.fillMethod = Image.FillMethod.Radial360;

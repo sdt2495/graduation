@@ -18,6 +18,10 @@ public class NovelBGMManager : MonoBehaviour
 
     private AudioSource currentSource; // 現在再生しているAudioSource
 
+    
+    private Coroutine crossFadeCoroutine;    // 現在実行中のクロスフェード
+    private Coroutine fadeOutCoroutine;      // 現在実行中のフェードアウト
+
 
     private void Awake()
     {
@@ -25,8 +29,8 @@ public class NovelBGMManager : MonoBehaviour
         sourceA.loop = true;
         sourceB.loop = true;
 
-        // 片方は消音
-        sourceA.volume = bgmVolume;
+        // 初期状態
+        sourceA.volume = 0f;
         sourceB.volume = 0f;
 
         currentSource = sourceA;
@@ -42,7 +46,7 @@ public class NovelBGMManager : MonoBehaviour
     /// <param name="bgmName">BGMファイル名</param>
     public void PlayBGM(string bgmName)
     {
-        // 空なら何もしない
+        // 空欄なら何もしない (現在のBGMをそのまま再生)
         if (string.IsNullOrEmpty(bgmName))
             return;
 
@@ -53,20 +57,34 @@ public class NovelBGMManager : MonoBehaviour
             return;
         }
 
+        // BGM読み込み
         AudioClip clip = Resources.Load<AudioClip>("BGM/" + bgmName);
-
-
         if (clip == null)
         {
             Debug.LogWarning("BGMが見つかりません : " + bgmName);
+            return;
         }
 
-        // 同じ曲ならそのまま
-        if (currentSource.clip == clip)
+        // 同じ曲なら何もしない
+        if (currentSource.clip == clip && currentSource.isPlaying)
             return;
 
-        // BGM再生
-        StartCoroutine(CrossFade(clip));
+        // 既存のクロスフェードを停止
+        if (crossFadeCoroutine != null)
+        {
+            StopCoroutine(crossFadeCoroutine);
+            crossFadeCoroutine = null;
+        }
+
+        // フェードアウト中なら停止
+        if (fadeOutCoroutine != null)
+        {
+            StopCoroutine(fadeOutCoroutine);
+            fadeOutCoroutine = null;
+        }
+
+        // BGM変更
+        crossFadeCoroutine = StartCoroutine(CrossFade(clip));
     }
 
 
@@ -77,7 +95,7 @@ public class NovelBGMManager : MonoBehaviour
     {
         AudioSource nextSource;
 
-        // nextSource
+        // 現在使っていないAudioSource(nextSource)を取得 
         if (currentSource == sourceA)
         {
             nextSource = sourceB;
@@ -87,25 +105,40 @@ public class NovelBGMManager : MonoBehaviour
             nextSource = sourceA;
         }
 
-
         // 新しいBGM設定 (初期化)
         nextSource.clip = newClip;
         nextSource.time = 0f;
         nextSource.volume = 0f;
+        // 再生開始
         nextSource.Play();
 
-        float time = 0f;
+        // 現在の音量を保存
+        float currentStartVolume = currentSource.volume;
+
+        // フェード時間0なら即時切替
+        if (fadeTime <= 0f)
+        {
+            currentSource.Stop();
+            currentSource.volume = 0f;
+
+            nextSource.volume = bgmVolume;
+
+            currentSource = nextSource;
+            crossFadeCoroutine = null;
+
+            yield break;
+        }
 
         // クロスフェード
+        float time = 0f;
         while (time < fadeTime)
         {
             time += Time.deltaTime;
+            float rate = Mathf.Clamp01(time / fadeTime);
 
-            float rate = time / fadeTime;
-
-            // 徐々に音を小さく (フェードアウト)
-            currentSource.volume = Mathf.Lerp(bgmVolume, 0f, rate);
-            // 徐々に音を大きく (フェードイン)
+            // 古いBGMをフェードアウト
+            currentSource.volume = Mathf.Lerp(currentStartVolume, 0f, rate);
+            // 新しいBGMをフェードイン
             nextSource.volume = Mathf.Lerp(0f, bgmVolume, rate);
 
             yield return null;
@@ -114,9 +147,11 @@ public class NovelBGMManager : MonoBehaviour
         // 古いBGM停止
         currentSource.Stop();
         currentSource.volume = 0f;
-
-        // currentSourceを切替
+        // 新しいBGMを完全再生
+        nextSource.volume = bgmVolume;
+        // 現在のAudioSourceを切り替え
         currentSource = nextSource;
+        crossFadeCoroutine = null;
     }
     #endregion
 
@@ -128,7 +163,20 @@ public class NovelBGMManager : MonoBehaviour
     /// </summary>
     public void StopBGM()
     {
-        StartCoroutine(FadeOut());
+        // クロスフェード中なら停止
+        if (crossFadeCoroutine != null)
+        {
+            StopCoroutine(crossFadeCoroutine);
+            crossFadeCoroutine = null;
+        }
+        // すでにフェードアウト中なら停止
+        if (fadeOutCoroutine != null)
+        {
+            StopCoroutine(fadeOutCoroutine);
+            fadeOutCoroutine = null;
+        }
+        // フェードアウト開始
+        fadeOutCoroutine = StartCoroutine(FadeOut());
     }
 
 
@@ -139,22 +187,34 @@ public class NovelBGMManager : MonoBehaviour
     {
         float startVolume = currentSource.volume;
 
+        // フェード時間0以下
+        if (fadeTime <= 0f)
+        {
+            currentSource.Stop();
+            currentSource.clip = null;
+            currentSource.volume = 0f;
+
+            fadeOutCoroutine = null;
+
+            yield break;
+        }
+
+        // フェードアウト
         float time = 0f;
-
-
-        // 徐々に音を小さく (フェードアウト)
         while (time < fadeTime)
         {
             time += Time.deltaTime;
-
-            currentSource.volume = Mathf.Lerp(startVolume, 0f, time / fadeTime);
+            float rate = Mathf.Clamp01(time / fadeTime);
+            currentSource.volume = Mathf.Lerp(startVolume, 0f, rate);
 
             yield return null;
         }
-
-        // 再生停止
+        // 完全停止
         currentSource.Stop();
         currentSource.clip = null;
+        currentSource.volume = 0f;
+
+        fadeOutCoroutine = null;
     }
     #endregion
 }

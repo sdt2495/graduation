@@ -107,14 +107,16 @@ public class NovelManager : MonoBehaviour
     [SerializeField] private bool waitVoiceEnd = true;
     
     [Header("──────────────────────────────")]
-    [Header("スキップモード待機時間")]
+    [Header("スキップモード中の待機時間")]
     [SerializeField] private float skipWaitTime = 0.1f;  // スキップモード待機時間
+    [Header("スキップモード中の演出時間")]
+    [SerializeField] private float SKIP_TRANSITION_TIME = 0.05f;    // スキップ中の演出時間
 
 
     private float autoTimer = 0f;            // オートモードタイマー
     private bool autoWaiting = false;        // オートタイマーが動いているか
 
-    private int currentLine = 0;             // 現在読んでいる行番号
+    private int currentLine = 1;             // 現在読んでいる行番号 (0行目はCSVの項目名なのでスキップ)
 
     private bool messageVisible = true;      // ウィンドウの表示
 
@@ -154,7 +156,7 @@ public class NovelManager : MonoBehaviour
     #endregion
 
 
-    #region イベント登録 +α
+    #region 初期設定とイベント登録
     void Start()
     {
         // メッセージウィンドウ透明度設定
@@ -168,6 +170,9 @@ public class NovelManager : MonoBehaviour
 
         //「次へ」アイコン
         UpdateNextMark();
+
+        // 最初の行を表示
+        AdvanceMessage();
     }
     void OnDestroy()
     {
@@ -413,11 +418,39 @@ public class NovelManager : MonoBehaviour
 
         // 演出前のメッセージUI表示状態を保存
         bool messageWasVisible = messageVisible;
-        // 演出があるか確認
+
+
+        // BG表示の方法を取得 (誤字ならInstance表示)
+        if (!System.Enum.TryParse(line[COL_BG_EFFECT], true, out TransitionType bgTransition))
+        {
+            bgTransition = TransitionType.Instant;
+        }
+        // BG演出時間が0秒ならInstant
+        CheckInstantTransition(line[COL_BG_TIME], ref bgTransition);
+
+        // CG表示の方法を取得 (誤字ならInstance表示)
+        if (!System.Enum.TryParse(line[COL_CG_EFFECT], true, out TransitionType cgTransition))
+        {
+            cgTransition = TransitionType.Instant;
+        }
+        // CG演出時間が0秒ならInstant
+        CheckInstantTransition(line[COL_CG_TIME], ref cgTransition);
+
+
+        // 画面エフェクト表示の方法を取得 (誤字ならInstance表示)
+        if (!System.Enum.TryParse(line[COL_SCREEN_EFFECT], true, out TransitionType screenTransition))
+        {
+            screenTransition = TransitionType.Instant;
+        }
+        // 画面エフェクト時間が0秒ならInstant
+        CheckInstantTransition(line[COL_SCREEN_TIME], ref screenTransition);
+
+
+        // 演出があるか確認 (Instantの場合はUIを非表示にしない)
         bool hasEffect =
-            !string.IsNullOrEmpty(line[COL_BG]) ||
-            !string.IsNullOrEmpty(line[COL_CG]) ||
-            !string.IsNullOrEmpty(line[COL_SCREEN]);
+            (!string.IsNullOrEmpty(line[COL_BG]) && bgTransition != TransitionType.Instant) ||
+            (!string.IsNullOrEmpty(line[COL_CG]) && cgTransition != TransitionType.Instant) ||
+            (!string.IsNullOrEmpty(line[COL_SCREEN]) && screenTransition != TransitionType.Instant);
         // 演出中はメッセージUIを非表示
         if (hasEffect)
         {
@@ -425,8 +458,11 @@ public class NovelManager : MonoBehaviour
         }
 
 
-        // ボイス再生
-        voiceManager?.PlayVoice(line[COL_VOICE]);
+        // ボイス再生 (スキップモード中は音声を再生しない)
+        if (!IsSkipMode)
+        {
+            voiceManager?.PlayVoice(line[COL_VOICE]);
+        }
         // SE再生
         seManager?.PlaySE(line[COL_SE]);
         // BGM再生
@@ -435,15 +471,8 @@ public class NovelManager : MonoBehaviour
         ambientManager?.PlayAmbient(line[COL_AMBIENT]);
 
 
-        // BG表示の方法を取得 (誤字ならInstance表示)
-        if (!System.Enum.TryParse(line[COL_BG_EFFECT], true, out TransitionType bgTransition))
-        {
-            bgTransition = TransitionType.Instant;
-        }
-        // BG演出時間を取得 (nullも入れられるfloat型)
-        float? bgTime = ParseTransitionTime(line[COL_BG_TIME]);
-        // BG演出時間が0秒ならInstant
-        CheckInstantTransition(line[COL_BG_TIME], ref bgTransition);
+        // BG演出時間を取得 (スキップ中でも、もともとInstantならInstantのまま)
+        float? bgTime = GetTransitionTime(line[COL_BG_TIME], bgTransition);
         // BG表示 (演出が終わるまで待つ)
         if (!string.IsNullOrEmpty(line[COL_BG]))
         {
@@ -457,15 +486,8 @@ public class NovelManager : MonoBehaviour
             characterManager.UpdateCharacters(line[COL_LEFT], line[COL_CENTER], line[COL_RIGHT], line[COL_MESSAGE_LEFT]);
         }
 
-        // CG表示の方法を取得 (誤字ならInstance表示)
-        if (!System.Enum.TryParse(line[COL_CG_EFFECT], true, out TransitionType cgTransition))
-        {
-            cgTransition = TransitionType.Instant;
-        }
-        // CG演出時間を取得 (nullも入れられるfloat型)
-        float? cgTime = ParseTransitionTime(line[COL_CG_TIME]);
-        // CG演出時間が0秒ならInstant
-        CheckInstantTransition(line[COL_CG_TIME], ref cgTransition);
+        // CG演出時間を取得 (スキップ中でも、もともとInstantならInstantのまま)
+        float? cgTime = GetTransitionTime(line[COL_CG_TIME], cgTransition);
         // CG表示
         if (line[COL_CG] == "NONE")
         {
@@ -484,15 +506,8 @@ public class NovelManager : MonoBehaviour
             }
         }
 
-        // 画面エフェクト表示の方法を取得 (誤字ならInstance表示)
-        if (!System.Enum.TryParse(line[COL_SCREEN_EFFECT], true, out TransitionType screenTransition))
-        {
-            screenTransition = TransitionType.Instant;
-        }
-        // 画面エフェクト時間を取得 (nullも入れられるfloat型)
-        float? screenTime = ParseTransitionTime(line[COL_SCREEN_TIME]);
-        // 画面エフェクト時間が0秒ならInstant
-        CheckInstantTransition(line[COL_SCREEN_TIME], ref screenTransition);
+        // 画面エフェクト時間を取得 (スキップ中でも、もともとInstantならInstantのまま)
+        float? screenTime = GetTransitionTime(line[COL_SCREEN_TIME], screenTransition);
         // 画面エフェクト
         switch (line[COL_SCREEN])
         {
@@ -521,6 +536,7 @@ public class NovelManager : MonoBehaviour
                 break;
         }
 
+
         // 演出終了後、演出前の状態に戻す
         if (hasEffect && messageWasVisible)
         {
@@ -538,11 +554,25 @@ public class NovelManager : MonoBehaviour
         {
             // 発言者を表示
             ShowSpeaker(line[COL_SPEAKER]);
+
+            // CSVから元のセリフを取得
+            string message = line[COL_MESSAGE];
+            // 発言者がいる場合は「」を付ける
+            if (!string.IsNullOrEmpty(line[COL_SPEAKER]))
+            {
+                //「セリフ」
+                message = "「" + message + "」";
+            }
+            else
+            {
+                //　セリフ
+                message = "　" + message;
+            }
             // セリフを表示
-            ShowMessage(line[COL_MESSAGE]);
+            ShowMessage(message);
 
             // バックログにログを追加
-            backLogManager.AddLog(line[COL_SPEAKER], line[COL_MESSAGE], line[COL_VOICE]);
+            backLogManager.AddLog(line[COL_SPEAKER], message, line[COL_VOICE]);
         }
 
         // 次の行へ
@@ -557,10 +587,36 @@ public class NovelManager : MonoBehaviour
             AdvanceMessage();
         }
     }
+    #endregion
+
+
+    #region 演出時間を取得する
 
     /// <summary>
-    /// CSVから演出時間を取得
-    /// 空欄・不正な値ならnullを返す
+    /// スキップモード中の演出時間を取得
+    /// スキップ中は高速演出にする (Instantの場合は上書きしない)
+    /// </summary>
+    float? GetTransitionTime(string timeValue, TransitionType transition)
+    {
+        // もともとInstantなら、スキップ中でもそのまま
+        if (transition == TransitionType.Instant)
+        {
+            return ParseTransitionTime(timeValue);
+        }
+
+        // スキップモード中
+        if (IsSkipMode)
+        {
+            // 完全なInstantにはせず「演出があった」と分かる程度の短い時間にする
+            return SKIP_TRANSITION_TIME;
+        }
+        // 通常時はCSVから取得
+        return ParseTransitionTime(timeValue);
+    }
+
+
+    /// <summary>
+    /// CSVから演出時間を取得 (空欄・不正な値ならnullを返す)
     /// </summary>
     float? ParseTransitionTime(string value)
     {
@@ -578,7 +634,6 @@ public class NovelManager : MonoBehaviour
         }
         // 不正な値
         Debug.LogWarning("演出時間が不正です : " + value);
-
         return null;
     }
 
@@ -591,7 +646,6 @@ public class NovelManager : MonoBehaviour
         // 時間が空欄なら何もしない
         if (string.IsNullOrEmpty(timeValue))
             return;
-
         // 数値に変換できないなら何もしない
         if (!float.TryParse(timeValue, out float time))
             return;
@@ -707,6 +761,9 @@ public class NovelManager : MonoBehaviour
 
         if (enable)
         {
+            // 現在再生中のボイスを停止
+            voiceManager?.StopVoice();
+
             // 文字送り中なら全文表示
             if (textTyper.IsTyping)
             {

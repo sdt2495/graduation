@@ -20,9 +20,6 @@ public enum TransitionType
 
     BottomToTop,   // 下→上
 
-
-    Zoom,          // ズーム
-
     Blur,          // ブラー
 
     Mosaic,        // モザイク

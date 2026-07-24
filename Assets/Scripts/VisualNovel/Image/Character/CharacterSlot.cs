@@ -26,7 +26,6 @@ public class CharacterSlot
         imageB.gameObject.SetActive(false);
     }
 
-
     /// <summary>
     /// 立ち絵を更新
     /// </summary>
@@ -99,7 +98,6 @@ public class CharacterSlot
     {
         // 現在の立ち絵を表示・非表示
         currentImage.gameObject.SetActive(visible);
-
     }
     #endregion
 }

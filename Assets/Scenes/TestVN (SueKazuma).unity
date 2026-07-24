@@ -1539,7 +1539,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u30E1\u30E2\uFF1A\n\u4ED6\u306ECSV\u30D5\u30A1\u30A4\u30EB\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\n\u65E2\u8AAD\n\u30B9\u30AD\u30C3\u30D7\u306E\u6F14\u51FA\u30B9\u30AD\u30C3\u30D7\n\u30B9\u30AD\u30C3\u30D7\u306E\u30DC\u30A4\u30B9\u518D\u751F\u306A\u3057\n\n\u30D0\u30B0:\n"
+  m_text: "\u30E1\u30E2\uFF1A\n\u4ED6\u306ECSV\u30D5\u30A1\u30A4\u30EB\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\n\u65E2\u8AAD\n\n\u30D0\u30B0:\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
@@ -2414,7 +2414,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1500, y: 230}
+  m_SizeDelta: {x: 1540, y: 230}
   m_Pivot: {x: 1, y: 0}
 --- !u!114 &892072036
 MonoBehaviour:
@@ -2436,7 +2436,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u3053\u3053\u306B\u30C6\u30AD\u30B9\u30C8\u3092\u8868\u793A"
+  m_text: "\u300C\u3053\u3053\u306B\u30C6\u30AD\u30B9\u30C8\u3092\u8868\u793A\u300D"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
@@ -2463,8 +2463,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 40
+  m_fontSizeBase: 40
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2618,6 +2618,7 @@ MonoBehaviour:
   autoWaitTime: 1
   waitVoiceEnd: 1
   skipWaitTime: 0.05
+  SKIP_TRANSITION_TIME: 0.5
 --- !u!114 &1042294293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4506,7 +4507,11 @@ PrefabInstance:
     - target: {fileID: 2541600945072552072, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 0560090e11b13e441bd3d136ff542f1f, type: 3}
+      objectReference: {fileID: 21300000, guid: 65ea2559136d3814398acd7b76913356, type: 3}
+    - target: {fileID: 2541600945072552072, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
+      propertyPath: m_PreserveAspect
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2564830156750093040, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -4530,6 +4535,10 @@ PrefabInstance:
     - target: {fileID: 4511280658296989058, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -450
+      objectReference: {fileID: 0}
+    - target: {fileID: 4511280658296989058, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5558214909651075798, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
       propertyPath: m_Pivot.y
@@ -4796,8 +4805,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 45
-  m_fontSizeBase: 45
+  m_fontSize: 50
+  m_fontSizeBase: 50
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18

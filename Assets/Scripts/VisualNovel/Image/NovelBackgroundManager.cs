@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.U2D;
 using UnityEngine.UI;
 
 /// <summary>
@@ -60,6 +59,23 @@ public class NovelBackgroundManager : MonoBehaviour
 
             case TransitionType.Clock:
                 yield return Clock(sprite, time);
+                break;
+
+            // 左→右
+            case TransitionType.LeftToRight:
+                yield return LeftToRight(sprite, time);
+                break;
+            // 右→左
+            case TransitionType.RightToLeft:
+                yield return RightToLeft(sprite, time);
+                break;
+            // 上→下
+            case TransitionType.TopToBottom:
+                yield return TopToBottom(sprite, time);
+                break;
+            // 下→上
+            case TransitionType.BottomToTop:
+                yield return BottomToTop(sprite, time);
                 break;
         }
     }
@@ -192,6 +208,137 @@ public class NovelBackgroundManager : MonoBehaviour
         // 表示完了
         nextBackgroundImage.fillAmount = 1f;
 
+        // 次の背景を現在の背景へ
+        ApplyNextBackground();
+    }
+
+
+
+
+
+    /// <summary>
+    /// 左から右へ表示
+    /// </summary>
+    IEnumerator LeftToRight(Sprite sprite, float duration)
+    {
+        // 次の背景に設定
+        SetNextBackground(sprite);
+
+        // 画像タイプを「塗りつぶし」に変更
+        nextBackgroundImage.type = Image.Type.Filled;
+        nextBackgroundImage.fillMethod = Image.FillMethod.Horizontal;
+        // 左から開始
+        nextBackgroundImage.fillOrigin = 0;
+        // 塗りつぶし0から開始
+        nextBackgroundImage.fillAmount = 0f;
+
+        // 徐々に表示
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            nextBackgroundImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+
+            yield return null;
+        }
+        // 表示完了
+        nextBackgroundImage.fillAmount = 1f;
+        // 次の背景を現在の背景へ
+        ApplyNextBackground();
+    }
+
+
+    /// <summary>
+    /// 右から左へ表示
+    /// </summary>
+    IEnumerator RightToLeft(Sprite sprite, float duration)
+    {
+        // 次の背景に設定
+        SetNextBackground(sprite);
+
+        // 画像タイプを「塗りつぶし」に変更
+        nextBackgroundImage.type = Image.Type.Filled;
+        nextBackgroundImage.fillMethod = Image.FillMethod.Horizontal;
+        // 右から開始
+        nextBackgroundImage.fillOrigin = 1;
+        // 塗りつぶし0から開始
+        nextBackgroundImage.fillAmount = 0f;
+
+        // 徐々に表示
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            nextBackgroundImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+
+            yield return null;
+        }
+        // 表示完了
+        nextBackgroundImage.fillAmount = 1f;
+        // 次の背景を現在の背景へ
+        ApplyNextBackground();
+    }
+
+
+    /// <summary>
+    /// 上から下へ表示
+    /// </summary>
+    IEnumerator TopToBottom(Sprite sprite, float duration)
+    {
+        // 次の背景に設定
+        SetNextBackground(sprite);
+
+        // 画像タイプを「塗りつぶし」に変更
+        nextBackgroundImage.type = Image.Type.Filled;
+        nextBackgroundImage.fillMethod = Image.FillMethod.Vertical;
+        // 上から開始
+        nextBackgroundImage.fillOrigin = 1;
+        // 塗りつぶし0から開始
+        nextBackgroundImage.fillAmount = 0f;
+
+        // 徐々に表示
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            nextBackgroundImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+
+            yield return null;
+        }
+        // 表示完了
+        nextBackgroundImage.fillAmount = 1f;
+        // 次の背景を現在の背景へ
+        ApplyNextBackground();
+    }
+
+
+    /// <summary>
+    /// 下から上へ表示
+    /// </summary>
+    IEnumerator BottomToTop(Sprite sprite, float duration)
+    {
+        // 次の背景に設定
+        SetNextBackground(sprite);
+
+        // 画像タイプを「塗りつぶし」に変更
+        nextBackgroundImage.type = Image.Type.Filled;
+        nextBackgroundImage.fillMethod = Image.FillMethod.Vertical;
+        // 下から開始
+        nextBackgroundImage.fillOrigin = 0;
+        // 塗りつぶし0から開始
+        nextBackgroundImage.fillAmount = 0f;
+
+        // 徐々に表示
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            nextBackgroundImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+
+            yield return null;
+        }
+        // 表示完了
+        nextBackgroundImage.fillAmount = 1f;
         // 次の背景を現在の背景へ
         ApplyNextBackground();
     }

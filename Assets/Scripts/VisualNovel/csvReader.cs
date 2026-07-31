@@ -10,18 +10,41 @@ public class CSVReader : MonoBehaviour
     private List<string[]> csvData = new List<string[]>(); // CSVファイルの中身(string)を入れるリスト
 
     #region Start()
+
     /// <summary>
     /// ファイルの読み込みを行う
     /// </summary>
     void Start()
     {
-        TextAsset csv = Resources.Load<TextAsset>("csv/Sample");    // Resourcesのcsvのsample.csvを格納
-        StringReader reader = new StringReader(csv.text);           // TextAssetをStringReaderに変換
+        // 最初に読み込むCSV
+        LoadCSV("Sample");
+    }
+    #endregion
 
-        // CSVを1行ずつ読む (ファイルが終わるまで繰り返す)
+
+    #region CSVを読み込む
+
+    /// <summary>
+    /// CSVを読み込む
+    /// </summary>
+    public void LoadCSV(string csvName)
+    {
+        // 前回読み込んだCSVを削除
+        csvData.Clear();
+
+        // CSV読み込み
+        TextAsset csv = Resources.Load<TextAsset>("csv/" + csvName);
+        if (csv == null)
+        {
+            Debug.LogError($"CSVが見つかりません : {csvName}");
+            return;
+        }
+
+        StringReader reader = new StringReader(csv.text);
+        // CSVを1行ずつ読み込む
         while (reader.Peek() != -1)
         {
-            csvData.Add(reader.ReadLine().Split(','));   // 1行ずつ読み込み、csvDataリストに追加する
+            csvData.Add(reader.ReadLine().Split(','));
         }
     }
     #endregion
@@ -29,7 +52,7 @@ public class CSVReader : MonoBehaviour
 
     #region 取得
     /// <summary>
-    /// 行数
+    /// 全行数を取得
     /// </summary>
     public int GetCount()
     {

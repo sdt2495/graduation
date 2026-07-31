@@ -45,6 +45,27 @@ public class NovelScreenEffectManager : MonoBehaviour
             case TransitionType.Clock:
                 yield return ClockIn(color, duration);
                 break;
+
+
+            // 左→右
+            case TransitionType.LeftToRight:
+                yield return LeftToRightIn(color, duration);
+                break;
+
+            // 右→左
+            case TransitionType.RightToLeft:
+                yield return RightToLeftIn(color, duration);
+                break;
+
+            // 上→下
+            case TransitionType.TopToBottom:
+                yield return TopToBottomIn(color, duration);
+                break;
+
+            // 下→上
+            case TransitionType.BottomToTop:
+                yield return BottomToTopIn(color, duration);
+                break;
         }
     }
 
@@ -73,6 +94,27 @@ public class NovelScreenEffectManager : MonoBehaviour
             // 時計ワイプ解除
             case TransitionType.Clock:
                 yield return ClockOut(duration);
+                break;
+
+
+            // 左→右解除
+            case TransitionType.LeftToRight:
+                yield return LeftToRightOut(duration);
+                break;
+
+            // 右→左解除
+            case TransitionType.RightToLeft:
+                yield return RightToLeftOut(duration);
+                break;
+
+            // 上→下解除
+            case TransitionType.TopToBottom:
+                yield return TopToBottomOut(duration);
+                break;
+
+            // 下→上解除
+            case TransitionType.BottomToTop:
+                yield return BottomToTopOut(duration);
                 break;
         }
     }
@@ -168,6 +210,110 @@ public class NovelScreenEffectManager : MonoBehaviour
         // 画像タイプを「シンプル」に戻す
         effectImage.type = Image.Type.Simple;
     }
+
+
+    /// <summary>
+    /// 左から右へ表示
+    /// </summary>
+    IEnumerator LeftToRightIn(Color color, float duration)
+    {
+        SetScreenColor(color);
+
+        effectImage.type = Image.Type.Filled;
+        effectImage.fillMethod = Image.FillMethod.Horizontal;
+        effectImage.fillOrigin = 0;
+        effectImage.fillAmount = 0f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            effectImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+
+            yield return null;
+        }
+
+        effectImage.fillAmount = 1f;
+        effectImage.type = Image.Type.Simple;
+    }
+
+
+    /// <summary>
+    /// 右から左へ表示
+    /// </summary>
+    IEnumerator RightToLeftIn(Color color, float duration)
+    {
+        SetScreenColor(color);
+
+        effectImage.type = Image.Type.Filled;
+        effectImage.fillMethod = Image.FillMethod.Horizontal;
+        effectImage.fillOrigin = 1;
+        effectImage.fillAmount = 0f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            effectImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+
+            yield return null;
+        }
+
+        effectImage.fillAmount = 1f;
+        effectImage.type = Image.Type.Simple;
+    }
+
+
+    /// <summary>
+    /// 上から下へ表示
+    /// </summary>
+    IEnumerator TopToBottomIn(Color color, float duration)
+    {
+        SetScreenColor(color);
+
+        effectImage.type = Image.Type.Filled;
+        effectImage.fillMethod = Image.FillMethod.Vertical;
+        effectImage.fillOrigin = 1;
+        effectImage.fillAmount = 0f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            effectImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+
+            yield return null;
+        }
+
+        effectImage.fillAmount = 1f;
+        effectImage.type = Image.Type.Simple;
+    }
+
+
+    /// <summary>
+    /// 下から上へ表示
+    /// </summary>
+    IEnumerator BottomToTopIn(Color color, float duration)
+    {
+        SetScreenColor(color);
+
+        effectImage.type = Image.Type.Filled;
+        effectImage.fillMethod = Image.FillMethod.Vertical;
+        effectImage.fillOrigin = 0;
+        effectImage.fillAmount = 0f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            effectImage.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+
+            yield return null;
+        }
+
+        effectImage.fillAmount = 1f;
+        effectImage.type = Image.Type.Simple;
+    }
     #endregion
 
 
@@ -244,5 +390,104 @@ public class NovelScreenEffectManager : MonoBehaviour
         effectImage.type = Image.Type.Simple;
     }
 
+    /// <summary>
+    /// 左から右へ非表示
+    /// </summary>
+    IEnumerator LeftToRightOut(float duration)
+    {
+        effectImage.type = Image.Type.Filled;
+        effectImage.fillMethod = Image.FillMethod.Horizontal;
+        effectImage.fillOrigin = 0;
+        effectImage.fillAmount = 1f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            effectImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
+
+            yield return null;
+        }
+
+        effectImage.fillAmount = 0f;
+        effectImage.gameObject.SetActive(false);
+
+        effectImage.type = Image.Type.Simple;
+    }
+
+    /// <summary>
+    /// 右から左へ非表示
+    /// </summary>
+    IEnumerator RightToLeftOut(float duration)
+    {
+        effectImage.type = Image.Type.Filled;
+        effectImage.fillMethod = Image.FillMethod.Horizontal;
+        effectImage.fillOrigin = 1;
+        effectImage.fillAmount = 1f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            effectImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
+
+            yield return null;
+        }
+
+        effectImage.fillAmount = 0f;
+        effectImage.gameObject.SetActive(false);
+
+        effectImage.type = Image.Type.Simple;
+    }
+
+    /// <summary>
+    /// 上から下へ非表示
+    /// </summary>
+    IEnumerator TopToBottomOut(float duration)
+    {
+        effectImage.type = Image.Type.Filled;
+        effectImage.fillMethod = Image.FillMethod.Vertical;
+        effectImage.fillOrigin = 1;
+        effectImage.fillAmount = 1f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            effectImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
+
+            yield return null;
+        }
+
+        effectImage.fillAmount = 0f;
+        effectImage.gameObject.SetActive(false);
+
+        effectImage.type = Image.Type.Simple;
+    }
+
+    /// <summary>
+    /// 下から上へ非表示
+    /// </summary>
+    IEnumerator BottomToTopOut(float duration)
+    {
+        effectImage.type = Image.Type.Filled;
+        effectImage.fillMethod = Image.FillMethod.Vertical;
+        effectImage.fillOrigin = 0;
+        effectImage.fillAmount = 1f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            effectImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
+
+            yield return null;
+        }
+
+        effectImage.fillAmount = 0f;
+        effectImage.gameObject.SetActive(false);
+
+        effectImage.type = Image.Type.Simple;
+    }
     #endregion
 }

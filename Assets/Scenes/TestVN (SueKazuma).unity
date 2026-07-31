@@ -255,7 +255,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_text
-      value: "\u30D0\u30C3\u30AF\u30ED\u30B0"
+      value: "\u30D0\u30C3\u30AF\u30ED\u30B0\u3000\u4E09"
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
@@ -340,6 +340,18 @@ PrefabInstance:
     - target: {fileID: 7231901736522808754, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Name
       value: BackLogButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.b
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.g
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.r
+      value: 0.78431374
       objectReference: {fileID: 0}
     - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -1539,7 +1551,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u30E1\u30E2\uFF1A\n\u4ED6\u306ECSV\u30D5\u30A1\u30A4\u30EB\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\n\u65E2\u8AAD\n\n\u30D0\u30B0:\n"
+  m_text: "\u30E1\u30E2\uFF1A\n\u7ACB\u3061\u7D75\u8868\u793A\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\u51E6\u7406\n\u300CResources\u300D\u3092\u3084\u3081\u308B\uFF1F\n\u7ACB\u3061\u7D75\u3092\u6ED1\u3089\u304B\u306B\u5207\u66FF\n\n\u30D0\u30B0:\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
@@ -3114,7 +3126,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_text
-      value: "\u30A6\u30A3\u30F3\u30C9\u30A6\u8868\u793A"
+      value: "\xD7"
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
@@ -3142,7 +3154,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.y
@@ -3199,6 +3211,18 @@ PrefabInstance:
     - target: {fileID: 7231901736522808754, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Name
       value: CloseButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.b
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.g
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.r
+      value: 0.78431374
       objectReference: {fileID: 0}
     - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -4045,7 +4069,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_text
-      value: "\u30B9\u30AD\u30C3\u30D7"
+      value: "\u30B9\u30AD\u30C3\u30D7\u3000\u226B"
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
@@ -4130,6 +4154,18 @@ PrefabInstance:
     - target: {fileID: 7231901736522808754, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Name
       value: SkipButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.b
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.g
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.r
+      value: 0.78431374
       objectReference: {fileID: 0}
     - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
@@ -5190,6 +5226,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1219904576}
     m_Modifications:
+    - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_text
+      value: "\u30AA\u30FC\u30C8\u3000\uFF1E\n"
+      objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -5273,6 +5313,18 @@ PrefabInstance:
     - target: {fileID: 7231901736522808754, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Name
       value: AutoButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.b
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.g
+      value: 0.78431374
+      objectReference: {fileID: 0}
+    - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
+      propertyPath: m_Colors.m_HighlightedColor.r
+      value: 0.78431374
       objectReference: {fileID: 0}
     - target: {fileID: 7747032809768481655, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size

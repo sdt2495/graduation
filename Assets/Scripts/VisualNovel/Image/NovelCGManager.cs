@@ -82,6 +82,31 @@ public class NovelCGManager : MonoBehaviour
                     SetAlpha(nextImage, 1f);
                     yield return ClockIn(nextImage, time);
                     break;
+
+
+                case TransitionType.LeftToRight:
+                    // 左→右
+                    SetAlpha(nextImage, 1f);
+                    yield return LeftToRightIn(nextImage, time);
+                    break;
+
+                case TransitionType.RightToLeft:
+                    // 右→左
+                    SetAlpha(nextImage, 1f);
+                    yield return RightToLeftIn(nextImage, time);
+                    break;
+
+                case TransitionType.TopToBottom:
+                    // 上→下
+                    SetAlpha(nextImage, 1f);
+                    yield return TopToBottomIn(nextImage, time);
+                    break;
+
+                case TransitionType.BottomToTop:
+                    // 下→上
+                    SetAlpha(nextImage, 1f);
+                    yield return BottomToTopIn(nextImage, time);
+                    break;
             }
             //// 現在画像と次画像を入れ替える
             SwapImages();
@@ -113,7 +138,31 @@ public class NovelCGManager : MonoBehaviour
                 yield return ClockIn(nextImage, time);
                 // 古いCGを非表示
                 currentImage.gameObject.SetActive(false);
+                break;
 
+
+            case TransitionType.LeftToRight:
+                SetAlpha(nextImage, 1f);
+                yield return LeftToRightIn(nextImage, time);
+                currentImage.gameObject.SetActive(false);
+                break;
+
+            case TransitionType.RightToLeft:
+                SetAlpha(nextImage, 1f);
+                yield return RightToLeftIn(nextImage, time);
+                currentImage.gameObject.SetActive(false);
+                break;
+
+            case TransitionType.TopToBottom:
+                SetAlpha(nextImage, 1f);
+                yield return TopToBottomIn(nextImage, time);
+                currentImage.gameObject.SetActive(false);
+                break;
+
+            case TransitionType.BottomToTop:
+                SetAlpha(nextImage, 1f);
+                yield return BottomToTopIn(nextImage, time);
+                currentImage.gameObject.SetActive(false);
                 break;
         }
         // 現在画像と次画像を入れ替える
@@ -146,6 +195,23 @@ public class NovelCGManager : MonoBehaviour
 
             case TransitionType.Clock:
                 yield return ClockOut(time);
+                break;
+
+
+            case TransitionType.LeftToRight:
+                yield return LeftToRightOut(time);
+                break;
+
+            case TransitionType.RightToLeft:
+                yield return RightToLeftOut(time);
+                break;
+
+            case TransitionType.TopToBottom:
+                yield return TopToBottomOut(time);
+                break;
+
+            case TransitionType.BottomToTop:
+                yield return BottomToTopOut(time);
                 break;
         }
     }
@@ -303,6 +369,95 @@ public class NovelCGManager : MonoBehaviour
         // 画像タイプを"シンプル"に変更
         image.type = Image.Type.Simple;
     }
+
+
+    /// <summary>
+    /// 左から右へ表示
+    /// </summary>
+    IEnumerator LeftToRightIn(Image image, float duration)
+    {
+        image.type = Image.Type.Filled;
+        image.fillMethod = Image.FillMethod.Horizontal;
+        image.fillOrigin = 0;
+        image.fillAmount = 0f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            image.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+            yield return null;
+        }
+
+        image.fillAmount = 1f;
+        image.type = Image.Type.Simple;
+    }
+
+    /// <summary>
+    /// 右から左へ表示
+    /// </summary>
+    IEnumerator RightToLeftIn(Image image, float duration)
+    {
+        image.type = Image.Type.Filled;
+        image.fillMethod = Image.FillMethod.Horizontal;
+        image.fillOrigin = 1;
+        image.fillAmount = 0f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            image.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+            yield return null;
+        }
+
+        image.fillAmount = 1f;
+        image.type = Image.Type.Simple;
+    }
+
+    /// <summary>
+    /// 上から下へ表示
+    /// </summary>
+    IEnumerator TopToBottomIn(Image image, float duration)
+    {
+        image.type = Image.Type.Filled;
+        image.fillMethod = Image.FillMethod.Vertical;
+        image.fillOrigin = 1;
+        image.fillAmount = 0f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            image.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+            yield return null;
+        }
+
+        image.fillAmount = 1f;
+        image.type = Image.Type.Simple;
+    }
+
+    /// <summary>
+    /// 下から上へ表示
+    /// </summary>
+    IEnumerator BottomToTopIn(Image image, float duration)
+    {
+        image.type = Image.Type.Filled;
+        image.fillMethod = Image.FillMethod.Vertical;
+        image.fillOrigin = 0;
+        image.fillAmount = 0f;
+
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            image.fillAmount = Mathf.Lerp(0f, 1f, time / duration);
+            yield return null;
+        }
+
+        image.fillAmount = 1f;
+        image.type = Image.Type.Simple;
+    }
     #endregion
 
 
@@ -335,6 +490,7 @@ public class NovelCGManager : MonoBehaviour
         ClearImage(currentImage);
     }
 
+
     /// <summary>
     /// 時計回りに消す
     /// </summary>
@@ -359,9 +515,123 @@ public class NovelCGManager : MonoBehaviour
         }
         // 完全に逆に塗りつぶされる
         currentImage.fillAmount = 0f;
-
         ClearImage(currentImage);
         // 画像タイプを"シンプル"に変更
+        currentImage.type = Image.Type.Simple;
+    }
+
+
+    /// <summary>
+    /// 左から右へ非表示
+    /// </summary>
+    IEnumerator LeftToRightOut(float duration)
+    {
+        // 画像タイプを「塗りつぶし」に変更
+        currentImage.type = Image.Type.Filled;
+        currentImage.fillMethod = Image.FillMethod.Horizontal;
+        currentImage.fillOrigin = 0;
+        currentImage.fillAmount = 1f;
+
+        // 徐々に逆塗りつぶし
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            currentImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
+            yield return null;
+        }
+        // 完全に逆塗りつぶし
+        currentImage.fillAmount = 0f;
+        // CG画像を非表示
+        ClearImage(currentImage);
+        // 画像タイプを「シンプル」に戻す
+        currentImage.type = Image.Type.Simple;
+    }
+
+
+    /// <summary>
+    /// 右から左へ非表示
+    /// </summary>
+    IEnumerator RightToLeftOut(float duration)
+    {
+        // 画像タイプを「塗りつぶし」に変更
+        currentImage.type = Image.Type.Filled;
+        currentImage.fillMethod = Image.FillMethod.Horizontal;
+        currentImage.fillOrigin = 1;
+        currentImage.fillAmount = 1f;
+
+        // 徐々に逆塗りつぶし
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            currentImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
+
+            yield return null;
+        }
+        // 完全に逆塗りつぶし
+        currentImage.fillAmount = 0f;
+        // CG画像を非表示
+        ClearImage(currentImage);
+        // 画像タイプを「シンプル」に戻す
+        currentImage.type = Image.Type.Simple;
+    }
+
+
+    /// <summary>
+    /// 上から下へ非表示
+    /// </summary>
+    IEnumerator TopToBottomOut(float duration)
+    {
+        // 画像タイプを「塗りつぶし」に変更
+        currentImage.type = Image.Type.Filled;
+        currentImage.fillMethod = Image.FillMethod.Vertical;
+        currentImage.fillOrigin = 1;
+        currentImage.fillAmount = 1f;
+
+        // 徐々に逆塗りつぶし
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            currentImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
+
+            yield return null;
+        }
+        // 完全に逆塗りつぶし
+        currentImage.fillAmount = 0f;
+        // CG画像を非表示
+        ClearImage(currentImage);
+        // 画像タイプを「シンプル」に戻す
+        currentImage.type = Image.Type.Simple;
+    }
+
+
+    /// <summary>
+    /// 下から上へ非表示
+    /// </summary>
+    IEnumerator BottomToTopOut(float duration)
+    {
+        // 画像タイプを「塗りつぶし」に変更
+        currentImage.type = Image.Type.Filled;
+        currentImage.fillMethod = Image.FillMethod.Vertical;
+        currentImage.fillOrigin = 0;
+        currentImage.fillAmount = 1f;
+
+        // 徐々に逆塗りつぶし
+        float time = 0f;
+        while (time < duration)
+        {
+            time += Time.deltaTime;
+            currentImage.fillAmount = Mathf.Lerp(1f, 0f, time / duration);
+
+            yield return null;
+        }
+        // 完全に逆塗りつぶし
+        currentImage.fillAmount = 0f;
+        // CG画像を非表示
+        ClearImage(currentImage);
+        // 画像タイプを「シンプル」に戻す
         currentImage.type = Image.Type.Simple;
     }
     #endregion

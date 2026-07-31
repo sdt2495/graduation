@@ -7,8 +7,6 @@ public enum TransitionType
 
     Fade,          // フェードイン
 
-    CrossFade,     // クロスフェード
-
     Clock,         // 時計ワイプ
 
 
@@ -19,8 +17,4 @@ public enum TransitionType
     TopToBottom,   // 上→下
 
     BottomToTop,   // 下→上
-
-    Blur,          // ブラー
-
-    Mosaic,        // モザイク
 }

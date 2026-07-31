@@ -15,11 +15,12 @@ public class NovelManager : MonoBehaviour
     private const int COL_MESSAGE = 2;           // セリフ
 
     private const int COL_VOICE = 3;             // VOICE再生
-    // 立ち絵
-    private const int COL_LEFT = 4;              // 左
-    private const int COL_CENTER = 5;            // 中央
-    private const int COL_RIGHT = 6;             // 右
-    private const int COL_MESSAGE_LEFT = 7;      // メッセージウィンドウ左
+                                                 // 立ち絵
+    private const int COL_MESSAGE_LEFT = 4;      // メッセージウィンドウ (左側)
+    private const int COL_LEFT = 5;              // 左
+    private const int COL_CENTER = 6;            // 中央
+    private const int COL_RIGHT = 7;             // 右
+
     // オーディオ
     private const int COL_SE = 8;                // SE再生
     private const int COL_BGM = 9;               // BGM再生
@@ -36,6 +37,8 @@ public class NovelManager : MonoBehaviour
     private const int COL_SCREEN = 17;           // 画面エフェクト色
     private const int COL_SCREEN_EFFECT = 18;    // 画面エフェクト演出
     private const int COL_SCREEN_TIME = 19;      // 画面エフェクト時間
+
+    private const int COL_WAIT = 20;             // 待機時間
     #endregion
 
     [Header("csvReader")]
@@ -534,6 +537,18 @@ public class NovelManager : MonoBehaviour
                     yield return screenEffectManager.Hide(screenTransition, screenTime);
                 }
                 break;
+        }
+
+        // 演出後に待機 (待機時間の指定があれば待機)
+        if (!string.IsNullOrEmpty(line[COL_WAIT]))
+        {
+            float waitTime = float.Parse(line[COL_WAIT]);
+            if (IsSkipMode)
+            {
+                waitTime = SKIP_TRANSITION_TIME;
+            }
+
+            yield return new WaitForSeconds(waitTime);
         }
 
 

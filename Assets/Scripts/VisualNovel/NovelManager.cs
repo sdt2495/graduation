@@ -479,7 +479,12 @@ public class NovelManager : MonoBehaviour
         // BG表示 (演出が終わるまで待つ)
         if (!string.IsNullOrEmpty(line[COL_BG]))
         {
+            // 背景変更開始前は、現在の立ち絵をそのまま表示しておく
+            // 新しい背景が前面に出てくることで、立ち絵が徐々に隠れていく
             yield return backgroundManager?.ChangeBackground(line[COL_BG], bgTransition, bgTime);
+
+            // 背景変更が完全に終了したら、立ち絵をすべて非表示にする
+            characterManager?.UpdateCharacters("NONE", "NONE", "NONE", "NONE");
         }
 
         // 立ち絵表示

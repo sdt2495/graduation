@@ -12,10 +12,21 @@ public class NovelBackgroundManager : MonoBehaviour
     [Header("Ÿ‚Ì”wŒiImage")]
     [SerializeField] private Image nextBackgroundImage;
 
+    [Header("Character")]
+    [SerializeField] private NovelCharacterManager characterManager;
+
     [Header("„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ„Ÿ")]
     [Header("Ø‘ÖŠÔ")]
     [SerializeField] private float transitionTime = 0.5f;
 
+    private int originalSiblingIndex; // nextBackgroundImage‚ÌŒ³‚ÌHierarchyˆÊ’u
+
+
+    private void Awake()
+    {
+        // nextBackgroundImage‚ªŒ³X‚¢‚½Hierarchyã‚ÌˆÊ’u‚ğ‹L‰¯
+        originalSiblingIndex = nextBackgroundImage.transform.GetSiblingIndex();
+    }
 
     /// <summary>
     /// ”wŒi•ÏX
@@ -134,6 +145,29 @@ public class NovelBackgroundManager : MonoBehaviour
     #endregion
 
 
+    #region ƒqƒGƒ‰ƒ‹ƒL[ˆÊ’u‚Ì•ÏX
+
+
+    /// <summary>
+    /// ”wŒi‰‰o’†‚¾‚¯Ÿ‚Ì”wŒi‚ğ‘O–Ê‚Éo‚·
+    /// </summary>
+    void MoveNextBackgroundToFront()
+    {
+        // nextBackgroundImage‚ğHierarchy‚Ìˆê”Ô‘O‚ÖˆÚ“®
+        nextBackgroundImage.transform.SetAsLastSibling();
+    }
+
+    /// <summary>
+    /// Ÿ‚Ì”wŒi‚ğ’Êí‚ÌˆÊ’u‚Ö–ß‚·
+    /// </summary>
+    void RestoreNextBackgroundPosition()
+    {
+        // nextBackgroundImage‚ğŒ³‚ÌHierarchyˆÊ’u‚Ö–ß‚·
+        nextBackgroundImage.transform.SetSiblingIndex(originalSiblingIndex);
+    }
+    #endregion
+
+
     #region ‰‰oˆ—
 
     /// <summary>
@@ -156,6 +190,9 @@ public class NovelBackgroundManager : MonoBehaviour
         // Ÿ‚Ì”wŒi‚Éİ’è
         SetNextBackground(sprite);
 
+        // ‰‰o’†‚¾‚¯Ÿ‚Ì”wŒi‚ğ—§‚¿ŠG‚æ‚è‘O–Ê‚É‚·‚é
+        MoveNextBackgroundToFront();
+
         // Ÿ‚Ì”wŒi‚ğ“§–¾‚É‚·‚é
         Color color = nextBackgroundImage.color;
         color.a = 0f;
@@ -177,6 +214,11 @@ public class NovelBackgroundManager : MonoBehaviour
 
         // Ÿ‚Ì”wŒi‚ğŒ»İ‚Ì”wŒi‚Ö
         ApplyNextBackground();
+
+        // Ÿ‚Ì”wŒi‚ğŒ³‚ÌHierarchyˆÊ’u‚Ö–ß‚·
+        RestoreNextBackgroundPosition();
+        // ”wŒi•ÏXŠ®—¹ŒãA—§‚¿ŠG‚ğ”ñ•\¦
+        characterManager?.SetCharactersVisible(false);
     }
 
 
@@ -187,7 +229,10 @@ public class NovelBackgroundManager : MonoBehaviour
     {
         // Ÿ‚Ì”wŒi‚Éİ’è
         SetNextBackground(sprite);
-        
+
+        // ‰‰o’†‚¾‚¯Ÿ‚Ì”wŒi‚ğ—§‚¿ŠG‚æ‚è‘O–Ê‚É‚·‚é
+        MoveNextBackgroundToFront();
+
         // ‰æ‘œƒ^ƒCƒv‚ğu“h‚è‚Â‚Ô‚µv‚É•ÏX
         nextBackgroundImage.type = Image.Type.Filled;
         nextBackgroundImage.fillMethod = Image.FillMethod.Radial360;
@@ -210,6 +255,11 @@ public class NovelBackgroundManager : MonoBehaviour
 
         // Ÿ‚Ì”wŒi‚ğŒ»İ‚Ì”wŒi‚Ö
         ApplyNextBackground();
+
+        // Ÿ‚Ì”wŒi‚ğŒ³‚ÌHierarchyˆÊ’u‚Ö–ß‚·
+        RestoreNextBackgroundPosition();
+        // ”wŒi•ÏXŠ®—¹ŒãA—§‚¿ŠG‚ğ”ñ•\¦
+        characterManager?.SetCharactersVisible(false);
     }
 
 
@@ -223,6 +273,9 @@ public class NovelBackgroundManager : MonoBehaviour
     {
         // Ÿ‚Ì”wŒi‚Éİ’è
         SetNextBackground(sprite);
+
+        // ‰‰o’†‚¾‚¯Ÿ‚Ì”wŒi‚ğ—§‚¿ŠG‚æ‚è‘O–Ê‚É‚·‚é
+        MoveNextBackgroundToFront();
 
         // ‰æ‘œƒ^ƒCƒv‚ğu“h‚è‚Â‚Ô‚µv‚É•ÏX
         nextBackgroundImage.type = Image.Type.Filled;
@@ -245,6 +298,11 @@ public class NovelBackgroundManager : MonoBehaviour
         nextBackgroundImage.fillAmount = 1f;
         // Ÿ‚Ì”wŒi‚ğŒ»İ‚Ì”wŒi‚Ö
         ApplyNextBackground();
+
+        // Ÿ‚Ì”wŒi‚ğŒ³‚ÌHierarchyˆÊ’u‚Ö–ß‚·
+        RestoreNextBackgroundPosition();
+        // ”wŒi•ÏXŠ®—¹ŒãA—§‚¿ŠG‚ğ”ñ•\¦
+        characterManager?.SetCharactersVisible(false);
     }
 
 
@@ -255,6 +313,9 @@ public class NovelBackgroundManager : MonoBehaviour
     {
         // Ÿ‚Ì”wŒi‚Éİ’è
         SetNextBackground(sprite);
+
+        // ‰‰o’†‚¾‚¯Ÿ‚Ì”wŒi‚ğ—§‚¿ŠG‚æ‚è‘O–Ê‚É‚·‚é
+        MoveNextBackgroundToFront();
 
         // ‰æ‘œƒ^ƒCƒv‚ğu“h‚è‚Â‚Ô‚µv‚É•ÏX
         nextBackgroundImage.type = Image.Type.Filled;
@@ -277,6 +338,11 @@ public class NovelBackgroundManager : MonoBehaviour
         nextBackgroundImage.fillAmount = 1f;
         // Ÿ‚Ì”wŒi‚ğŒ»İ‚Ì”wŒi‚Ö
         ApplyNextBackground();
+
+        // Ÿ‚Ì”wŒi‚ğŒ³‚ÌHierarchyˆÊ’u‚Ö–ß‚·
+        RestoreNextBackgroundPosition();
+        // ”wŒi•ÏXŠ®—¹ŒãA—§‚¿ŠG‚ğ”ñ•\¦
+        characterManager?.SetCharactersVisible(false);
     }
 
 
@@ -287,6 +353,9 @@ public class NovelBackgroundManager : MonoBehaviour
     {
         // Ÿ‚Ì”wŒi‚Éİ’è
         SetNextBackground(sprite);
+
+        // ‰‰o’†‚¾‚¯Ÿ‚Ì”wŒi‚ğ—§‚¿ŠG‚æ‚è‘O–Ê‚É‚·‚é
+        MoveNextBackgroundToFront();
 
         // ‰æ‘œƒ^ƒCƒv‚ğu“h‚è‚Â‚Ô‚µv‚É•ÏX
         nextBackgroundImage.type = Image.Type.Filled;
@@ -309,6 +378,11 @@ public class NovelBackgroundManager : MonoBehaviour
         nextBackgroundImage.fillAmount = 1f;
         // Ÿ‚Ì”wŒi‚ğŒ»İ‚Ì”wŒi‚Ö
         ApplyNextBackground();
+
+        // Ÿ‚Ì”wŒi‚ğŒ³‚ÌHierarchyˆÊ’u‚Ö–ß‚·
+        RestoreNextBackgroundPosition();
+        // ”wŒi•ÏXŠ®—¹ŒãA—§‚¿ŠG‚ğ”ñ•\¦
+        characterManager?.SetCharactersVisible(false);
     }
 
 
@@ -319,6 +393,9 @@ public class NovelBackgroundManager : MonoBehaviour
     {
         // Ÿ‚Ì”wŒi‚Éİ’è
         SetNextBackground(sprite);
+
+        // ‰‰o’†‚¾‚¯Ÿ‚Ì”wŒi‚ğ—§‚¿ŠG‚æ‚è‘O–Ê‚É‚·‚é
+        MoveNextBackgroundToFront();
 
         // ‰æ‘œƒ^ƒCƒv‚ğu“h‚è‚Â‚Ô‚µv‚É•ÏX
         nextBackgroundImage.type = Image.Type.Filled;
@@ -341,6 +418,11 @@ public class NovelBackgroundManager : MonoBehaviour
         nextBackgroundImage.fillAmount = 1f;
         // Ÿ‚Ì”wŒi‚ğŒ»İ‚Ì”wŒi‚Ö
         ApplyNextBackground();
+
+        // Ÿ‚Ì”wŒi‚ğŒ³‚ÌHierarchyˆÊ’u‚Ö–ß‚·
+        RestoreNextBackgroundPosition();
+        // ”wŒi•ÏXŠ®—¹ŒãA—§‚¿ŠG‚ğ”ñ•\¦
+        characterManager?.SetCharactersVisible(false);
     }
     #endregion
 }

@@ -58,4 +58,21 @@ public class NovelCharacterManager : MonoBehaviour
         // メッセージウィンドウ左
         messageLeftSlot.SetCharacter(messageLeft);
     }
+
+
+    /// <summary>
+    /// すべての立ち絵を表示・非表示
+    /// </summary>
+    public void SetCharactersVisible(bool visible)
+    {
+        // 左
+        leftSlot.SetVisible(visible);
+        // 中央
+        centerSlot.SetVisible(visible);
+        // 右
+        rightSlot.SetVisible(visible);
+
+        // メッセージウィンドウ左
+        messageLeftSlot.SetVisible(visible);
+    }
 }

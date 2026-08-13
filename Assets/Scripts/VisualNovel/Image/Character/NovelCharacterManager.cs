@@ -7,56 +7,78 @@ using UnityEngine.UI;
 /// </summary>
 public class NovelCharacterManager : MonoBehaviour
 {
-    [Header("MessageLeft")]
-    [SerializeField] private Image messageLeftA;
-    [SerializeField] private Image messageLeftB;
-
     [Header("Left")]
-    [SerializeField] private Image leftA;
-    [SerializeField] private Image leftB;
-    [Header("Center")]
-    [SerializeField] private Image centerA;
-    [SerializeField] private Image centerB;
+    [SerializeField] private Image leftImage;
+    [SerializeField] private Animator leftAnimator;
+
     [Header("Right")]
-    [SerializeField] private Image rightA;
-    [SerializeField] private Image rightB;
+    [SerializeField] private Image rightImage;
+    [SerializeField] private Animator rightAnimator;
 
-    [Header("──────────────────────────────")]
-    [Header("立ち絵切替時間")]
-    [SerializeField] private float transitionTime = 0.5f;
 
-    // 4つの立ち絵表示場所
-    private CharacterSlot messageLeftSlot;
+    // 左右2つの立ち絵表示場所
     private CharacterSlot leftSlot;
-    private CharacterSlot centerSlot;
     private CharacterSlot rightSlot;
-
 
     private void Awake()
     {
-        // 各場所の立ち絵スロットを作成
-        messageLeftSlot = new CharacterSlot(messageLeftA, messageLeftB, transitionTime);
-
-        leftSlot = new CharacterSlot(leftA, leftB, transitionTime);
-        centerSlot = new CharacterSlot(centerA, centerB, transitionTime);
-        rightSlot = new CharacterSlot(rightA, rightB, transitionTime);
+        // 左の立ち絵スロットを作成
+        leftSlot = new CharacterSlot(leftImage, leftAnimator);
+        // 右の立ち絵スロットを作成
+        rightSlot = new CharacterSlot(rightImage, rightAnimator);
     }
 
 
     /// <summary>
     /// 立ち絵を更新
     /// </summary>
-    public void UpdateCharacters(string left, string center, string right, string messageLeft)
+    /// <param name="left">左に表示する立ち絵</param>
+    /// <param name="right">右に表示する立ち絵</param>
+    /// <param name="active">明るくする立ち絵 (LEFT / RIGHT / BOTH / NONE)</param>
+    public void UpdateCharacters(string left, string right, string active)
     {
-        // 左
+        // 左の立ち絵を更新
         leftSlot.SetCharacter(left);
-        // 中央
-        centerSlot.SetCharacter(center);
-        // 右
+
+        // 右の立ち絵を更新
         rightSlot.SetCharacter(right);
 
-        // メッセージウィンドウ左
-        messageLeftSlot.SetCharacter(messageLeft);
+
+        // Activeの内容によってアニメーションを変更
+        switch (active.ToUpper())
+        {
+            // 左だけActive
+            case "LEFT":
+                leftSlot.SetActive(true);
+                rightSlot.SetActive(false);
+                break;
+
+            // 右だけActive
+            case "RIGHT":
+                leftSlot.SetActive(false);
+                rightSlot.SetActive(true);
+                break;
+
+            // 左右ともActive
+            case "BOTH":
+                leftSlot.SetActive(true);
+                rightSlot.SetActive(true);
+                break;
+
+            // 左右とも非Active
+            case "NONE":
+                leftSlot.SetActive(false);
+                rightSlot.SetActive(false);
+                break;
+
+            // 空欄なら明るさを変更しない
+            case "":
+                break;
+
+            default:
+                Debug.LogWarning($"Activeの値が正しくありません : {active}");
+                break;
+        }
     }
 
 
@@ -65,14 +87,7 @@ public class NovelCharacterManager : MonoBehaviour
     /// </summary>
     public void SetCharactersVisible(bool visible)
     {
-        // 左
         leftSlot.SetVisible(visible);
-        // 中央
-        centerSlot.SetVisible(visible);
-        // 右
         rightSlot.SetVisible(visible);
-
-        // メッセージウィンドウ左
-        messageLeftSlot.SetVisible(visible);
     }
 }

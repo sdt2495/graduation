@@ -15,30 +15,29 @@ public class NovelManager : MonoBehaviour
     private const int COL_MESSAGE = 2;           // セリフ
 
     private const int COL_VOICE = 3;             // VOICE再生
-                                                 // 立ち絵
-    private const int COL_MESSAGE_LEFT = 4;      // メッセージウィンドウ (左側)
-    private const int COL_LEFT = 5;              // 左
-    private const int COL_CENTER = 6;            // 中央
-    private const int COL_RIGHT = 7;             // 右
+    // 立ち絵
+    private const int COL_LEFT = 4;
+    private const int COL_RIGHT = 5;
+    private const int COL_ACTIVE = 6;
 
     // オーディオ
-    private const int COL_SE = 8;                // SE再生
-    private const int COL_BGM = 9;               // BGM再生
-    private const int COL_AMBIENT = 10;          // 環境音再生
+    private const int COL_SE = 7;                // SE再生
+    private const int COL_BGM = 8;               // BGM再生
+    private const int COL_AMBIENT = 9;           // 環境音再生
     // 背景
-    private const int COL_BG = 11;               // BG画像
-    private const int COL_BG_EFFECT = 12;        // BG演出
-    private const int COL_BG_TIME = 13;          // BG時間
+    private const int COL_BG = 10;               // BG画像
+    private const int COL_BG_EFFECT = 11;        // BG演出
+    private const int COL_BG_TIME = 12;          // BG時間
     // CG
-    private const int COL_CG = 14;               // CG画像
-    private const int COL_CG_EFFECT = 15;        // CG演出
-    private const int COL_CG_TIME = 16;          // CG時間
+    private const int COL_CG = 13;               // CG画像
+    private const int COL_CG_EFFECT = 14;        // CG演出
+    private const int COL_CG_TIME = 15;          // CG時間
     // 画面エフェクト
-    private const int COL_SCREEN = 17;           // 画面エフェクト色
-    private const int COL_SCREEN_EFFECT = 18;    // 画面エフェクト演出
-    private const int COL_SCREEN_TIME = 19;      // 画面エフェクト時間
+    private const int COL_SCREEN = 16;           // 画面エフェクト色
+    private const int COL_SCREEN_EFFECT = 17;    // 画面エフェクト演出
+    private const int COL_SCREEN_TIME = 18;      // 画面エフェクト時間
 
-    private const int COL_WAIT = 20;             // 待機時間
+    private const int COL_WAIT = 19;             // 待機時間
     #endregion
 
     [Header("csvReader")]
@@ -419,6 +418,14 @@ public class NovelManager : MonoBehaviour
         // 現在の行を取得
         string[] line = csvReader.GetLine(currentLine);
 
+        // ★ここを追加
+        Debug.Log(
+            $"currentLine = {currentLine} / " +
+            $"ID = {line[COL_ID]} / " +
+            $"Speaker = {line[COL_SPEAKER]} / " +
+            $"Message = {line[COL_MESSAGE]}"
+        );
+
         // 演出前のメッセージUI表示状態を保存
         bool messageWasVisible = messageVisible;
 
@@ -479,19 +486,16 @@ public class NovelManager : MonoBehaviour
         // BG表示 (演出が終わるまで待つ)
         if (!string.IsNullOrEmpty(line[COL_BG]))
         {
-            // 背景変更開始前は、現在の立ち絵をそのまま表示しておく
-            // 新しい背景が前面に出てくることで、立ち絵が徐々に隠れていく
+            // 背景変更開始前は、現在の立ち絵をそのまま表示しておく。
+            // 新しい背景が前面に出てくることで、背景変更中に立ち絵が背景の下へ隠れていく。
             yield return backgroundManager?.ChangeBackground(line[COL_BG], bgTransition, bgTime);
-
-            // 背景変更が完全に終了したら、立ち絵をすべて非表示にする
-            characterManager?.UpdateCharacters("NONE", "NONE", "NONE", "NONE");
         }
 
         // 立ち絵表示
         if (characterManager != null)
         {
-            // 立ち絵は演出なしで即座に切り替える
-            characterManager.UpdateCharacters(line[COL_LEFT], line[COL_CENTER], line[COL_RIGHT], line[COL_MESSAGE_LEFT]);
+            // 左・右の立ち絵とActiveを渡す
+            characterManager.UpdateCharacters(line[COL_LEFT], line[COL_RIGHT], line[COL_ACTIVE]);
         }
 
         // CG演出時間を取得 (スキップ中でも、もともとInstantならInstantのまま)

@@ -7,97 +7,82 @@ using UnityEngine.UI;
 /// </summary>
 public class CharacterSlot
 {
-    private Image currentImage;      // 現在表示しているImage
-    private Image nextImage;         // 次に表示するImage
+    private Image image;         // Image
+    private Animator animator;
 
-    private string currentCharacterName = "";    // 現在表示している立ち絵名
-
+    private string currentCharacter = "";    // 現在表示している立ち絵名
 
     /// <summary>
-    /// CharacterSlotを作成 (立ち絵の型)
+    /// コンストラクタ
     /// </summary>
-    public CharacterSlot(Image imageA, Image imageB, float transitionTime)
+    public CharacterSlot(Image image, Animator animator)
     {
-        currentImage = imageA;
-        nextImage = imageB;
-
-        // 初期状態では非表示
-        imageA.gameObject.SetActive(false);
-        imageB.gameObject.SetActive(false);
+        this.image = image;
+        this.animator = animator;
     }
 
+
     /// <summary>
-    /// 立ち絵を更新
+    /// 立ち絵を設定
     /// </summary>
-    public void SetCharacter(string characterName)
+    public void SetCharacter(string character)
     {
-        // 空欄なら何もしない (現在表示している立ち絵をそのまま維持)
-        if (string.IsNullOrEmpty(characterName))
+        // 空欄なら変更しない
+        if (string.IsNullOrEmpty(character))
             return;
 
-        // NONEなら立ち絵を非表示
-        if (characterName == "NONE")
+        // NONEなら非表示
+        if (character == "NONE")
         {
-            ClearImage(currentImage);
-            // 現在表示している立ち絵名を削除
-            currentCharacterName = "";
-
+            SetVisible(false);
+            currentCharacter = "";
             return;
         }
 
-        // 同じ立ち絵なら何もしない
-        if (currentCharacterName == characterName)
+        // 同じ立ち絵なら変更しない
+        if (currentCharacter == character && image.enabled)
             return;
 
         // 立ち絵を読み込む
-        Sprite sprite = Resources.Load<Sprite>("Character/" + characterName);
+        Sprite sprite = Resources.Load<Sprite>("Character/" + character);
 
-        // 立ち絵が見つからなかった場合
         if (sprite == null)
         {
-            Debug.LogWarning($"立ち絵が見つかりません : {characterName}");
+            Debug.LogWarning($"立ち絵が見つかりません : {character}");
             return;
         }
 
-        // 現在の立ち絵を即座に変更
-        currentImage.sprite = sprite;
-        currentImage.color = Color.white;
-        currentImage.gameObject.SetActive(true);
+        // 立ち絵を設定
+        image.sprite = sprite;
 
-        // 次のImageは使用しないので非表示
-        nextImage.sprite = null;
-        nextImage.gameObject.SetActive(false);
-        nextImage.color = Color.white;
+        // 表示
+        image.enabled = true;
 
-        // 現在の立ち絵名を更新
-        currentCharacterName = characterName;
+        // 現在の立ち絵を記録
+        currentCharacter = character;
     }
 
 
-    #region 画像の表示・非表示
-
     /// <summary>
-    /// 立ち絵を完全に消す
+    /// Active状態を変更 (Animatorのフラグ)
     /// </summary>
-    private void ClearImage(Image image)
+    public void SetActive(bool active)
     {
-        image.sprite = null;
-        image.gameObject.SetActive(false);
-
-        // 透明度を初期状態に戻す
-        Color color = image.color;
-        color.a = 1f;
-        image.color = color;
+        if (animator == null)
+        {
+            Debug.LogWarning("Animatorが設定されていません。");
+            return;
+        }
+        // AnimatorのActiveパラメータを変更
+        animator.SetBool("Active", active);
     }
 
 
     /// <summary>
-    /// 立ち絵を表示・非表示
+    /// 表示・非表示
     /// </summary>
     public void SetVisible(bool visible)
     {
-        // 現在の立ち絵を表示・非表示
-        currentImage.gameObject.SetActive(visible);
+        image.enabled = visible;
     }
-    #endregion
 }

@@ -14,6 +14,18 @@ public class TextTyper : MonoBehaviour
     [Header("文字送り速度（秒）")]
     [SerializeField] private float textSpeed = 0.1f;
 
+    [Header("──────────────────────────────")]
+    [Header("「、」(読点) 一時停止機能")]
+    [SerializeField] private bool pauseAtComma = true;
+    [Tooltip("「、」(読点) 一時停止時間")][SerializeField] private float commaPauseTime = 0.5f;
+
+    [Header("「。」(句点) 一時停止機能")]
+    [SerializeField] private bool pauseAtPeriod = true;
+    [Tooltip("「。」(句点) 一時停止時間")][SerializeField] private float periodPauseTime = 0.5f;
+
+
+    private bool isSkipMode = false; // Skipモード中か
+
 
     private string currentMessage;           // 現在表示している全文を保存
     private Coroutine typingCoroutine;       // 文字送りのCoroutineを保存
@@ -23,6 +35,19 @@ public class TextTyper : MonoBehaviour
 
     #region Get:読み取り関数
     public bool IsTyping { get; private set; } // 現在文字送り中かどうか (true = 表示中│false = 表示完了)
+    #endregion
+
+
+    #region Skipモード
+
+    /// <summary>
+    /// Skipモードの状態を設定 (NovelManagerからSkipモードの状態を受け取る)
+    /// </summary>
+    public void SetSkipMode(bool skipMode)
+    {
+        isSkipMode = skipMode;
+    }
+
     #endregion
 
 
@@ -56,14 +81,55 @@ public class TextTyper : MonoBehaviour
         // 最初は空文字にする
         messageText.text = "";
 
-        // 文章を一文字ずつ取り出す
-        foreach (char c in currentMessage)
-        {
-            // 一文字追加
-            messageText.text += c;
 
-            // 指定秒数待つ
-            yield return new WaitForSeconds(textSpeed);
+        // 現在の文章を一文字ずつ処理
+        for (int i = 0; i < currentMessage.Length; i++)
+        {
+            // Rich Textのタグを検出
+            if (currentMessage[i] == '<')
+            {
+                // 「>」までをタグとして取得
+                int tagEnd = currentMessage.IndexOf('>', i);
+
+                // タグが見つかった場合
+                if (tagEnd != -1)
+                {
+                    // タグ全体を一気に追加
+                    messageText.text += currentMessage.Substring(i, tagEnd - i + 1);
+
+                    // タグの最後まで進める
+                    i = tagEnd;
+
+                    // タグ自体では待機しない
+                    continue;
+                }
+            }
+
+
+            // 一文字追加
+            messageText.text += currentMessage[i];
+
+            // Skipモード中は待機しない
+            if (isSkipMode)
+            {
+                continue;
+            }
+
+            // 「、」の場合は専用の待機時間
+            if (pauseAtComma && currentMessage[i] == '、')
+            {
+                yield return new WaitForSeconds(commaPauseTime);
+            }
+            // 「。」の場合は専用の待機時間
+            else if (pauseAtPeriod && currentMessage[i] == '。')
+            {
+                yield return new WaitForSeconds(periodPauseTime);
+            }
+            else
+            {
+                // 通常の文字送り
+                yield return new WaitForSeconds(textSpeed);
+            }
         }
 
         // 文字送り終了
@@ -72,6 +138,7 @@ public class TextTyper : MonoBehaviour
         OnTypingFinished?.Invoke();
     }
     #endregion
+
 
     #region 文字送りスキップ
     /// <summary>

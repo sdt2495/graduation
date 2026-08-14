@@ -2474,6 +2474,7 @@ MonoBehaviour:
   waitVoiceEnd: 1
   skipWaitTime: 0.05
   SKIP_TRANSITION_TIME: 0.5
+  useQuotation: 0
 --- !u!114 &3100473870792325369
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3974,6 +3975,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TextTyper
   messageText: {fileID: 6541541832953592173}
   textSpeed: 0.05
+  pauseAtComma: 1
+  commaPauseTime: 0.5
+  pauseAtPeriod: 1
+  periodPauseTime: 1
 --- !u!114 &6541541832953592173
 MonoBehaviour:
   m_ObjectHideFlags: 0

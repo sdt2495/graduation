@@ -114,6 +114,10 @@ public class NovelManager : MonoBehaviour
     [Header("スキップモード中の演出時間")]
     [SerializeField] private float SKIP_TRANSITION_TIME = 0.05f;    // スキップ中の演出時間
 
+    [Header("──────────────────────────────")]
+    [Header("自動「 」追加機能")]
+    [SerializeField] private bool useQuotation = false;
+
 
     private float autoTimer = 0f;            // オートモードタイマー
     private bool autoWaiting = false;        // オートタイマーが動いているか
@@ -418,14 +422,6 @@ public class NovelManager : MonoBehaviour
         // 現在の行を取得
         string[] line = csvReader.GetLine(currentLine);
 
-        // ★ここを追加
-        Debug.Log(
-            $"currentLine = {currentLine} / " +
-            $"ID = {line[COL_ID]} / " +
-            $"Speaker = {line[COL_SPEAKER]} / " +
-            $"Message = {line[COL_MESSAGE]}"
-        );
-
         // 演出前のメッセージUI表示状態を保存
         bool messageWasVisible = messageVisible;
 
@@ -572,7 +568,6 @@ public class NovelManager : MonoBehaviour
 
         // 現在の行にセリフがあるか確認
         bool hasMessage = !string.IsNullOrEmpty(line[COL_MESSAGE]);
-
         // セリフがある場合
         if (hasMessage)
         {
@@ -581,16 +576,21 @@ public class NovelManager : MonoBehaviour
 
             // CSVから元のセリフを取得
             string message = line[COL_MESSAGE];
-            // 発言者がいる場合は「」を付ける
-            if (!string.IsNullOrEmpty(line[COL_SPEAKER]))
+
+            // useQuotationがtrueなら、従来通り「 」や空白を追加
+            if (useQuotation)
             {
-                //「セリフ」
-                message = "「" + message + "」";
-            }
-            else
-            {
-                //　セリフ
-                message = "　" + message;
+                // 発言者がいる場合は「 」を付ける
+                if (!string.IsNullOrEmpty(line[COL_SPEAKER]))
+                {
+                    //「セリフ」
+                    message = "「" + message + "」";
+                }
+                else
+                {
+                    //　セリフ
+                    message = "　" + message;
+                }
             }
             // セリフを表示
             ShowMessage(message);
@@ -773,6 +773,9 @@ public class NovelManager : MonoBehaviour
 
         // モード変更
         ChangePlayMode(enable ? PlayMode.Skip : PlayMode.Normal);
+
+        // TextTyperにもSkipモードの状態を伝える
+        textTyper.SetSkipMode(enable);
 
         // ボタン表示更新
         UpdateButtonView();

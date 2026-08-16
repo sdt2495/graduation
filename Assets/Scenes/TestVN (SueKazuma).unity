@@ -2487,8 +2487,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 519d0a19f77cb8e43b02b3a2f2516912, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BackLogManager
+  novelManager: {fileID: 3087721613134683416}
   backLogPanel: {fileID: 6263397440851040984}
   voiceManager: {fileID: 2992682603336986271}
+  scrollAmount: 0.15
   scrollRect: {fileID: 5529976042692858721}
   content: {fileID: 1398597180904013843}
   entryPrefab: {fileID: 4282339466454428255, guid: 040853a55af2bbb49ade760c5a0cf776, type: 3}

@@ -36,7 +36,7 @@ public class NovelManager : MonoBehaviour
     private const int COL_SCREEN = 16;           // 画面エフェクト色
     private const int COL_SCREEN_EFFECT = 17;    // 画面エフェクト演出
     private const int COL_SCREEN_TIME = 18;      // 画面エフェクト時間
-
+    // 待機
     private const int COL_WAIT = 19;             // 待機時間
     #endregion
 
@@ -491,7 +491,7 @@ public class NovelManager : MonoBehaviour
         if (characterManager != null)
         {
             // 左・右の立ち絵とActiveを渡す
-            characterManager.UpdateCharacters(line[COL_LEFT], line[COL_RIGHT], line[COL_ACTIVE]);
+            yield return characterManager.UpdateCharacters(line[COL_LEFT], line[COL_RIGHT], line[COL_ACTIVE]);
         }
 
         // CG演出時間を取得 (スキップ中でも、もともとInstantならInstantのまま)
@@ -791,6 +791,9 @@ public class NovelManager : MonoBehaviour
             // 現在再生中のボイスを停止
             voiceManager?.StopVoice();
 
+            // 立ち絵アニメーションを高速化
+            characterManager?.SetSkipMode(true);
+
             // 文字送り中なら全文表示
             if (textTyper.IsTyping)
             {
@@ -801,6 +804,11 @@ public class NovelManager : MonoBehaviour
             {
                 BeginNextLineWait();
             }
+        }
+        else
+        {
+            // 立ち絵アニメーションを通常速度に戻す
+            characterManager?.SetSkipMode(false);
         }
     }
 
@@ -974,7 +982,7 @@ public class NovelManager : MonoBehaviour
     /// <summary>
     /// バックログを閉じる
     /// </summary>
-    void CloseBackLog()
+    public void CloseBackLog()
     {
         // 状態変更
         state = NovelState.Normal;

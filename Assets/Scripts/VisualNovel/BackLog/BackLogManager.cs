@@ -5,11 +5,17 @@ using System.Collections;
 
 public class BackLogManager : MonoBehaviour
 {
+    [Header("NovelManager")]
+    [SerializeField] private NovelManager novelManager;
+
     [Header("バックログパネル")]
     [SerializeField] private GameObject backLogPanel;
 
     [Header("Voice")]
     [SerializeField] private NovelVoiceManager voiceManager;
+
+    [Header("1回の入力でスクロールする量")]
+    [SerializeField] private float scrollAmount = 0.15f;
 
     [Header("──────────────────────────────")]
     [SerializeField] private ScrollRect scrollRect;
@@ -18,6 +24,89 @@ public class BackLogManager : MonoBehaviour
 
     private List<BackLogData> logs = new();      // バックログ一覧
     public bool IsOpen { get; private set; }     // バックログが開いているか
+
+    private const float BOTTOM_THRESHOLD = 0.001f;     // 一番下にいると判定するための許容値
+
+
+    /// <summary>
+    /// バックログ操作
+    /// </summary>
+    private void Update()
+    {
+        // バックログが開いていないなら何もしない
+        if (!IsOpen)
+            return;
+
+        // 上方向キー
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            ScrollUp();
+        }
+        // 下方向キー
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            // 一番下ならバックログを閉じる
+            if (IsAtBottom())
+            {
+                novelManager.CloseBackLog();
+                return;
+            }
+            ScrollDown();
+        }
+
+
+        // マウスホイール
+        float wheel = Input.mouseScrollDelta.y;
+        // ホイール上
+        if (wheel > 0)
+        {
+            ScrollUp();
+        }
+        // ホイール下
+        else if (wheel < 0)
+        {
+            // 一番下ならバックログを閉じる
+            if (IsAtBottom())
+            {
+                novelManager.CloseBackLog();
+                return;
+            }
+            ScrollDown();
+        }
+    }
+
+    #region スクロール処理
+
+    /// <summary>
+    /// バックログを上へスクロール
+    /// </summary>
+    private void ScrollUp()
+    {
+        scrollRect.verticalNormalizedPosition += scrollAmount;
+        // 1を超えないようにする
+        scrollRect.verticalNormalizedPosition = Mathf.Clamp01(scrollRect.verticalNormalizedPosition);
+    }
+    /// <summary>
+    /// バックログを下へスクロール
+    /// </summary>
+    private void ScrollDown()
+    {
+        scrollRect.verticalNormalizedPosition -= scrollAmount;
+        // 0を下回らないようにする
+        scrollRect.verticalNormalizedPosition = Mathf.Clamp01(scrollRect.verticalNormalizedPosition);
+    }
+
+    /// <summary>
+    /// バックログが一番下にいるか
+    /// </summary>
+    private bool IsAtBottom()
+    {
+        // 誤差を考慮して判定
+        return scrollRect.verticalNormalizedPosition <= BOTTOM_THRESHOLD;
+    }
+    #endregion
+
+
 
 
     /// <summary>

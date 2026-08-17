@@ -800,7 +800,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 822, y: 389}
+  m_AnchoredPosition: {x: 822, y: 406.3}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &528733449
@@ -1431,6 +1431,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ComboUI
   comboText: {fileID: 528733449}
+  flashAlpha: 0.3
+  effectScale: 1.3
+  effectAngle: 10
+  effectSpeed: 1.5
+  scaleUpDuration: 0.1
+  scaleDowntDuration: 0.15
 --- !u!1 &838218676
 GameObject:
   m_ObjectHideFlags: 0

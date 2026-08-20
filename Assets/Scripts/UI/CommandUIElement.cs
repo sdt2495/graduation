@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 // ===================================
 // コマンド１個の表示・状態管理
@@ -7,7 +8,14 @@ using UnityEngine;
 
 public class CommandUIElement : MonoBehaviour
 {
-    [SerializeField] private TextMeshProUGUI arrowText;
+    [SerializeField] private Image diamondImage;
+    [SerializeField] private Image arrowImage;
+
+    [Header("矢印画像")]
+    [SerializeField] private Sprite upSprite;
+    [SerializeField] private Sprite downSprite;
+    [SerializeField] private Sprite leftSprite;
+    [SerializeField] private Sprite rightSprite;
 
     /// <summary>
     /// コマンドの中身をランダムに選択
@@ -18,17 +26,26 @@ public class CommandUIElement : MonoBehaviour
         switch (command)
         {
             case CommandType.Up:
-                arrowText.text = "↑";
+                arrowImage.sprite = upSprite;
                 break;
             case CommandType.Down:
-                arrowText.text = "↓";
+                arrowImage.sprite = downSprite;
                 break;
             case CommandType.Left:
-                arrowText.text = "←";
+                arrowImage.sprite = leftSprite;
                 break;
             case CommandType.Right:
-                arrowText.text = "→";
+                arrowImage.sprite = rightSprite;
                 break;
         }
+    }
+
+    /// <summary>
+    /// ひし形の表示・非表示
+    /// </summary>
+    /// <param name="visible"></param>
+    public void SetDiamondVisible(bool visible)
+    {
+        diamondImage.gameObject.SetActive(visible);
     }
 }

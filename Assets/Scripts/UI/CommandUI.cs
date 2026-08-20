@@ -49,6 +49,9 @@ public class CommandUI : MonoBehaviour
 
             element.SetCommand(commands[i]);
 
+            // Battoleはひし形表示・Nextは非表示
+            element.SetDiamondVisible(parent != nextCommandParent);
+
             // 横方向に配置
             RectTransform rectTransform = element.GetComponent<RectTransform>();
             float x = startX + i * spacing;

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security;
 using NUnit.Framework;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -15,6 +16,14 @@ public class CommandUI : MonoBehaviour
     [SerializeField] private Transform commandParent;
     [SerializeField] private Transform nextCommandParent;
     [SerializeField] private float spacing = 150f;
+
+    [Header("入力中のひし形")]
+    [SerializeField] private float activeDiamondMoveDuration = 0.15f;
+    [SerializeField] private AnimationCurve activeDiamondMoveCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
+    [Header("コマンドの大きさ")]
+    [SerializeField] private float normalScale = 1.0f;
+    [SerializeField] private float activeScale = 1.1f;
 
     private List<CommandUIElement> commandElements = new List<CommandUIElement>();    
     private List<CommandUIElement> nextcommandElements = new List<CommandUIElement>();
@@ -103,6 +112,8 @@ public class CommandUI : MonoBehaviour
 
     private IEnumerator MoveActiveDiamond(int currentIndex)
     {
+        UpdateCommandScale(currentIndex);
+
         // 移動先のElement
         CommandUIElement targetElement = commandElements[currentIndex];
 
@@ -115,14 +126,17 @@ public class CommandUI : MonoBehaviour
         Vector3 targetPosition = target.position;
 
         // 移動時間
-        float duration = 0.15f;
         float time = 0f;
 
-        while (time < duration)
+        while (time < activeDiamondMoveDuration)
         {
             time += Time.deltaTime;
-            float t = time / duration;
-            acitiveDiamond.position = Vector3.Lerp(startPosition, targetPosition, t);
+            float t = time / activeDiamondMoveDuration;
+
+            // スッと加速して、最後に減速
+            float curveValue = activeDiamondMoveCurve.Evaluate(t);
+
+            acitiveDiamond.position = Vector3.Lerp(startPosition, targetPosition, curveValue);
 
             yield return null;
         }
@@ -138,5 +152,20 @@ public class CommandUI : MonoBehaviour
 
         // 移動してきたピンクをArrowの直前にする
         acitiveDiamond.SetSiblingIndex(1);
+    }
+
+    private void UpdateCommandScale(int currentIndex)
+    {
+        for (int i = 0; i < commandElements.Count; i++)
+        {
+            if (i == currentIndex)
+            {
+                commandElements[i].SetScale(activeScale);
+            }
+            else
+            {
+                commandElements[i].SetScale(normalScale);
+            }
+        }
     }
 }

@@ -72,4 +72,10 @@ public class CommandUIElement : MonoBehaviour
     {
         return activeDiamondImage.GetComponent<RectTransform>();
     }
+
+    public void SetScale(float scale)
+    {
+        diamondImage.transform.localScale = Vector3.one * scale;
+        arrowImage.transform.localScale = Vector3.one * scale;
+    }
 }

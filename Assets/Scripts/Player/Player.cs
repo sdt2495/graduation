@@ -17,6 +17,9 @@ public class Player : MonoBehaviour
     [SerializeField] private ComboUI commboUI;
     private int commbo = 0;
 
+    [Header("ƒRƒ}ƒ“ƒhUI")]
+    [SerializeField] private CommandUI commandUI;
+
     private void Start()
     {
         curretHP = maxHP;
@@ -65,6 +68,7 @@ public class Player : MonoBehaviour
                 CameraShake.instance.Shake(0.08f, 0.05f);
                 commbo++;
                 commboUI.UpdateCombo(commbo);
+                commandUI.UpdateActiveComand(enemy.GetCurrentIndex());
                 break;
 
             case CheckResult.Complete:

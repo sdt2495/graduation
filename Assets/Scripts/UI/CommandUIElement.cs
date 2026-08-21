@@ -8,7 +8,13 @@ using UnityEngine.UI;
 
 public class CommandUIElement : MonoBehaviour
 {
+    // 黒いひし形
     [SerializeField] private Image diamondImage;
+
+    // ピンクのひし形
+    [SerializeField] private Image activeDiamondImage;
+    
+    // 矢印
     [SerializeField] private Image arrowImage;
 
     [Header("矢印画像")]
@@ -41,11 +47,29 @@ public class CommandUIElement : MonoBehaviour
     }
 
     /// <summary>
-    /// ひし形の表示・非表示
+    /// 黒いひし形の表示・非表示
     /// </summary>
     /// <param name="visible"></param>
     public void SetDiamondVisible(bool visible)
     {
         diamondImage.gameObject.SetActive(visible);
+    }
+
+    /// <summary>
+    /// ピンクのひし形の表示・非表示
+    /// </summary>
+    /// <param name="visible"></param>
+    public void SetActiveDiamondVisible(bool visible)
+    {
+        activeDiamondImage.gameObject.SetActive(visible);
+    }
+
+    /// <summary>
+    /// ピンクのひし形の位置を取得
+    /// </summary>
+    /// <returns></returns>
+    public RectTransform GetActiveDiamondTransform()
+    {
+        return activeDiamondImage.GetComponent<RectTransform>();
     }
 }

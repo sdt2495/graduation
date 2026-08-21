@@ -1695,7 +1695,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_text
-      value: "\u30B9\u30AD\u30C3\u30D7\u3000\u226B"
+      value: "\u226B"
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
@@ -1723,7 +1723,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.y
@@ -2504,7 +2504,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_text
-      value: "\u30AA\u30FC\u30C8\u3000\uFF1E\n"
+      value: "\uFF1E\n"
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
@@ -2532,7 +2532,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.y
@@ -3800,7 +3800,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u30E1\u30E2\uFF1A\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\u51E6\u7406\n\u300CResources\u300D\u3092\u3084\u3081\u308B\uFF1F\n\u3082\u3057\u304B\u3057\u3066\u5730\u306E\u6587\u3068\u306E\u533A\u5225(\u300C\u300D)\u3063\u3066\u3044\u3089\u306A\u3044\uFF1F\n\u30B9\u30E9\u30A4\u30C9\u5165\u5834\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u8FFD\u52A0\n\n\u30D0\u30B0:\n\u7ACB\u3061\u7D75\u306E\u5927\u304D\u3055\u3092\uFF11\u306B\n\u623B\u308B\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u306E\u6ED1\u3089\u304B\u3055\u306B\u96E3\u3042\u308A\n"
+  m_text: "\u30E1\u30E2\uFF1A\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\u51E6\u7406\n\u300CResources\u300D\u3092\u3084\u3081\u308B\uFF1F\n\n\u30D0\u30B0:\n\u7ACB\u3061\u7D75\u306E\u5927\u304D\u3055\u3092\uFF11\u306B\n\u623B\u308B\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u306E\u6ED1\u3089\u304B\u3055\u306B\u96E3\u3042\u308A\n"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
@@ -4099,7 +4099,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_text
-      value: "\u30D0\u30C3\u30AF\u30ED\u30B0\u3000\u4E09"
+      value: "\u4E09"
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
@@ -4127,7 +4127,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.y
@@ -4829,7 +4829,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_text
-      value: "\u9589\u3058\u308B"
+      value: "\xD7"
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
@@ -4857,7 +4857,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 150
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_SizeDelta.y

@@ -73,9 +73,23 @@ public class CommandUIElement : MonoBehaviour
         return activeDiamondImage.GetComponent<RectTransform>();
     }
 
+    /// <summary>
+    /// Scaleを設定
+    /// ピンク色のひし形ののみサイズ固定
+    /// </summary>
+    /// <param name="scale"></param>
     public void SetScale(float scale)
     {
         diamondImage.transform.localScale = Vector3.one * scale;
         arrowImage.transform.localScale = Vector3.one * scale;
+    }
+
+    /// <summary>
+    /// 色を設定
+    /// </summary>
+    /// <param name="color"></param>
+    public void SetDiamondColor(Color color)
+    {
+        diamondImage.color = color;
     }
 }

@@ -25,6 +25,10 @@ public class CommandUI : MonoBehaviour
     [SerializeField] private float normalScale = 1.0f;
     [SerializeField] private float activeScale = 1.1f;
 
+    [Header("コマンドの色")]
+    [SerializeField] private Color normalColor = Color.black;
+    [SerializeField] private Color misslColor = Color.red;
+
     private List<CommandUIElement> commandElements = new List<CommandUIElement>();    
     private List<CommandUIElement> nextcommandElements = new List<CommandUIElement>();
 
@@ -168,4 +172,14 @@ public class CommandUI : MonoBehaviour
             }
         }
     }
+
+    //public void SetMissCommand(int index)
+    //{
+    //    if(index < 0 || index >= commandElements.Count)
+    //    {
+    //        return;
+    //    }
+
+    //    commandElements[index].SetDiamondColor(missColor);
+    //}
 }

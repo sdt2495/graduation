@@ -680,7 +680,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9607844, g: 0.9607844, b: 0.9607844, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1161,7 +1161,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.9019608}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.5882353}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2359,7 +2359,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5882353}
+  m_Color: {r: 0.10324784, g: 0.06603771, b: 0.19999999, a: 0.87058824}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3769,7 +3769,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 10}
   m_SizeDelta: {x: 0, y: 50}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!222 &5675563825475328740
@@ -3800,7 +3800,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u30E1\u30E2\uFF1A\n\u9078\u629E\u80A2\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\u51E6\u7406\n\u300CResources\u300D\u3092\u3084\u3081\u308B\uFF1F\n\n\u30D0\u30B0:\n\u7ACB\u3061\u7D75\u306E\u5927\u304D\u3055\u3092\uFF11\u306B\n\u623B\u308B\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u306E\u6ED1\u3089\u304B\u3055\u306B\u96E3\u3042\u308A\n"
+  m_text: "\u30E1\u30E2\uFF1A\n\u30B2\u30FC\u30E0\u3078\u306E\u53D7\u3051\u6E21\u3057\u51E6\u7406\n\u300CResources\u300D\u3092\u3084\u3081\u308B\uFF1F\n\n\u30D0\u30B0:\n\u7ACB\u3061\u7D75\u306E\u5927\u304D\u3055\u3092\uFF11\u306B\n\u623B\u308B\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\u306E\u6ED1\u3089\u304B\u3055\u306B\u96E3\u3042\u308A\n<wavy><shaky>\u52D5\u4F5C\u306B\u96E3\u3042\u308A(\u30B9\u30AD\u30C3\u30D7\u6642)"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
@@ -3866,7 +3866,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -57.893494, w: 4.295044}
+  m_margin: {x: 0, y: 0, z: -104.773315, w: 4.295044}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -3976,11 +3976,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TextTyper
   messageText: {fileID: 6541541832953592173}
-  textSpeed: 0.05
+  textSpeed: 0.1
+  fadeInCharacter: 1
+  letterPop: 1
+  letterPopStartScale: 0.7
+  letterPopOvershootScale: 1.15
+  letterPopPeakPosition: 0.75
   pauseAtComma: 1
   commaPauseTime: 0.5
   pauseAtPeriod: 1
   periodPauseTime: 1
+  wavy: 1
+  wavyAmplitude: 5
+  wavySpeed: 5
+  shaky: 1
+  shakyAmplitude: 3
+  shakySpeed: 20
 --- !u!114 &6541541832953592173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4099,7 +4110,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2069873286122985849, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_text
-      value: "\u4E09"
+      value: "\u2261"
       objectReference: {fileID: 0}
     - target: {fileID: 3033943775745066664, guid: 9d206f6b09d461442ac3c5ec17731a27, type: 3}
       propertyPath: m_Pivot.x
@@ -4547,7 +4558,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0.7490196, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

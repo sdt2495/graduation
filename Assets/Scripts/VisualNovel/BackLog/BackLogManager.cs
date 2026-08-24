@@ -5,6 +5,14 @@ using System.Collections;
 
 public class BackLogManager : MonoBehaviour
 {
+    #region 特殊演出タグ (TextTyperと揃えてください)
+    private const string WAVY_TAG = "<wavy>";
+    private const string WAVY_END_TAG = "</wavy>";
+
+    private const string SHAKY_TAG = "<shaky>";
+    private const string SHAKY_END_TAG = "</shaky>";
+    #endregion
+
     [Header("NovelManager")]
     [SerializeField] private NovelManager novelManager;
 
@@ -114,8 +122,26 @@ public class BackLogManager : MonoBehaviour
     /// </summary>
     public void AddLog(string speaker, string message, string voice)
     {
+        // バックログでは特殊演出タグを表示しない
+        message = RemoveSpecialEffectTags(message);
+
         logs.Add(new BackLogData(speaker, message, voice));
     }
+
+    /// <summary>
+    /// 特殊演出タグを削除する
+    /// </summary>
+    private string RemoveSpecialEffectTags(string message)
+    {
+        message = message.Replace(WAVY_TAG, "");
+        message = message.Replace(WAVY_END_TAG, "");
+
+        message = message.Replace(SHAKY_TAG, "");
+        message = message.Replace(SHAKY_END_TAG, "");
+
+        return message;
+    }
+
 
     /// <summary>
     /// ログ取得

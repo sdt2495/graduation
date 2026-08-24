@@ -9,9 +9,12 @@ public class CharacterSlot
 {
     // 通常時のアニメーション速度
     private const float NORMAL_ANIMATION_SPEED = 1f;
+    // キャラクター交代時のアニメーション速度 (外から弄れるようにしたいね☆ミ)
+    private const float SWITCH_ANIMATION_SPEED = 2f;
 
     // スキップモード中のアニメーション速度 (外から弄れるようにしたいね☆ミ)
     private float skipAnimationSpeed = 2f;
+
 
     // 現在Skipモードか
     private bool isSkipMode = false;
@@ -100,7 +103,7 @@ public class CharacterSlot
             // 現在キャラクターが表示されている場合
             if (image.enabled)
             {
-                yield return ExitCharacter();
+                yield return ExitCharacter(false);
             }
 
             currentCharacter = "";
@@ -118,10 +121,13 @@ public class CharacterSlot
             yield break;
         }
 
+        // 別のキャラクターへの交代か
+        bool isCharacterSwitch = image.enabled && currentCharacter != newCharacter;
+
         // 別のキャラクターが現在表示されている場合、まず現在のキャラクターを退場させる
         if (image.enabled)
         {
-            yield return ExitCharacter();
+            yield return ExitCharacter(isCharacterSwitch);
         }
         // 新しい立ち絵を設定
         SetSprite(character);
@@ -130,7 +136,7 @@ public class CharacterSlot
         currentCharacter = newCharacter;
 
         // 画面外から登場
-        yield return EnterCharacter();
+        yield return EnterCharacter(isCharacterSwitch);
     }
 
 
@@ -180,7 +186,7 @@ public class CharacterSlot
     /// <summary>
     /// 画面外から登場
     /// </summary>
-    private IEnumerator EnterCharacter()
+    private IEnumerator EnterCharacter(bool isCharacterSwitch)
     {
         if (animator == null)
         {
@@ -190,7 +196,7 @@ public class CharacterSlot
         }
 
         // 現在のAnimator速度を設定
-        SetAnimatorSpeed();
+        SetAnimatorSpeed(isCharacterSwitch);
 
         // まだ立ち絵を表示しない
         image.enabled = false;
@@ -224,7 +230,7 @@ public class CharacterSlot
     /// <summary>
     /// 画面外へ退場
     /// </summary>
-    private IEnumerator ExitCharacter()
+    private IEnumerator ExitCharacter(bool isCharacterSwitch)
     {
         if (animator == null)
         {
@@ -233,7 +239,7 @@ public class CharacterSlot
         }
 
         // 現在のAnimator速度を設定
-        SetAnimatorSpeed();
+        SetAnimatorSpeed(isCharacterSwitch);
 
         // 退場アニメーション開始
         animator.ResetTrigger("Enter");
@@ -264,12 +270,19 @@ public class CharacterSlot
     /// <summary>
     /// Animatorの速度を現在のモードに合わせる
     /// </summary>
-    private void SetAnimatorSpeed()
+    private void SetAnimatorSpeed(bool isCharacterSwitch)
     {
+        // Skip中はSkip速度を優先
         if (isSkipMode)
         {
             animator.speed = skipAnimationSpeed;
         }
+        // キャラクター交代時は高速
+        else if (isCharacterSwitch)
+        {
+            animator.speed = SWITCH_ANIMATION_SPEED;
+        }
+        // 通常の登場・退場
         else
         {
             animator.speed = NORMAL_ANIMATION_SPEED;

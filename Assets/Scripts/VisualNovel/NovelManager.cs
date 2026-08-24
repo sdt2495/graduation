@@ -972,6 +972,9 @@ public class NovelManager : MonoBehaviour
         // 状態変更
         state = NovelState.BackLog;
 
+        // メッセージUIを非表示
+        messageUI.SetActive(false);
+
         // SE再生
         systemSEManager?.PlayBackLogOpenSE();
 
@@ -986,7 +989,10 @@ public class NovelManager : MonoBehaviour
     {
         // 状態変更
         state = NovelState.Normal;
-        
+
+        // メッセージUIを表示
+        messageUI.SetActive(true);
+
         // SE再生
         systemSEManager?.PlayBackLogCloseSE();
 

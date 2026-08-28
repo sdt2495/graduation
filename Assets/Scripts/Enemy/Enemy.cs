@@ -24,6 +24,9 @@ public class Enemy : MonoBehaviour
     private List<CommandType> commaneds = new List<CommandType>();
     private int currentIndex = 0;
 
+    // ミスしたコマンドのindex
+    private int missIndex = -1;
+
     /// <summary>
     /// 正しい入力がされたらクリア
     /// </summary>
@@ -45,7 +48,12 @@ public class Enemy : MonoBehaviour
             return CheckResult.Success;
         }
 
-        // ミス
+        // ミスした場所を記録
+        missIndex = currentIndex;
+
+        // ミスしたコマンドをスキップ
+        currentIndex++;
+
         return CheckResult.Miss;
     }
 
@@ -53,6 +61,7 @@ public class Enemy : MonoBehaviour
     {
         commaneds.Clear();
         currentIndex = 0;
+        missIndex = -1;
 
         int count = Random.Range(1, 4);
 
@@ -67,5 +76,10 @@ public class Enemy : MonoBehaviour
     public int GetCurrentIndex()
     {
         return currentIndex;
+    }
+
+    public int GetMissIndex()
+    {
+        return missIndex;
     }
 }

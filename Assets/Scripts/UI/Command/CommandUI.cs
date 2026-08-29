@@ -29,6 +29,11 @@ public class CommandUI : MonoBehaviour
     [SerializeField] private Color normalColor = Color.black;
     [SerializeField] private Color missColor = Color.red;
 
+    [Header("ミス演出")]
+    [SerializeField] private float missFlashDuration = 0.05f;
+    [SerializeField] private float missTiltAngle = 15f;
+    [SerializeField] private float missTiltDuration = 0.1f;
+
     private List<CommandUIElement> commandElements = new List<CommandUIElement>();    
     private List<CommandUIElement> nextcommandElements = new List<CommandUIElement>();
 
@@ -181,5 +186,50 @@ public class CommandUI : MonoBehaviour
         }
 
         commandElements[index].SetDiamondColor(missColor);
+    }
+
+    public void  PlayMissAnimation(int missIndex, int nextIndex)
+    {
+        StartCoroutine(MissAnimation(missIndex, nextIndex));
+    }
+
+    private IEnumerator MissAnimation(int missIndex)
+    {
+        if(missIndex < 0 || missIndex >= commandElements.Count) { yield break; }
+
+        CommandUIElement missElement = commandElements[missIndex];
+
+        // 白くフラッシュ
+        missElement.SetDiamondColor(Color.whilte);
+
+        yield return new WaitForSeceonds(missFlashDuration);
+
+        // 赤色に変更
+        missElement.SetDiamondColor(Color.red);
+
+        // 少し傾ける
+        RectTransform rect = missElement.GetCompornent<RectTransform>();
+
+        Quaternion startRotation = rect.localRotation;
+        Quaternion targetRotation = Quaternion.Euler(0f, 0f, missTiltAngle);
+
+        float time = 0f;
+
+        while( time < missTiltAngle)
+        {
+            time += time.deltaTime;
+
+            float t = time / missTiltDuration;
+
+            rect.localRotation = Quaternion.Lerp(startRotation, targetRotation, t);
+
+            yield return break;
+        }
+
+        // 元の角度の戻す
+        rect.localRotation = startRotation;
+
+        // 次のコマンドへ移動
+        UpdateActiveComand(enemy.GetCurrentIndex());
     }
 }

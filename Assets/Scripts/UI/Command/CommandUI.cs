@@ -193,43 +193,43 @@ public class CommandUI : MonoBehaviour
         StartCoroutine(MissAnimation(missIndex, nextIndex));
     }
 
-    private IEnumerator MissAnimation(int missIndex)
+    private IEnumerator MissAnimation(int missIndex, int nextIndex)
     {
         if(missIndex < 0 || missIndex >= commandElements.Count) { yield break; }
 
         CommandUIElement missElement = commandElements[missIndex];
 
         // 白くフラッシュ
-        missElement.SetDiamondColor(Color.whilte);
+        missElement.SetDiamondColor(Color.white);
 
-        yield return new WaitForSeceonds(missFlashDuration);
+        yield return new WaitForSeconds(missFlashDuration);
 
         // 赤色に変更
         missElement.SetDiamondColor(Color.red);
 
         // 少し傾ける
-        RectTransform rect = missElement.GetCompornent<RectTransform>();
+        RectTransform rect = missElement.GetComponent<RectTransform>();
 
         Quaternion startRotation = rect.localRotation;
         Quaternion targetRotation = Quaternion.Euler(0f, 0f, missTiltAngle);
 
         float time = 0f;
 
-        while( time < missTiltAngle)
+        while( time < missTiltDuration)
         {
-            time += time.deltaTime;
+            time += Time.deltaTime;
 
             float t = time / missTiltDuration;
 
             rect.localRotation = Quaternion.Lerp(startRotation, targetRotation, t);
 
-            yield return break;
+            yield return null;
         }
 
         // 元の角度の戻す
         rect.localRotation = startRotation;
 
         // 次のコマンドへ移動
-        UpdateActiveComand(enemy.GetCurrentIndex());
+        UpdateActiveComand(nextIndex);
     }
 }

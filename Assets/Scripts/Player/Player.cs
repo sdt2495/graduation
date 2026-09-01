@@ -81,18 +81,7 @@ public class Player : MonoBehaviour
 
             case CheckResult.Miss:
                 // ミスをしたらダメージを受ける
-                commandUI.SetMissCommand(enemy.GetMissIndex());
-
-                // 最後のコマンドの場合
-                if(enemy.GetCurrentIndex() >= enemy.GetCommands().Count)
-                {
-                    spawner.StartSpawn();
-                }
-                else
-                {
-                    // 次のコマンドへ
-                    commandUI.UpdateActiveComand(enemy.GetCurrentIndex());
-                }
+                commandUI.PlayMissAnimation(enemy.GetMissIndex(), enemy.GetCurrentIndex());
 
                 Damage();
                 break;

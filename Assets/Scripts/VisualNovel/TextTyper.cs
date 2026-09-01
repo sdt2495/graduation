@@ -20,8 +20,8 @@ public class TextTyper : MonoBehaviour
     [Header("表示するテキスト")]
     [SerializeField] private TextMeshProUGUI messageText;
 
-    [Header("文字送り速度（秒）")]
-    [SerializeField] private float textSpeed = 0.1f;
+    //[Header("文字送り速度（秒）")]
+    //[SerializeField] private float textSpeed = 0.1f;
 
     [Header("──────────────────────────────")]
     [Header("文字フェード")]
@@ -43,12 +43,14 @@ public class TextTyper : MonoBehaviour
     [Header("──────────────────────────────")]
 
     [Header("「、」(読点) 一時停止機能")]
-    [SerializeField] private bool pauseAtComma = true;
-    [Tooltip("「、」(読点) 一時停止時間")][SerializeField] private float commaPauseTime = 0.5f;
+    //[SerializeField] private bool pauseAtComma = true;
+    [Tooltip("「、」(読点) の待機時間倍率")]
+    [SerializeField] private float commaPauseMultiplier = 5f;
 
     [Header("「。」(句点) 一時停止機能")]
-    [SerializeField] private bool pauseAtPeriod = true;
-    [Tooltip("「。」(句点) 一時停止時間")][SerializeField] private float periodPauseTime = 0.5f;
+    //[SerializeField] private bool pauseAtPeriod = true;
+    [Tooltip("「。」(句点) の待機時間倍率")]
+    [SerializeField] private float periodPauseMultiplier = 5f;
 
     [Header("──────────────────────────────")]
     [Header("Wavy")]
@@ -238,6 +240,9 @@ public class TextTyper : MonoBehaviour
     /// </summary>
     IEnumerator TypeText()
     {
+        // 文字送り速度を設定から取得
+        float textSpeed = TextSettingsManager.Instance.GetTextSpeed();
+
         // 文字送り開始
         IsTyping = true;
         // 最初は空文字にする
@@ -415,16 +420,19 @@ public class TextTyper : MonoBehaviour
                 yield return new WaitForSeconds(textSpeed);
             }
 
-
-            // 「、」の場合は専用の待機時間
-            if (pauseAtComma && currentMessage[i] == '、')
+            // 句読点一時停止がONの場合
+            if (TextSettingsManager.Instance.GetPauseAtPunctuation())
             {
-                yield return new WaitForSeconds(commaPauseTime);
-            }
-            // 「。」の場合は専用の待機時間
-            else if (pauseAtPeriod && currentMessage[i] == '。')
-            {
-                yield return new WaitForSeconds(periodPauseTime);
+                // 「、」の場合はTextSpeedに応じた待機
+                if (currentMessage[i] == '、')
+                {
+                    yield return new WaitForSeconds(textSpeed * commaPauseMultiplier);
+                }
+                // 「。」の場合はTextSpeedに応じた待機
+                else if (currentMessage[i] == '。')
+                {
+                    yield return new WaitForSeconds(textSpeed * periodPauseMultiplier);
+                }
             }
         }
 

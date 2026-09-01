@@ -12,12 +12,18 @@ public class ConfigManager : MonoBehaviour
     [SerializeField] private ConfigSEManager configSEManager; // コンフィグでのSEを再生するスクリプト
 
     [Header("──────────────────────────────")]
-    [Header("スライダーたち")]
+    [Header("AudioSetting")]
     [SerializeField] private Slider masterSlider;
     [SerializeField] private Slider bgmSlider;
     [SerializeField] private Slider systemSESlider;
     [SerializeField] private Slider voiceSlider;
     [SerializeField] private Slider seSlider;
+
+    [Header("──────────────────────────────")]
+    [Header("TextSetting")]
+    [SerializeField] private Slider textSpeedSlider;
+    [SerializeField] private Slider autoSpeedSlider;
+    [SerializeField] private Toggle pauseAtPunctuationToggle;
 
 
     private void Start()
@@ -27,8 +33,13 @@ public class ConfigManager : MonoBehaviour
             Debug.LogError("AudioSettingsManagerが存在しません");
             return;
         }
+        if (TextSettingsManager.Instance == null)
+        {
+            Debug.LogError("TextSettingsManagerが存在しません");
+            return;
+        }
 
-        // 保存済みの音量をSliderへ反映
+        // 保存済みの設定をSliderへ反映
         LoadSliderValue();
 
         // Slider変更イベント登録
@@ -42,11 +53,17 @@ public class ConfigManager : MonoBehaviour
     private void LoadSliderValue()
     {
         // 保存した値を、スライダーに設定
+        // Audio
         masterSlider.value = AudioSettingsManager.Instance.GetMasterVolume();
         bgmSlider.value = AudioSettingsManager.Instance.GetBGMVolume();
         systemSESlider.value = AudioSettingsManager.Instance.GetSystemSEVolume();
         voiceSlider.value = AudioSettingsManager.Instance.GetVoiceVolume();
         seSlider.value = AudioSettingsManager.Instance.GetSEVolume();
+        // Text
+        textSpeedSlider.value = TextSettingsManager.Instance.GetTextSpeed();
+        autoSpeedSlider.value = TextSettingsManager.Instance.GetAutoSpeed();
+
+        pauseAtPunctuationToggle.isOn = TextSettingsManager.Instance.GetPauseAtPunctuation();
     }
 
     #region イベント
@@ -56,11 +73,17 @@ public class ConfigManager : MonoBehaviour
     private void AddListener()
     {
         // 値変更イベント登録 (Sliderの値が変わったら関数が呼び出しされる)
+        // Audio
         masterSlider.onValueChanged.AddListener(AudioSettingsManager.Instance.SetMasterVolume);
         bgmSlider.onValueChanged.AddListener(AudioSettingsManager.Instance.SetBGMVolume);
         systemSESlider.onValueChanged.AddListener(AudioSettingsManager.Instance.SetSystemSEVolume);
         voiceSlider.onValueChanged.AddListener(AudioSettingsManager.Instance.SetVoiceVolume);
         seSlider.onValueChanged.AddListener(AudioSettingsManager.Instance.SetSEVolume);
+        // Text
+        textSpeedSlider.onValueChanged.AddListener(TextSettingsManager.Instance.SetTextSpeed);
+        autoSpeedSlider.onValueChanged.AddListener(TextSettingsManager.Instance.SetAutoSpeed);
+
+        pauseAtPunctuationToggle.onValueChanged.AddListener(TextSettingsManager.Instance.SetPauseAtPunctuation);
     }
 
     /// <summary>
@@ -68,17 +91,23 @@ public class ConfigManager : MonoBehaviour
     /// </summary>
     private void OnDestroy()
     {
-        // AudioSettingsManagerが存在しなければ処理をやめる
-        if (AudioSettingsManager.Instance == null)
+        // Audio
+        if (AudioSettingsManager.Instance != null)
         {
-            return;
+            masterSlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetMasterVolume);
+            bgmSlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetBGMVolume);
+            systemSESlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetSystemSEVolume);
+            voiceSlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetVoiceVolume);
+            seSlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetSEVolume);
         }
+        // Text
+        if (TextSettingsManager.Instance != null)
+        {
+            textSpeedSlider.onValueChanged.RemoveListener(TextSettingsManager.Instance.SetTextSpeed);
+            autoSpeedSlider.onValueChanged.RemoveListener(TextSettingsManager.Instance.SetAutoSpeed);
 
-        masterSlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetMasterVolume);
-        bgmSlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetBGMVolume);
-        systemSESlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetSystemSEVolume);
-        voiceSlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetVoiceVolume);
-        seSlider.onValueChanged.RemoveListener(AudioSettingsManager.Instance.SetSEVolume);
+            pauseAtPunctuationToggle.onValueChanged.RemoveListener(TextSettingsManager.Instance.SetPauseAtPunctuation);
+        }
     }
     #endregion
 
@@ -87,7 +116,7 @@ public class ConfigManager : MonoBehaviour
     /// <summary>
     /// Scene変更 (ボタン)
     /// </summary>
-    public void OnClickChangeSneceButton(string sceneName)
+    public void OnClickChangeSceneButton(string sceneName)
     {
         // シーン移動
         StartCoroutine(ChangeScene(sceneName));
@@ -111,6 +140,13 @@ public class ConfigManager : MonoBehaviour
 
         // シーン遷移
         SceneManager.LoadScene(sceneName);
+    }
+
+
+
+    public void OnClickCloseConfigButton()
+    {
+        ConfigSceneController.Instance.CloseConfig();
     }
     #endregion
 }

@@ -8,38 +8,26 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class TitleManager : MonoBehaviour
 {
-    [Header("TitleSEManager")]
-    [SerializeField] private TitleSEManager titleSEManager; // タイトルでのSEを再生するスクリプト
 
     #region ボタン (仮)
 
     /// <summary>
-    /// Scene変更 (ボタン)
+    /// ゲーム開始 (GameScene)
     /// </summary>
-    public void OnClickChangeSneceButton(string sceneName)
+    public void OnClickStartGameButton()
     {
         // シーン移動
-        StartCoroutine(ChangeScene(sceneName));
+        SceneManager.LoadScene("GameScene");
     }
-    private IEnumerator ChangeScene(string sceneName)
+
+
+
+    /// <summary>
+    /// 設定画面 (ConfigScene)
+    /// </summary>
+    public void OnClickConfigButton()
     {
-        float seLength = 0f;
-
-        if (titleSEManager != null)
-        {
-            // SE再生
-            seLength = titleSEManager.PlayDecisionSE();
-        }
-        else
-        {
-            Debug.LogWarning("TitleSEManagerが設定されていません");
-        }
-
-        // SE終了待ち
-        yield return new WaitForSeconds(seLength);
-
-        // シーン遷移
-        SceneManager.LoadScene(sceneName);
+        ConfigSceneController.OpenFromGame();
     }
 
 
@@ -56,4 +44,15 @@ public class TitleManager : MonoBehaviour
 #endif
     }
     #endregion
+
+
+
+    /// <summary>
+    /// Scene変更 (String指定)
+    /// </summary>
+    public void OnClickLoadStringSneceButton(string sceneName)
+    {
+        // シーン移動
+        SceneManager.LoadScene(sceneName);
+    }
 }

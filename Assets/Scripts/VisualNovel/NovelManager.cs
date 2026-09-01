@@ -318,7 +318,7 @@ public class NovelManager : MonoBehaviour
         autoTimer += Time.deltaTime;
 
         // スキップモード中なら skipWaitTime、falseならautoWaitTime (条件 ? 条件がtrueの場合 : 条件がfalseの場合)
-        float waitTime = playMode == PlayMode.Skip ? skipWaitTime : autoWaitTime;
+        float waitTime = playMode == PlayMode.Skip? skipWaitTime : TextSettingsManager.Instance.GetAutoSpeed();
 
         // 待機時間を超えたら
         if (autoTimer >= waitTime)
@@ -1075,6 +1075,19 @@ public class NovelManager : MonoBehaviour
     public void OnClickCloseBackLogButton()
     {
         CloseBackLog();
+    }
+
+
+    /// <summary>
+    /// 設定画面 (ConfigScene)
+    /// </summary>
+    public void OnClickConfigButton()
+    {
+        // Auto・Skip中は開けない
+        if (playMode != PlayMode.Normal)
+            return;
+
+        ConfigSceneController.OpenFromGame();
     }
 
     #endregion

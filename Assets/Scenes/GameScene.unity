@@ -1458,6 +1458,12 @@ MonoBehaviour:
     m_RotationOrder: 4
   normalScale: 1
   activeScale: 1.2
+  normalColor: {r: 0, g: 0, b: 0, a: 1}
+  missColor: {r: 1, g: 0, b: 0, a: 1}
+  missFlashDuration: 0.05
+  missTiltAngle: 15
+  missTiltDuration: 0.1
+  completeAnimationDuration: 0.2
 --- !u!1 &843311866
 GameObject:
   m_ObjectHideFlags: 0

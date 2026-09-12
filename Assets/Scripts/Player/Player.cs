@@ -23,6 +23,10 @@ public class Player : MonoBehaviour
 
     private bool isCommandAnimation = false;
 
+    // ŠO•”QÆ—p
+    public int CurrentHP { get { return curretHP; } }
+    public int MaxHP { get { return maxHP; } }
+
     private void Start()
     {
         curretHP = maxHP;

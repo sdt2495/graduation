@@ -21,6 +21,8 @@ public class Player : MonoBehaviour
     [Header("コマンドUI")]
     [SerializeField] private CommandUI commandUI;
 
+    private bool isCommandAnimation = false;
+
     private void Start()
     {
         curretHP = maxHP;
@@ -34,8 +36,13 @@ public class Player : MonoBehaviour
         {
             return;
         }
-        
-        if(Input.GetKeyDown(KeyCode.LeftArrow))
+
+        if (isCommandAnimation)
+        {
+            return;
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             CheckCommaned(CommandType.Left);
         }
@@ -77,16 +84,15 @@ public class Player : MonoBehaviour
                 break;
 
             case CheckResult.Miss:
-                // ミスをしたらダメージを受ける
-                commandUI.PlayMissAnimation(enemy.GetMissIndex(), enemy.GetCurrentIndex());
-
-                Damage();
+                StartCoroutine(MissCommand());
                 break;
         }
     }
 
     private IEnumerator CompleteCommand()
     {
+        isCommandAnimation = true;
+
         // 大きい画面揺れ
         CameraShake.instance.Shake(0.18f, 0.2f);
 
@@ -96,6 +102,26 @@ public class Player : MonoBehaviour
         commbo++;
         commboUI.UpdateCombo(commbo);
 
+        isCommandAnimation = false;
+    }
+
+    private IEnumerator MissCommand()
+    {
+        isCommandAnimation = true;
+
+        int missIndex = enemy.GetMissIndex();
+        int nextIndex = enemy.GetCurrentIndex();
+
+        // ミスをしたらダメージを受ける
+        yield return StartCoroutine(commandUI.PlayMissAnimation(missIndex, nextIndex));
+        Damage();
+
+        if (enemy.GetCurrentIndex() >= enemy.GetCommands().Count)
+        {
+            spawner.StartSpawn();
+        }
+
+        isCommandAnimation = false;
     }
 
     /// <summary>

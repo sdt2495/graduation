@@ -99,8 +99,7 @@ public class CommandUIElement : MonoBehaviour
     /// <param name="scale"></param>
     public void SetVerticalScale(float scale)
     {
-        diamondImage.transform.localScale = new Vector3(diamondOriginalScale.x, diamondOriginalScale.y * scale, diamondOriginalScale.z);
-        arrowImage.transform.localScale = new Vector3(arrowOriginalScale.x, arrowOriginalScale.y * scale, arrowOriginalScale.z);
+        transform.localScale = new Vector3(1f, scale, 1f);
     }
 
     /// <summary>

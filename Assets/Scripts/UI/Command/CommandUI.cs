@@ -191,9 +191,9 @@ public class CommandUI : MonoBehaviour
         commandElements[index].SetDiamondColor(missColor);
     }
 
-    public void  PlayMissAnimation(int missIndex, int nextIndex)
+    public IEnumerator  PlayMissAnimation(int missIndex, int nextIndex)
     {
-        StartCoroutine(MissAnimation(missIndex, nextIndex));
+       yield return StartCoroutine(MissAnimation(missIndex, nextIndex));
     }
 
     public IEnumerator PlayCompleteAnimation(int completeIndex)
@@ -254,10 +254,6 @@ public class CommandUI : MonoBehaviour
     /// <returns></returns>
     private IEnumerator CompleteAnimation(int completeIndex)
     {
-        if (completeIndex < 0 || completeIndex >= commandElements.Count) { yield break; }
-
-        CommandUIElement element = commandElements[completeIndex];
-
         float time = 0f;
 
         while(time < completeAnimationDuration)
@@ -265,16 +261,19 @@ public class CommandUI : MonoBehaviour
             time += Time.deltaTime;
 
             float t = time / completeAnimationDuration;
-
-            // 1 ¨ 0
             float scale = Mathf.Lerp(1f, 0f, t);
 
-            element.SetVerticalScale(scale);
+            foreach(CommandUIElement element in commandElements)
+            {
+                element.SetVerticalScale(scale);
+            }
 
             yield return null;
         }
 
-        // ÅŒã‚ÉŠ®‘S‚É‚Â‚Ô‚·
-        element.SetVerticalScale(0f);
+        foreach (CommandUIElement element in commandElements)
+        {
+            element.SetVerticalScale(0f);
+        }
     }
 }

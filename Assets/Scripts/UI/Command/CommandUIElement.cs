@@ -23,6 +23,15 @@ public class CommandUIElement : MonoBehaviour
     [SerializeField] private Sprite leftSprite;
     [SerializeField] private Sprite rightSprite;
 
+    private Vector3 diamondOriginalScale;
+    private Vector3 arrowOriginalScale;
+
+    private void Awake()
+    {
+        diamondOriginalScale = diamondImage.transform.localScale;
+        arrowOriginalScale = arrowImage.transform.localScale;
+    }
+
     /// <summary>
     /// コマンドの中身をランダムに選択
     /// </summary>
@@ -82,6 +91,16 @@ public class CommandUIElement : MonoBehaviour
     {
         diamondImage.transform.localScale = Vector3.one * scale;
         arrowImage.transform.localScale = Vector3.one * scale;
+    }
+
+    /// <summary>
+    /// コマンドを縦方向に縮める
+    /// </summary>
+    /// <param name="scale"></param>
+    public void SetVerticalScale(float scale)
+    {
+        diamondImage.transform.localScale = new Vector3(diamondOriginalScale.x, diamondOriginalScale.y * scale, diamondOriginalScale.z);
+        arrowImage.transform.localScale = new Vector3(arrowOriginalScale.x, arrowOriginalScale.y * scale, arrowOriginalScale.z);
     }
 
     /// <summary>

@@ -34,6 +34,9 @@ public class CommandUI : MonoBehaviour
     [SerializeField] private float missTiltAngle = 15f;
     [SerializeField] private float missTiltDuration = 0.1f;
 
+    [Header("完了演出")]
+    [SerializeField] private float completeAnimationDuration = 0.2f;
+
     private List<CommandUIElement> commandElements = new List<CommandUIElement>();    
     private List<CommandUIElement> nextcommandElements = new List<CommandUIElement>();
 
@@ -193,6 +196,17 @@ public class CommandUI : MonoBehaviour
         StartCoroutine(MissAnimation(missIndex, nextIndex));
     }
 
+    public IEnumerator PlayCompleteAnimation(int completeIndex)
+    {
+        yield return StartCoroutine(CompleteAnimation(completeIndex));
+    }
+
+    /// <summary>
+    /// ミスしたときのアニメーション
+    /// </summary>
+    /// <param name="missIndex"></param>
+    /// <param name="nextIndex"></param>
+    /// <returns></returns>
     private IEnumerator MissAnimation(int missIndex, int nextIndex)
     {
         if(missIndex < 0 || missIndex >= commandElements.Count) { yield break; }
@@ -231,5 +245,36 @@ public class CommandUI : MonoBehaviour
 
         // 次のコマンドへ移動
         UpdateActiveComand(nextIndex);
+    }
+
+    /// <summary>
+    /// コマンドが最後まで入力されたあとのアニメーション
+    /// </summary>
+    /// <param name="completeIndex"></param>
+    /// <returns></returns>
+    private IEnumerator CompleteAnimation(int completeIndex)
+    {
+        if (completeIndex < 0 || completeIndex >= commandElements.Count) { yield break; }
+
+        CommandUIElement element = commandElements[completeIndex];
+
+        float time = 0f;
+
+        while(time < completeAnimationDuration)
+        {
+            time += Time.deltaTime;
+
+            float t = time / completeAnimationDuration;
+
+            // 1 → 0
+            float scale = Mathf.Lerp(1f, 0f, t);
+
+            element.SetVerticalScale(scale);
+
+            yield return null;
+        }
+
+        // 最後に完全につぶす
+        element.SetVerticalScale(0f);
     }
 }

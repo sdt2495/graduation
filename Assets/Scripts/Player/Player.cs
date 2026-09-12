@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -72,11 +73,7 @@ public class Player : MonoBehaviour
                 break;
 
             case CheckResult.Complete:
-                // ‘å‚«‚¢‰æ–Ê—h‚ê
-                CameraShake.instance.Shake(0.18f, 0.2f);
-                spawner.StartSpawn();
-                commbo++;
-                commboUI.UpdateCombo(commbo);
+                StartCoroutine(CompleteCommand());
                 break;
 
             case CheckResult.Miss:
@@ -86,6 +83,19 @@ public class Player : MonoBehaviour
                 Damage();
                 break;
         }
+    }
+
+    private IEnumerator CompleteCommand()
+    {
+        // ‘å‚«‚¢‰æ–Ê—h‚ê
+        CameraShake.instance.Shake(0.18f, 0.2f);
+
+        yield return StartCoroutine(commandUI.PlayCompleteAnimation(enemy.GetCurrentIndex() - 1));
+
+        spawner.StartSpawn();
+        commbo++;
+        commboUI.UpdateCombo(commbo);
+
     }
 
     /// <summary>

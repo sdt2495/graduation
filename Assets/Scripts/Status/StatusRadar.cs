@@ -19,17 +19,23 @@ public class StatusRadar : Graphic
     [Range(0, 100)]
     public float TEC = 100;
 
-    // 6個目。画像では下側にラベルがないので、とりあえず0
     [Range(0, 100)]
     public float Other = 100;
 
-    [Header("色")]
+    [Header("メーター色")]
     public Color meterColor = new Color(1f, 0.3f, 0.1f, 0.5f);
 
-    public Color lineColor = Color.black;
+    [Header("外枠")]
+    public Color frameColor = Color.black;
+
+    [Header("補助線")]
+    public Color guideColor = new Color(0f, 0f, 0f, 0.3f);
 
     [Header("線の太さ")]
     public float lineWidth = 5f;
+
+    [Header("補助線の太さ")]
+    public float guideWidth = 2f;
 
     protected override void OnPopulateMesh(VertexHelper vh)
     {
@@ -40,7 +46,10 @@ public class StatusRadar : Graphic
             rectTransform.rect.height
         ) * 0.45f;
 
+        // ========================================
         // 六角形の方向
+        // ========================================
+
         Vector2[] directions = new Vector2[6];
 
         for (int i = 0; i < 6; i++)
@@ -53,7 +62,21 @@ public class StatusRadar : Graphic
             );
         }
 
+        // ========================================
+        // 最大値100の外側の六角形
+        // ========================================
+
+        Vector2[] framePoints = new Vector2[6];
+
+        for (int i = 0; i < 6; i++)
+        {
+            framePoints[i] = directions[i] * radius;
+        }
+
+        // ========================================
         // ステータス
+        // ========================================
+
         float[] values =
         {
             HP,
@@ -64,19 +87,56 @@ public class StatusRadar : Graphic
             TEC
         };
 
-        // 実際の頂点
+        // ========================================
+        // 実際のステータス頂点
+        // ========================================
+
         Vector2[] points = new Vector2[6];
 
         for (int i = 0; i < 6; i++)
         {
             float value = Mathf.Clamp01(values[i] / 100f);
 
-            points[i] = directions[i] * radius * value;
+            points[i] =
+                directions[i] * radius * value;
         }
 
-        // =========================
-        // メーター内部
-        // =========================
+        // ========================================
+        // ① 補助線
+        // ========================================
+
+        // 中心から各頂点へ線を引く
+        for (int i = 0; i < 6; i++)
+        {
+            DrawLine(
+                vh,
+                Vector2.zero,
+                framePoints[i],
+                guideColor,
+                guideWidth
+            );
+        }
+
+        // ========================================
+        // ② 外側の六角形の枠
+        // ========================================
+
+        for (int i = 0; i < 6; i++)
+        {
+            int next = (i + 1) % 6;
+
+            DrawLine(
+                vh,
+                framePoints[i],
+                framePoints[next],
+                frameColor,
+                lineWidth
+            );
+        }
+
+        // ========================================
+        // ③ メーター内部
+        // ========================================
 
         for (int i = 0; i < 6; i++)
         {
@@ -84,9 +144,23 @@ public class StatusRadar : Graphic
 
             int index = vh.currentVertCount;
 
-            AddVertex(vh, Vector2.zero, meterColor);
-            AddVertex(vh, points[i], meterColor);
-            AddVertex(vh, points[next], meterColor);
+            AddVertex(
+                vh,
+                Vector2.zero,
+                meterColor
+            );
+
+            AddVertex(
+                vh,
+                points[i],
+                meterColor
+            );
+
+            AddVertex(
+                vh,
+                points[next],
+                meterColor
+            );
 
             vh.AddTriangle(
                 index,
@@ -94,10 +168,10 @@ public class StatusRadar : Graphic
                 index + 2
             );
         }
-
-        // =========================
-        // 外周
-        // =========================
+        /*
+        // ========================================
+        // ④ ステータス部分の外周
+        // ========================================
 
         for (int i = 0; i < 6; i++)
         {
@@ -106,10 +180,17 @@ public class StatusRadar : Graphic
             DrawLine(
                 vh,
                 points[i],
-                points[next]
+                points[next],
+                frameColor,
+                lineWidth
             );
         }
+        */
     }
+
+    // ========================================
+    // 頂点追加
+    // ========================================
 
     private void AddVertex(
         VertexHelper vh,
@@ -124,42 +205,48 @@ public class StatusRadar : Graphic
         vh.AddVert(vertex);
     }
 
+    // ========================================
+    // 線を描く
+    // ========================================
+
     private void DrawLine(
         VertexHelper vh,
         Vector2 start,
-        Vector2 end)
+        Vector2 end,
+        Color color,
+        float width)
     {
         Vector2 direction =
             (end - start).normalized;
 
         Vector2 normal =
             new Vector2(-direction.y, direction.x)
-            * lineWidth * 0.5f;
+            * width * 0.5f;
 
         int index = vh.currentVertCount;
 
         AddVertex(
             vh,
             start + normal,
-            lineColor
+            color
         );
 
         AddVertex(
             vh,
             start - normal,
-            lineColor
+            color
         );
 
         AddVertex(
             vh,
             end - normal,
-            lineColor
+            color
         );
 
         AddVertex(
             vh,
             end + normal,
-            lineColor
+            color
         );
 
         vh.AddTriangle(
@@ -175,19 +262,24 @@ public class StatusRadar : Graphic
         );
     }
 
-    // 外部から数値を入れる場合
+    // ========================================
+    // 外部からステータスを設定
+    // ========================================
+
     public void SetStatus(
-        float hp,
-        float atk,
-        float def,
-        float cri,
-        float tec)
+    float hp,
+    float atk,
+    float def,
+    float cri,
+    float tec,
+    float other)
     {
         HP = hp;
         ATK = atk;
         DEF = def;
         CRI = cri;
         TEC = tec;
+        Other = other;
 
         SetVerticesDirty();
     }

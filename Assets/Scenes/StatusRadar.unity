@@ -153,8 +153,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 33.9103, y: 21.0938}
-  m_SizeDelta: {x: 167.8206, y: 142.1876}
+  m_AnchoredPosition: {x: 127.218376, y: 59.149967}
+  m_SizeDelta: {x: 354.4368, y: 218.2999}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &153017747
 MonoBehaviour:
@@ -178,9 +178,11 @@ MonoBehaviour:
   CRI: 100
   TEC: 100
   Other: 100
-  meterColor: {r: 1, g: 0.3, b: 0.1, a: 0.5}
-  lineColor: {r: 0, g: 0, b: 0, a: 1}
+  meterColor: {r: 1, g: 0.0298337, b: 0, a: 0.5}
+  frameColor: {r: 0, g: 0, b: 0, a: 1}
+  guideColor: {r: 0, g: 0, b: 0, a: 0.3}
   lineWidth: 5
+  guideWidth: 2
 --- !u!222 &153017748
 CanvasRenderer:
   m_ObjectHideFlags: 0

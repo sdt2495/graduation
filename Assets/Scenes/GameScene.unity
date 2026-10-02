@@ -1187,7 +1187,7 @@ MonoBehaviour:
   spawner: {fileID: 515253254}
   renderer: {fileID: 758857480}
   hpUI: {fileID: 843311868}
-  maxHP: 3
+  maxHP: 10
   commboUI: {fileID: 833779302}
   commandUI: {fileID: 838218681}
 --- !u!1 &792608291
@@ -1554,6 +1554,8 @@ MonoBehaviour:
   player: {fileID: 758857482}
   playerHPBar: {fileID: 2100757711}
   playerDamageBar: {fileID: 31711582}
+  hpBarDelay: 0.3
+  hpBarDecreaseSpeed: 2
 --- !u!1 &843311866
 GameObject:
   m_ObjectHideFlags: 0

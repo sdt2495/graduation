@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
 
     [Header("HP")]
     [SerializeField] private HPUI hpUI;
-    [SerializeField] private int maxHP = 3;
+    [SerializeField] private int maxHP = 10;
     private int curretHP;
 
     [Header("ƒRƒ“ƒ{")]

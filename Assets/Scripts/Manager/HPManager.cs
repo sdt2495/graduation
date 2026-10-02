@@ -14,9 +14,13 @@ public class HPManager : MonoBehaviour
     [SerializeField] private float hpBarDelay = 0.3f;
     [SerializeField] private float hpBarDecreaseSpeed = 2.0f;
 
+    private float previsousHP;
+
     void Start()
     {
+        previsousHP = player.CurrentHP;
         UpdatePlayerHPBar();
+        playerDamageBar.fillAmount = playerHPBar.fillAmount;
     }
 
     void Update()
@@ -26,17 +30,40 @@ public class HPManager : MonoBehaviour
 
     private void UpdatePlayerHPBar()
     {
-        playerHPBar.fillAmount = (float)player.CurrentHP / player.MaxHP;
+        float hpRate = (float)player.CurrentHP / player.MaxHP;
+        playerHPBar.fillAmount = hpRate;
+
+        if (hpRate >= 0.5f)
+        {
+            // 緑→黄色
+            float t = (1.0f - hpRate) / 0.5f;
+            playerHPBar.color = Color.Lerp(Color.green, Color.yellow , t);
+        }
+        else
+        {
+            // 黄色→赤
+            float t = hpRate / 0.5f;
+            playerHPBar.color = Color.Lerp(Color.red, Color.yellow , t);
+        }
+
+        // HPが減ったらダメージバーを遅れて減らす
+        if (player.CurrentHP < previsousHP)
+        {
+            StartCoroutine(DecreasePlayerHPBar());
+        }
+        previsousHP = player.CurrentHP;
+
     }
 
     private IEnumerator DecreasePlayerHPBar()
     {
         yield return new WaitForSeconds(hpBarDelay);
 
-        while(playerDamageBar.fillAmount > playerDamageBar.fillAmount)
+        while(playerDamageBar.fillAmount > playerHPBar.fillAmount)
         {
             playerDamageBar.fillAmount = Mathf.MoveTowards(playerDamageBar.fillAmount, playerHPBar.fillAmount, hpBarDecreaseSpeed * Time.deltaTime);
+
+            yield return null;
         }
-        yield return null;
     }
 }

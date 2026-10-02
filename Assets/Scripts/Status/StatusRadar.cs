@@ -138,6 +138,33 @@ public class StatusRadar : Graphic
         // ③ メーター内部
         // ========================================
 
+        // 0のステータスでも完全に消えないようにする
+        float minDisplayRadius = 4f;
+
+        // パラメーターの頂点を描画用に調整
+        Vector2[] displayPoints = new Vector2[6];
+
+        for (int i = 0; i < 6; i++)
+        {
+            // 元のポイント
+            Vector2 point = points[i];
+
+            // 0の場合だけ、中心から少しだけ離す
+            if (point.magnitude < 0.001f)
+            {
+                displayPoints[i] =
+                    directions[i] * minDisplayRadius;
+            }
+            else
+            {
+                displayPoints[i] = point;
+            }
+        }
+
+        // ========================================
+        // 六角形を塗りつぶす
+        // ========================================
+
         for (int i = 0; i < 6; i++)
         {
             int next = (i + 1) % 6;
@@ -152,13 +179,13 @@ public class StatusRadar : Graphic
 
             AddVertex(
                 vh,
-                points[i],
+                displayPoints[i],
                 meterColor
             );
 
             AddVertex(
                 vh,
-                points[next],
+                displayPoints[next],
                 meterColor
             );
 

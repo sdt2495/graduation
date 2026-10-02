@@ -38,6 +38,13 @@ public class NovelManager : MonoBehaviour
     private const int COL_SCREEN_TIME = 18;      // 画面エフェクト時間
     // 待機
     private const int COL_WAIT = 19;             // 待機時間
+    // 選択肢
+    private const int COL_CHOICE1 = 20;          // 選択肢1テキスト
+    private const int COL_CHOICE1_ID = 21;       // 選択肢1ジャンプID
+    private const int COL_CHOICE2 = 22;          // 選択肢2テキスト
+    private const int COL_CHOICE2_ID = 23;       // 選択肢2ジャンプID
+    // ジャンプ
+    private const int COL_JUMP = 24;       // 選択肢2ジャンプID
     #endregion
 
     [Header("csvReader")]
@@ -75,6 +82,10 @@ public class NovelManager : MonoBehaviour
 
     [Header("NovelScreenEffectManager")]
     [SerializeField] private NovelScreenEffectManager screenEffectManager;   // スクリーンエフェクトを表示するスクリプト
+
+    // ★選択肢 ★
+    [Header("ChoiceManager")]
+    [SerializeField] private ChoiceManager choiceManager;                    // 選択肢のスクリプト
 
 
     [Header("──────────────────────────────")]
@@ -171,6 +182,9 @@ public class NovelManager : MonoBehaviour
         // イベント登録 (TextTyperの終了イベントを受け取る)
         textTyper.OnTypingFinished += OnTypingFinished;
 
+        // イベント登録 (ChoiceManagerの終了イベントを受け取る)
+        choiceManager.OnChoiceSelected += OnChoiceSelected;
+
         // ボタン表示更新
         UpdateButtonView();
 
@@ -184,6 +198,8 @@ public class NovelManager : MonoBehaviour
     {
         // イベント登録解除
         textTyper.OnTypingFinished -= OnTypingFinished;
+
+        choiceManager.OnChoiceSelected -= OnChoiceSelected;
     }
 
     /// <summary>
@@ -191,11 +207,65 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     void OnTypingFinished()
     {
+        // 現在表示した行
+        int displayedLine = currentLine - 1;
+
+        string[] line = csvReader.GetLine(displayedLine);
+        // 選択肢がある場合
+        if (!string.IsNullOrEmpty(line[COL_CHOICE1]) ||
+            !string.IsNullOrEmpty(line[COL_CHOICE2]))
+        {
+            ShowChoices(line);
+            return;
+        }
+
+        // 通常
+
         //「次へ」アイコン
         UpdateNextMark();
-
         // 待機開始
         BeginNextLineWait();
+    }
+
+    /// <summary>
+    /// 選択肢を画面に表示する
+    /// </summary>
+    void ShowChoices(string[] line)
+    {
+        // オート・スキップ解除
+        SetAutoMode(false);
+        SetSkipMode(false);
+
+        choiceManager.ShowChoices(
+            line[COL_CHOICE1],
+            line[COL_CHOICE1_ID],
+            line[COL_CHOICE2],
+            line[COL_CHOICE2_ID]
+        );
+        //「次へ」アイコン
+        UpdateNextMark();
+    }
+
+    /// <summary>
+    /// 選択肢が選ばれたときに、指定されたIDの行へジャンプする
+    /// </summary>
+    public void OnChoiceSelected(string jumpID)
+    {
+        // ジャンプ先のIDからCSV上の行番号を検索する
+        int line = FindLineByID(jumpID);
+
+        // 指定されたIDが見つからなければ処理を終了する
+        if (line == -1)
+            return;
+
+        // 表示中の選択肢を非表示にする
+        choiceManager.HideChoices();
+
+        // 次に表示する行をジャンプ先に変更する
+        currentLine = line;
+
+        // ジャンプ先の行からシナリオを再開する
+        AdvanceMessage();
     }
     #endregion
 
@@ -383,6 +453,9 @@ public class NovelManager : MonoBehaviour
         // 演出処理中なら進めない
         if (isDisplayingLine)
             return;
+        // 選択肢表示中は通常のメッセージ送りをしない
+        if (choiceManager != null && choiceManager.IsShowing)
+            return;
 
         //「次へ」アイコン
         UpdateNextMark();
@@ -409,6 +482,29 @@ public class NovelManager : MonoBehaviour
 
         // 現在の行を表示
         StartCoroutine(DisplayCurrentLine());
+    }
+
+
+    /// <summary>
+    /// CSVのIDから行番号を探す
+    /// </summary>
+    private int FindLineByID(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+            return -1;
+
+        for (int i = 1; i < csvReader.GetCount(); i++)
+        {
+            string[] line = csvReader.GetLine(i);
+
+            if (line[COL_ID] == id)
+            {
+                return i;
+            }
+        }
+
+        Debug.LogWarning("指定されたIDが見つかりません: " + id);
+        return -1;
     }
 
 

@@ -456,15 +456,8 @@ public class TextTyper : MonoBehaviour
         // Coroutineを停止
         StopCoroutine(typingCoroutine);
 
-        // 特殊演出タグを除去して全文表示
-        string displayMessage = currentMessage;
-
-        displayMessage = displayMessage.Replace(WAVY_TAG, "");
-        displayMessage = displayMessage.Replace(WAVY_END_TAG, "");
-        displayMessage = displayMessage.Replace(SHAKY_TAG, "");
-        displayMessage = displayMessage.Replace(SHAKY_END_TAG, "");
-
-        messageText.text = displayMessage;
+        // 全文表示
+        RebuildSpecialCharacters();
 
         // 文字送り終了
         IsTyping = false;
@@ -479,6 +472,7 @@ public class TextTyper : MonoBehaviour
 
 
     #region 全文表示
+
     /// <summary>
     /// 文章を一瞬で表示する
     /// </summary>
@@ -492,20 +486,117 @@ public class TextTyper : MonoBehaviour
 
         currentMessage = message;
 
-        // 特殊演出タグを除去して全文表示
-        string displayMessage = message;
-
-        displayMessage = displayMessage.Replace(WAVY_TAG, "");
-        displayMessage = displayMessage.Replace(WAVY_END_TAG, "");
-        displayMessage = displayMessage.Replace(SHAKY_TAG, "");
-        displayMessage = displayMessage.Replace(SHAKY_END_TAG, "");
-
-        messageText.text = displayMessage;
+        // 全文表示 + 特殊演出対象を再構築
+        RebuildSpecialCharacters();
 
         // 文字送り終了
         IsTyping = false;
         //「文字送り終了」を通知 (イベント)
         OnTypingFinished?.Invoke();
+    }
+    #endregion
+
+
+    #region
+
+    /// <summary>
+    /// 全文表示後のWavy / Shaky対象文字を再構築する
+    /// </summary>
+    private void RebuildSpecialCharacters()
+    {
+        // 以前の特殊演出情報をクリア
+        wavyCharacters.Clear();
+        shakyCharacters.Clear();
+        originalVertices.Clear();
+
+        bool wavyActive = false;
+        bool shakyActive = false;
+
+        // 特殊演出タグを除去した表示用文字列を作る
+        string displayMessage = currentMessage
+            .Replace(WAVY_TAG, "")
+            .Replace(WAVY_END_TAG, "")
+            .Replace(SHAKY_TAG, "")
+            .Replace(SHAKY_END_TAG, "");
+
+        // 全文を表示
+        messageText.text = displayMessage;
+
+        // TextMeshProの文字情報を更新
+        messageText.ForceMeshUpdate();
+
+        // TMP上の文字番号
+        int characterIndex = 0;
+
+        // 元の文章を走査
+        for (int i = 0; i < currentMessage.Length; i++)
+        {
+            // タグなら処理
+            if (currentMessage[i] == '<')
+            {
+                // WAVY
+                if (currentMessage.Substring(i).StartsWith(WAVY_TAG))
+                {
+                    wavyActive = true;
+                    i += WAVY_TAG.Length - 1;
+                    continue;
+                }
+                // WAVY_END
+                if (currentMessage.Substring(i).StartsWith(WAVY_END_TAG))
+                {
+                    wavyActive = false;
+                    i += WAVY_END_TAG.Length - 1;
+                    continue;
+                }
+
+                // SHAKY
+                if (currentMessage.Substring(i).StartsWith(SHAKY_TAG))
+                {
+                    shakyActive = true;
+                    i += SHAKY_TAG.Length - 1;
+                    continue;
+                }
+                // SHAKY_END
+                if (currentMessage.Substring(i).StartsWith(SHAKY_END_TAG))
+                {
+                    shakyActive = false;
+                    i += SHAKY_END_TAG.Length - 1;
+                    continue;
+                }
+
+                // その他のRich Textタグ
+                int tagEnd = currentMessage.IndexOf('>', i);
+
+                if (tagEnd != -1)
+                {
+                    i = tagEnd;
+                    continue;
+                }
+            }
+
+            // TMPの文字が存在するか確認
+            if (characterIndex >= messageText.textInfo.characterCount)
+                break;
+
+            TMP_CharacterInfo charInfo = messageText.textInfo.characterInfo[characterIndex];
+
+            // 表示される文字なら元頂点を保存
+            if (charInfo.isVisible)
+            {
+                SaveOriginalVertices(characterIndex);
+
+                if (wavyActive && wavy)
+                {
+                    wavyCharacters.Add(characterIndex);
+                }
+
+                if (shakyActive && shaky)
+                {
+                    shakyCharacters.Add(characterIndex);
+                }
+            }
+            characterIndex++;
+        }
     }
     #endregion
 

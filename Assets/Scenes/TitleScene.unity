@@ -274,9 +274,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       insertIndex: -1
       addedObject: {fileID: 658345560}
-    - targetCorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 658345561}
   m_SourcePrefab: {fileID: 100100000, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
 --- !u!224 &272556363 stripped
 RectTransform:
@@ -527,22 +524,6 @@ MonoBehaviour:
   visualImage: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 0, g: 1, b: 1, a: 1}
---- !u!114 &658345561
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 658345556}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6be287981b46f124081f1eeb6b42c75f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonIdleMotion
-  moveAmount: 10
-  speed: 3
-  phaseOffset: 0
-  delay: 1
 --- !u!1 &869521056
 GameObject:
   m_ObjectHideFlags: 0
@@ -1071,9 +1052,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2137226359}
-    - targetCorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2137226360}
   m_SourcePrefab: {fileID: 100100000, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
 --- !u!1 &1461610720
 GameObject:
@@ -1413,9 +1391,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1662469552}
-    - targetCorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1662469553}
   m_SourcePrefab: {fileID: 100100000, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
 --- !u!224 &1662469548 stripped
 RectTransform:
@@ -1440,22 +1415,6 @@ MonoBehaviour:
   visualImage: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 0, g: 1, b: 1, a: 1}
---- !u!114 &1662469553
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1655285588}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6be287981b46f124081f1eeb6b42c75f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonIdleMotion
-  moveAmount: 10
-  speed: 3
-  phaseOffset: 0
-  delay: 1
 --- !u!1 &1804615197
 GameObject:
   m_ObjectHideFlags: 0
@@ -1707,22 +1666,6 @@ MonoBehaviour:
   visualImage: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 0, g: 1, b: 1, a: 1}
---- !u!114 &2137226360
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1531176098}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6be287981b46f124081f1eeb6b42c75f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonIdleMotion
-  moveAmount: 10
-  speed: 3
-  phaseOffset: 0
-  delay: 1
 --- !u!1 &2139003890 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
@@ -1740,10 +1683,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 917a5b1889c06e040bc6101288a5827a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButtonWobble
-  scaleSelected: 1.15
-  scaleNormal: 1
-  lerpSpeed: 10
-  targetScale: {x: 0, y: 0, z: 0}
 --- !u!114 &2139003895
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1762,22 +1701,6 @@ MonoBehaviour:
   visualImage: {fileID: 0}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 0, g: 1, b: 1, a: 1}
---- !u!114 &2139003896
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2139003890}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6be287981b46f124081f1eeb6b42c75f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MenuButtonIdleMotion
-  moveAmount: 10
-  speed: 2
-  phaseOffset: 0
-  delay: 1
 --- !u!1001 &8375121034131712900
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1964,9 +1887,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2139003895}
-    - targetCorrespondingSourceObject: {fileID: 9149798558439035193, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2139003896}
   m_SourcePrefab: {fileID: 100100000, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

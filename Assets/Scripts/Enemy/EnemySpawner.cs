@@ -22,6 +22,15 @@ public class EnemySpawner : MonoBehaviour
     private Enemy battleEnemy;
     private Enemy nextEnemy;
 
+    /// <summary>
+    /// バトルエネミーの外部参照用
+    /// </summary>
+    /// <returns></returns>
+    public Enemy GetBattleEnemy()
+    {
+        return battleEnemy;
+    }
+
     private void Start()
     {
         // Enemyを生成
@@ -32,8 +41,6 @@ public class EnemySpawner : MonoBehaviour
 
         // Playerにバトル中のEnemyを渡す
         player.SetEnemy(battleEnemy);
-
-        commandUI.UpdateCommanedText(battleEnemy, nextEnemy);
 
         battleEnemy.GetCurrentIndex();
         waveUI.UpdateWave(currrentWave, maxWave);

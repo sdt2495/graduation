@@ -6,7 +6,6 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField] private Enemy enemy;
-    [SerializeField] private EnemySpawner spawner;
     [SerializeField] private SpriteRenderer renderer;
 
     [Header("HP")]
@@ -21,7 +20,11 @@ public class Player : MonoBehaviour
     [Header("コマンドUI")]
     [SerializeField] private CommandUI commandUI;
 
+    [Header("バトルマネージャー")]
+    [SerializeField] private BattleManager battleManager;
+
     private bool isCommandAnimation = false;
+    private bool isCommandInput = false;
 
     // 外部参照用
     public int CurrentHP { get { return curretHP; } }
@@ -42,6 +45,11 @@ public class Player : MonoBehaviour
         }
 
         if (isCommandAnimation)
+        {
+            return;
+        }
+
+        if(!isCommandInput)
         {
             return;
         }
@@ -67,6 +75,15 @@ public class Player : MonoBehaviour
     public void SetEnemy(Enemy newEnemy)
     {
         enemy = newEnemy;
+    }
+
+    /// <summary>
+    /// 戦闘コマンドが選択されているか
+    /// </summary>
+    /// <param name="active"></param>
+    public void SetCommandInput(bool active)
+    {
+        isCommandInput = active;
     }
 
     private void CheckCommaned(CommandType command)
@@ -102,9 +119,12 @@ public class Player : MonoBehaviour
 
         yield return StartCoroutine(commandUI.PlayCompleteAnimation(enemy.GetCurrentIndex() - 1));
 
-        spawner.StartSpawn();
+        battleManager.CompleteCommand();
         commbo++;
         commboUI.UpdateCombo(commbo);
+
+        enemy.SetRandomCommands();
+        commandUI.UpdateCommanedText(enemy, null);
 
         isCommandAnimation = false;
     }
@@ -120,9 +140,11 @@ public class Player : MonoBehaviour
         yield return StartCoroutine(commandUI.PlayMissAnimation(missIndex, nextIndex));
         Damage();
 
-        if (enemy.GetCurrentIndex() >= enemy.GetCommands().Count)
-        {
-            spawner.StartSpawn();
+        if(enemy.IsCommandFinished())
+        { 
+            enemy.SetRandomCommands();
+
+            commandUI.UpdateCommanedText(enemy, null);
         }
 
         isCommandAnimation = false;

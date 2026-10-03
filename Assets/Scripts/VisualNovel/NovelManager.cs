@@ -701,9 +701,18 @@ public class NovelManager : MonoBehaviour
         // 演出処理終了
         isDisplayingLine = false;
 
-        // セリフがない行なら自動的に次の行へ
-        if (!hasMessage)
+        // セリフがない行でも、選択肢があれば表示する
+        bool hasChoice = !string.IsNullOrEmpty(line[COL_CHOICE1]) || !string.IsNullOrEmpty(line[COL_CHOICE2]);
+
+        // 選択肢あり
+        if (hasChoice)
         {
+            // 選択肢
+            ShowChoices(line);
+        }
+        else if (!hasMessage)
+        {
+            // セリフも選択肢もない行なら自動的に次の行へ
             AdvanceMessage();
         }
     }

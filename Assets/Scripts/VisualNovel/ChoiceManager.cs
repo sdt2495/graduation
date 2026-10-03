@@ -16,6 +16,7 @@ public class ChoiceManager : MonoBehaviour
     [SerializeField] private Button choiceButton2;
     [SerializeField] private TMP_Text choiceText2;
 
+    // 選択
     private string choice1ID;
     private string choice2ID;
 
@@ -23,19 +24,23 @@ public class ChoiceManager : MonoBehaviour
     public bool IsShowing => choicePanel != null && choicePanel.activeSelf;     // 現在、選択肢を表示しているか
     public event Action<string> OnChoiceSelected;    // 選択肢が選ばれたときにIDを通知する
 
+    #region イベント?
     private void Awake()
     {
+        // イベント登録
         choiceButton1?.onClick.AddListener(OnClickChoice1);
         choiceButton2?.onClick.AddListener(OnClickChoice2);
-
+        // 選択肢を非表示
         HideChoices();
     }
 
     private void OnDestroy()
     {
+        // イベント解除
         choiceButton1?.onClick.RemoveListener(OnClickChoice1);
         choiceButton2?.onClick.RemoveListener(OnClickChoice2);
     }
+    #endregion
 
     /// <summary>
     /// 選択肢を表示する

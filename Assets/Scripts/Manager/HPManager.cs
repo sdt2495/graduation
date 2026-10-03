@@ -10,6 +10,11 @@ public class HPManager : MonoBehaviour
     [SerializeField] private Image playerHPBar;
     [SerializeField] private Image playerDamageBar;
 
+    [Header("Enemy HP")]
+    [SerializeField] private Enemy enemy;
+    [SerializeField] private Image enemyHPBar;
+    [SerializeField] private Image enemyDamageBar;
+
     [Header("HPBarの減少")]
     [SerializeField] private float hpBarDelay = 0.3f;
     [SerializeField] private float hpBarDecreaseSpeed = 2.0f;
@@ -26,6 +31,12 @@ public class HPManager : MonoBehaviour
     void Update()
     {
         UpdatePlayerHPBar();
+        UpdateEnemyPBar();
+    }
+
+    public void SetEnemy(Enemy newEnemy)
+    {
+        enemy = newEnemy;
     }
 
     private void UpdatePlayerHPBar()
@@ -52,6 +63,33 @@ public class HPManager : MonoBehaviour
             StartCoroutine(DecreasePlayerHPBar());
         }
         previsousHP = player.CurrentHP;
+
+    }
+
+    private void UpdateEnemyPBar()
+    {
+        float hpRate = (float)enemy.CurrentHP / enemy.MaxHP;
+        enemyHPBar.fillAmount = hpRate;
+
+        if (hpRate >= 0.5f)
+        {
+            // 緑→黄色
+            float t = (1.0f - hpRate) / 0.5f;
+            enemyHPBar.color = Color.Lerp(Color.green, Color.yellow, t);
+        }
+        else
+        {
+            // 黄色→赤
+            float t = hpRate / 0.5f;
+            enemyHPBar.color = Color.Lerp(Color.red, Color.yellow, t);
+        }
+
+        // HPが減ったらダメージバーを遅れて減らす
+        if (enemy.CurrentHP < previsousHP)
+        {
+            StartCoroutine(DecreasePlayerHPBar());
+        }
+        previsousHP = enemy.CurrentHP;
 
     }
 

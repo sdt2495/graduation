@@ -213,6 +213,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 838218680}
     m_Modifications:
+    - target: {fileID: 1431991902788169137, guid: de8c08690f85d0d4d8b693cbdd645763, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1740220552786313931, guid: de8c08690f85d0d4d8b693cbdd645763, type: 3}
       propertyPath: m_Name
       value: EnemyHP
@@ -256,6 +260,10 @@ PrefabInstance:
     - target: {fileID: 1779497812133452136, guid: de8c08690f85d0d4d8b693cbdd645763, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7217253265565315647, guid: de8c08690f85d0d4d8b693cbdd645763, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

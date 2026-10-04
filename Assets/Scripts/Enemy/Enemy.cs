@@ -32,7 +32,7 @@ public class Enemy : MonoBehaviour
 
     private int currentHP;
 
-    private void Start()
+    private void Awake()
     {
         currentHP = maxHP;
     }

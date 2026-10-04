@@ -19,11 +19,12 @@ public class HPManager : MonoBehaviour
     [SerializeField] private float hpBarDelay = 0.3f;
     [SerializeField] private float hpBarDecreaseSpeed = 2.0f;
 
-    private float previsousHP;
+    private float previsousPlayerHP;
+    private float previsousEnemyHP;
 
     void Start()
     {
-        previsousHP = player.CurrentHP;
+        previsousPlayerHP = player.CurrentHP;
         UpdatePlayerHPBar();
         playerDamageBar.fillAmount = playerHPBar.fillAmount;
     }
@@ -31,14 +32,32 @@ public class HPManager : MonoBehaviour
     void Update()
     {
         UpdatePlayerHPBar();
-        UpdateEnemyPBar();
+
+        if (enemy != null)
+        {
+            UpdateEnemyPBar();
+        }
     }
 
     public void SetEnemy(Enemy newEnemy)
     {
         enemy = newEnemy;
+
+        Debug.Log("Enemy CurrentHP: " + enemy.CurrentHP);
+        Debug.Log("Enemy MaxHP: " + enemy.MaxHP);
+
+        previsousEnemyHP = enemy.CurrentHP;
+
+        UpdateEnemyPBar();
+        enemyDamageBar.fillAmount = enemyHPBar.fillAmount;
+
+        Debug.Log("Enemy HPBar: " + enemyHPBar.fillAmount);
+        Debug.Log("Enemy DamageBar: " + enemyDamageBar.fillAmount);
     }
 
+    /// <summary>
+    /// プレイヤーのHPを管理
+    /// </summary>
     private void UpdatePlayerHPBar()
     {
         float hpRate = (float)player.CurrentHP / player.MaxHP;
@@ -58,11 +77,11 @@ public class HPManager : MonoBehaviour
         }
 
         // HPが減ったらダメージバーを遅れて減らす
-        if (player.CurrentHP < previsousHP)
+        if (player.CurrentHP < previsousPlayerHP)
         {
-            StartCoroutine(DecreasePlayerHPBar());
+            StartCoroutine(DecreasePlayerHPBar(playerHPBar, playerDamageBar));
         }
-        previsousHP = player.CurrentHP;
+        previsousPlayerHP = player.CurrentHP;
 
     }
 
@@ -85,21 +104,25 @@ public class HPManager : MonoBehaviour
         }
 
         // HPが減ったらダメージバーを遅れて減らす
-        if (enemy.CurrentHP < previsousHP)
+        if (enemy.CurrentHP < previsousEnemyHP)
         {
-            StartCoroutine(DecreasePlayerHPBar());
+            StartCoroutine(DecreasePlayerHPBar(enemyHPBar, enemyDamageBar));
         }
-        previsousHP = enemy.CurrentHP;
+        previsousEnemyHP = enemy.CurrentHP;
 
     }
 
-    private IEnumerator DecreasePlayerHPBar()
+    /// <summary>
+    /// ダメージバーを遅れて減らす
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator DecreasePlayerHPBar(Image hpBar, Image damageBar)
     {
         yield return new WaitForSeconds(hpBarDelay);
 
-        while(playerDamageBar.fillAmount > playerHPBar.fillAmount)
+        while(damageBar.fillAmount > hpBar.fillAmount)
         {
-            playerDamageBar.fillAmount = Mathf.MoveTowards(playerDamageBar.fillAmount, playerHPBar.fillAmount, hpBarDecreaseSpeed * Time.deltaTime);
+           damageBar.fillAmount = Mathf.MoveTowards(damageBar.fillAmount, hpBar.fillAmount, hpBarDecreaseSpeed * Time.deltaTime);
 
             yield return null;
         }

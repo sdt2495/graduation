@@ -71,7 +71,7 @@ public class EnemySpawner : MonoBehaviour
         UpdateEnemyView();
 
         player.SetEnemy(battleEnemy);
-        commandUI.UpdateCommanedText(battleEnemy, nextEnemy);
+        commandUI.UpdateCommanedText(battleEnemy);
 
         currrentWave++;
         waveUI.UpdateWave(currrentWave, maxWave);

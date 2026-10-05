@@ -123,8 +123,9 @@ public class Player : MonoBehaviour
         commbo++;
         commboUI.UpdateCombo(commbo);
 
-        enemy.SetRandomCommands();
-        commandUI.UpdateCommanedText(enemy, null);
+        commandUI.ApplyNext(enemy);
+        commandUI.UpdateNextCommand();
+        commandUI.UpdateCommanedText(enemy);
 
         isCommandAnimation = false;
     }
@@ -144,7 +145,7 @@ public class Player : MonoBehaviour
         { 
             enemy.SetRandomCommands();
 
-            commandUI.UpdateCommanedText(enemy, null);
+            commandUI.UpdateCommanedText(enemy);
         }
 
         isCommandAnimation = false;

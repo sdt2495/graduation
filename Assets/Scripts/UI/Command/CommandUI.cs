@@ -39,19 +39,48 @@ public class CommandUI : MonoBehaviour
 
     private List<CommandUIElement> commandElements = new List<CommandUIElement>();    
     private List<CommandUIElement> nextcommandElements = new List<CommandUIElement>();
+    private List<CommandType> nextCommand = new List<CommandType>();
 
     private RectTransform acitiveDiamond;
 
-    public void UpdateCommanedText(Enemy battleEnemy, Enemy nextEnemy)
+    /// <summary>
+    /// 現在のコマンドとNextコマンドのUIを更新する
+    /// </summary>
+    /// <param name="battleEnemy"></param>
+    public void UpdateCommanedText(Enemy battleEnemy)
     {
         CreateCommandElements(battleEnemy.GetCommands(), commandParent, commandElements);
 
-        if(nextEnemy != null)
-        {
-            CreateCommandElements(nextEnemy.GetCommands(), nextCommandParent, nextcommandElements);
-        }
+        CreateCommandElements(nextCommand, nextCommandParent, nextcommandElements);
 
         UpdateActiveComand(battleEnemy.GetCurrentIndex());
+    }
+
+    /// <summary>
+    /// 戦闘開始時のNextコマンドを生成して表示する
+    /// </summary>
+    public void SetInitialNextCommands()
+    {
+        SetNextCommand();
+
+        CreateCommandElements(nextCommand, nextCommandParent, nextcommandElements);
+    }
+
+    /// <summary>
+    /// NextコマンドをEnemyの現在のコマンドとして設定する
+    /// </summary>
+    /// <param name="enemy"></param>
+    public void ApplyNext(Enemy enemy)
+    {
+        enemy.SetCommands(nextCommand);
+    }
+
+    /// <summary>
+    /// Nextコマンドを新しくランダム生成する
+    /// </summary>
+    public void UpdateNextCommand()
+    {
+        SetNextCommand();
     }
 
     /// <summary>
@@ -104,7 +133,7 @@ public class CommandUI : MonoBehaviour
     }
 
     /// <summary>
-    /// 選択されてるひし形を移動
+    /// 入力対象のコマンドへひし形を移動する
     /// </summary>
     /// <param name="currentIndex"></param>
     public void UpdateActiveComand(int currentIndex)
@@ -181,6 +210,25 @@ public class CommandUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 次のコマンドを設定する
+    /// </summary>
+    private void SetNextCommand()
+    {
+        nextCommand.Clear();
+
+        int count = Random.Range(1, 4);
+
+        for(int i = 0; i < count;i++)
+        {
+            nextCommand.Add((CommandType)Random.Range(0, 4));
+        }
+    }
+
+    /// <summary>
+    /// 指定したコマンドのひし形をミス色に変更する
+    /// </summary>
+    /// <param name="index"></param>
     public void SetMissCommand(int index)
     {
         if (index < 0 || index >= commandElements.Count)

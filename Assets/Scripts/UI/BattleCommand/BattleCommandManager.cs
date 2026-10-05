@@ -24,7 +24,8 @@ public class BattaleCommandManager : MonoBehaviour
 
         commandUI.gameObject.SetActive(true);
 
-        commandUI.UpdateCommanedText(battleEnemy, null);
+        commandUI.SetInitialNextCommands();
+        commandUI.UpdateCommanedText(battleEnemy);
 
         player.SetCommandInput(true);
     }

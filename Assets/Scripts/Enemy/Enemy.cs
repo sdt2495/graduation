@@ -21,7 +21,7 @@ public enum CheckResult
 
 public class Enemy : MonoBehaviour
 {
-    private List<CommandType> commaneds = new List<CommandType>();
+    private List<CommandType> currentCommaneds = new List<CommandType>();
     private int currentIndex = 0;
 
     // ミスしたコマンドのindex
@@ -64,12 +64,12 @@ public class Enemy : MonoBehaviour
     /// <returns></returns>
     public CheckResult Check(CommandType inputcommaned)
     {
-        if (inputcommaned == commaneds[currentIndex])
+        if (inputcommaned == currentCommaneds[currentIndex])
         {
             currentIndex++;
 
             // 全成功
-            if (currentIndex >= commaneds.Count)
+            if (currentIndex >= currentCommaneds.Count)
             {
                 return CheckResult.Complete;
             }
@@ -89,7 +89,7 @@ public class Enemy : MonoBehaviour
 
     public void SetRandomCommands()
     {
-        commaneds.Clear();
+        currentCommaneds.Clear();
         currentIndex = 0;
         missIndex = -1;
 
@@ -97,11 +97,20 @@ public class Enemy : MonoBehaviour
 
         for(int i = 0; i < count; i++)
         {
-            commaneds.Add((CommandType)Random.Range(0, 4));
+            currentCommaneds.Add((CommandType)Random.Range(0, 4));
         }
     }
 
-    public List<CommandType> GetCommands() { return commaneds; }
+    public void SetCommands(List<CommandType> commands)
+    {
+        currentCommaneds.Clear();
+        currentCommaneds.AddRange(commands);
+
+        currentIndex = 0;
+        missIndex = -1;
+    }
+
+    public List<CommandType> GetCommands() { return currentCommaneds; }
 
     public int GetCurrentIndex()
     {
@@ -115,6 +124,6 @@ public class Enemy : MonoBehaviour
 
     public bool IsCommandFinished()
     {
-        return currentIndex >= commaneds.Count;
+        return currentIndex >= currentCommaneds.Count;
     }
 }

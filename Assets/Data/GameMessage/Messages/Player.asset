@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b110af7a643b3784d8366008b7ddaf92, type: 3}
+  m_Name: Player
+  m_EditorClassIdentifier: Assembly-CSharp::GameMessageData
+  character: {fileID: 11400000, guid: bab1ded5db130d04abc8b17085440d00, type: 2}
+  messages:
+  - type: 0
+    face: 3
+    message: "\u300C\u3066\u3044\u3084\u30FC\u3063\uFF01\u300D"
+  - type: 1
+    face: 2
+    message: "\u300C\u3050\u306F\u3063\uFF01\u300D"
+  - type: 3
+    face: 1
+    message: "\u300C\u3057\u3083\u3042\u3063\uFF01\u300D"

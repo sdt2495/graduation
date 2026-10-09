@@ -37,6 +37,8 @@ public class StatusRadar : Graphic
     [Header("補助線の太さ")]
     public float guideWidth = 2f;
 
+    [Header("ゴールド")]
+    public float gold = 1000;
     protected override void OnPopulateMesh(VertexHelper vh)
     {
         vh.Clear();
@@ -195,24 +197,6 @@ public class StatusRadar : Graphic
                 index + 2
             );
         }
-        /*
-        // ========================================
-        // ④ ステータス部分の外周
-        // ========================================
-
-        for (int i = 0; i < 6; i++)
-        {
-            int next = (i + 1) % 6;
-
-            DrawLine(
-                vh,
-                points[i],
-                points[next],
-                frameColor,
-                lineWidth
-            );
-        }
-        */
     }
 
     // ========================================

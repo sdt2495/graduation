@@ -182,7 +182,7 @@ MonoBehaviour:
   frameColor: {r: 0, g: 0, b: 0, a: 1}
   guideColor: {r: 0, g: 0, b: 0, a: 0.3}
   lineWidth: 5
-  guideWidth: 2
+  guideWidth: 3
 --- !u!222 &153017748
 CanvasRenderer:
   m_ObjectHideFlags: 0

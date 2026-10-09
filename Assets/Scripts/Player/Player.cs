@@ -88,6 +88,8 @@ public class Player : MonoBehaviour
 
     private void CheckCommaned(CommandType command)
     {
+        battleManager.StartTimer();
+
         CheckResult result = enemy.Check(command);
 
         switch (result)
@@ -95,12 +97,20 @@ public class Player : MonoBehaviour
             case CheckResult.Success:
                 // 小さい画面揺れ
                 CameraShake.instance.Shake(0.08f, 0.05f);
+
+                // Enemyにダメージ
+                battleManager.CompleteCommand();
+
                 commbo++;
                 commboUI.UpdateCombo(commbo);
                 commandUI.UpdateActiveComand(enemy.GetCurrentIndex());
                 break;
 
             case CheckResult.Complete:
+
+                // Enemyにダメージ
+                battleManager.CompleteCommand();
+
                 StartCoroutine(CompleteCommand());
                 break;
 
@@ -119,7 +129,6 @@ public class Player : MonoBehaviour
 
         yield return StartCoroutine(commandUI.PlayCompleteAnimation(enemy.GetCurrentIndex() - 1));
 
-        battleManager.CompleteCommand();
         commbo++;
         commboUI.UpdateCombo(commbo);
 
@@ -175,5 +184,14 @@ public class Player : MonoBehaviour
         renderer.color = Color.red;
         yield return new WaitForSeconds(0.1f);
         renderer.color = Color.white;
+    }
+
+    /// <summary>
+    /// プレイヤーの状態(アニメーション中か)を返す関数
+    /// </summary>
+    /// <returns></returns>
+    public bool IsCommandAnimation()
+    {
+        return isCommandAnimation;
     }
 }

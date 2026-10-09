@@ -2,10 +2,10 @@ using UnityEngine;
 
 public class biimTest : MonoBehaviour
 {
-    [Header("biimテスト")]
+    [Header("GameMessageManager(メッセージ表示スクリプト)")]
     [SerializeField] GameMessageManager gameMessageManager;
 
-    [Header("キャラデータ")]
+    [Header("キャラデータ(誰が喋るのか)")]
     [SerializeField] private GameMessageCharacter thisCharacter;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created

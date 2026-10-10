@@ -17,9 +17,10 @@ public class StatusRadar : Graphic
     public Color meterLineColor = new Color(1f, 0.2f, 0.05f, 1f);
     public float meterLineWidth = 3f;
 
-    [Header("プレビュー")]
-    public Color previewColor = new Color(1f, 0.85f, 0.1f, 1f);
+    [Header("予想チャート")]
+    public Color previewColor = new Color(1f, 0.85f, 0.1f, 0.3f);
     public float previewLineWidth = 3f;
+    public Color previewFillColor = new Color(1f, 0.85f, 0.1f, 0.12f);
 
     [Header("外枠")]
     public Color frameColor = Color.black;
@@ -40,6 +41,10 @@ public class StatusRadar : Graphic
 
     private bool initialized;
     private bool previewing;
+
+    
+
+    private float blinkAlpha = 1f;
 
     protected override void Start()
     {
@@ -85,6 +90,7 @@ public class StatusRadar : Graphic
 
         if (changed)
             SetVerticesDirty();
+
     }
 
     public void SetStatus(
@@ -173,10 +179,23 @@ public class StatusRadar : Graphic
 
         // プレビュー中は黄色い輪郭だけを上に重ねる
         // 現在値のオレンジ色の面は消さない
+        // 予想チャートを半透明で重ねる
         if (previewing)
         {
-            Vector2[] previewPoints = MakePoints(directions, radius, preview);
-            DrawPolygon(vh, previewPoints, previewColor, previewLineWidth);
+            Vector2[] previewPoints =
+                MakePoints(directions, radius, preview);
+
+            // 薄い黄色の面を重ねる
+            FillPolygon(vh, previewPoints, previewFillColor);
+            /*
+            // 薄い黄色の輪郭線を重ねる
+            DrawPolygon(
+                vh,
+                previewPoints,
+                previewColor,
+                previewLineWidth
+            );
+            */
         }
 
         // 外枠

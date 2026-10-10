@@ -2866,7 +2866,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuButtonSelectEffect
   scaleSelected: 1.15
   scaleNormal: 1
+  scaleDecided: 1.4
   lerpSpeed: 10
+  decideDuration: 0.2
   visualImage: {fileID: 7504781965599334141}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 1, g: 0, b: 0.18431377, a: 1}
@@ -2886,8 +2888,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 100.07141, y: -30.94104}
-  m_SizeDelta: {x: 500, y: 80}
+  m_AnchoredPosition: {x: 112.33, y: -30.94104}
+  m_SizeDelta: {x: -224.64, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &1793675946197673035
 PrefabInstance:
@@ -3162,8 +3164,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 100.07141, y: -27.41}
-  m_SizeDelta: {x: 500, y: -2.6192}
+  m_AnchoredPosition: {x: 112.33, y: -27.41}
+  m_SizeDelta: {x: -224.65, y: -2.6192}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3052073807219553976
 CanvasRenderer:

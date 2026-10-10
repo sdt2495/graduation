@@ -1706,7 +1706,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatusTrade
   statusRadar: {fileID: 153017747}
-  money: 1000
+  money: 100000
   moneyText: {fileID: 1490342395}
   buyPrice: 100
   sellPrice: 50

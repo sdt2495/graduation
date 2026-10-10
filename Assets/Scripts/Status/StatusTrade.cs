@@ -1,7 +1,9 @@
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using TMPro;
+using UnityEngine.Events;
 
 public class StatusTrade : MonoBehaviour
 {
@@ -41,49 +43,152 @@ public class StatusTrade : MonoBehaviour
             statusRadar.SetStatus(value, value, value, value, value, value);
         }
 
-        // Hierarchyのボタン名でクリック処理を登録
-        RegisterButton("HP Buy", () => BuyStatus("HP"));
-        RegisterButton("HP Sell", () => SellStatus("HP"));
+        RegisterButton("HP Buy", "HP", true);
+        RegisterButton("HP Sell", "HP", false);
 
-        RegisterButton("ATK Buy", () => BuyStatus("ATK"));
-        RegisterButton("ATK Sell", () => SellStatus("ATK"));
+        RegisterButton("ATK Buy", "ATK", true);
+        RegisterButton("ATK Sell", "ATK", false);
 
-        RegisterButton("DEF Buy", () => BuyStatus("DEF"));
-        RegisterButton("DEF Sell", () => SellStatus("DEF"));
+        RegisterButton("DEF Buy", "DEF", true);
+        RegisterButton("DEF Sell", "DEF", false);
 
-        RegisterButton("CRL Buy", () => BuyStatus("CRI"));
-        RegisterButton("CRL Sell", () => SellStatus("CRI"));
+        RegisterButton("CRL Buy", "CRI", true);
+        RegisterButton("CRL Sell", "CRI", false);
 
-        RegisterButton("SAN Buy", () => BuyStatus("Other"));
-        RegisterButton("SAN Sell", () => SellStatus("Other"));
+        RegisterButton("SAN Buy", "Other", true);
+        RegisterButton("SAN Sell", "Other", false);
 
-        RegisterButton("TEC Buy", () => BuyStatus("TEC"));
-        RegisterButton("TEC Sell", () => SellStatus("TEC"));
+        RegisterButton("TEC Buy", "TEC", true);
+        RegisterButton("TEC Sell", "TEC", false);
 
         UpdateUI();
-        ShowMessage("売買テストを開始できます！");
+        ShowMessage("ボタンにカーソルを乗せると結果を予測できます！");
     }
 
-    private void RegisterButton(string objectName, UnityEngine.Events.UnityAction action)
+    private void RegisterButton(
+        string objectName, string statusName, bool isBuy)
     {
-        GameObject buttonObject = GameObject.Find(objectName);
+        GameObject obj = GameObject.Find(objectName);
 
-        if (buttonObject == null)
+        if (obj == null)
         {
             Debug.LogWarning("ボタンが見つかりません: " + objectName);
             return;
         }
 
-        Button button = buttonObject.GetComponent<Button>();
+        Button button = obj.GetComponent<Button>();
 
         if (button == null)
         {
-            Debug.LogWarning(objectName + " にButtonコンポーネントがありません！");
+            Debug.LogWarning(objectName + " にButtonがありません！");
             return;
         }
 
-        button.onClick.AddListener(action);
+        // クリック時の処理
+        button.onClick.AddListener(() =>
+        {
+            statusRadar.ClearPreview();
+
+            if (isBuy)
+                BuyStatus(statusName);
+            else
+                SellStatus(statusName);
+        });
+
+        // マウスカーソルの出入りを取得
+        EventTrigger trigger = obj.GetComponent<EventTrigger>();
+
+        if (trigger == null)
+            trigger = obj.AddComponent<EventTrigger>();
+
+        AddPointerEvent(trigger, EventTriggerType.PointerEnter, () =>
+        {
+            PreviewStatus(statusName, isBuy);
+        });
+
+        AddPointerEvent(trigger, EventTriggerType.PointerExit, () =>
+        {
+            statusRadar.ClearPreview();
+        });
+
         Debug.Log(objectName + " の登録完了");
+    }
+
+    private void AddPointerEvent(
+        EventTrigger trigger,
+        EventTriggerType type,
+        UnityAction action)
+    {
+        EventTrigger.Entry entry = new EventTrigger.Entry();
+        entry.eventID = type;
+        entry.callback.AddListener((data) => action());
+
+        trigger.triggers.Add(entry);
+    }
+
+    private void PreviewStatus(string name, bool isBuy)
+    {
+        if (statusRadar == null) return;
+
+        float current = GetStatus(name);
+        float next = current;
+
+        if (isBuy)
+        {
+            if (money < buyPrice || current >= 100f || buyPrice <= 0)
+            {
+                ShowMessage("購入できません（所持金・上限を確認）");
+                return;
+            }
+
+            next = Mathf.Min(100f, current + tradeAmount);
+        }
+        else
+        {
+            if (current <= 0f || sellPrice <= 0)
+            {
+                ShowMessage("これ以上売却できません！");
+                return;
+            }
+
+            next = Mathf.Max(0f, current - tradeAmount);
+        }
+
+        ApplyPreview(name, next);
+
+        string action = isBuy ? "購入" : "売却";
+        int price = isBuy ? buyPrice : sellPrice;
+
+        ShowMessage(
+            name + "を" + action + "した場合\n" +
+            "ステータス：" + current.ToString("F0") +
+            " → " + next.ToString("F0") + "\n" +
+            "所持金：" + money.ToString("N0") +
+            (isBuy ? " → " + (money - price).ToString("N0") + " G"
+                   : " → " + ((long)money + price).ToString("N0") + " G")
+        );
+    }
+
+    private void ApplyPreview(string name, float value)
+    {
+        float hp = statusRadar.HP;
+        float atk = statusRadar.ATK;
+        float def = statusRadar.DEF;
+        float cri = statusRadar.CRI;
+        float tec = statusRadar.TEC;
+        float other = statusRadar.Other;
+
+        switch (name)
+        {
+            case "HP": hp = value; break;
+            case "ATK": atk = value; break;
+            case "DEF": def = value; break;
+            case "CRI": cri = value; break;
+            case "TEC": tec = value; break;
+            case "Other": other = value; break;
+        }
+
+        statusRadar.SetPreviewStatus(hp, atk, def, cri, tec, other);
     }
 
     private void BuyStatus(string name)
@@ -111,7 +216,6 @@ public class StatusTrade : MonoBehaviour
         }
 
         float amount = Mathf.Min(tradeAmount, 100f - current);
-
         money -= buyPrice;
         SetStatus(name, current + amount);
 
@@ -138,7 +242,6 @@ public class StatusTrade : MonoBehaviour
         }
 
         float amount = Mathf.Min(tradeAmount, current);
-
         money += sellPrice;
         SetStatus(name, current - amount);
 
@@ -187,7 +290,7 @@ public class StatusTrade : MonoBehaviour
     private void UpdateUI()
     {
         if (moneyText != null)
-            moneyText.text = "所持金：" + money + " G";
+            moneyText.text = "所持金：" + money.ToString("N0") + " G";
     }
 
     private void ShowMessage(string message)
@@ -198,6 +301,7 @@ public class StatusTrade : MonoBehaviour
         Debug.Log(message);
     }
 }
+
 
 
 

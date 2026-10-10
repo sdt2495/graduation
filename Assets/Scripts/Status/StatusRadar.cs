@@ -1,44 +1,132 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 
 public class StatusRadar : Graphic
 {
     [Header("ステータス（0～100）")]
-    [Range(0, 100)]
-    public float HP = 100;
+    [Range(0, 100)] public float HP = 50;
+    [Range(0, 100)] public float ATK = 50;
+    [Range(0, 100)] public float DEF = 50;
+    [Range(0, 100)] public float CRI = 50;
+    [Range(0, 100)] public float TEC = 50;
+    [Range(0, 100)] public float Other = 50;
 
-    [Range(0, 100)]
-    public float ATK = 100;
+    [Header("現在のステータス")]
+    public Color meterColor = new Color(1f, 0.3f, 0.1f, 0.4f);
+    public Color meterLineColor = new Color(1f, 0.2f, 0.05f, 1f);
+    public float meterLineWidth = 3f;
 
-    [Range(0, 100)]
-    public float DEF = 100;
-
-    [Range(0, 100)]
-    public float CRI = 100;
-
-    [Range(0, 100)]
-    public float TEC = 100;
-
-    [Range(0, 100)]
-    public float Other = 100;
-
-    [Header("メーター色")]
-    public Color meterColor = new Color(1f, 0.3f, 0.1f, 0.5f);
+    [Header("プレビュー")]
+    public Color previewColor = new Color(1f, 0.85f, 0.1f, 1f);
+    public float previewLineWidth = 3f;
 
     [Header("外枠")]
     public Color frameColor = Color.black;
+    public float lineWidth = 4f;
 
     [Header("補助線")]
-    public Color guideColor = new Color(0f, 0f, 0f, 0.3f);
+    public Color guideColor = new Color(0f, 0f, 0f, 0.2f);
+    public float guideWidth = 1.5f;
+    [Range(1, 5)] public int guideCount = 5;
 
-    [Header("線の太さ")]
-    public float lineWidth = 5f;
+    [Header("アニメーション")]
+    [Tooltip("大きいほど素早く変化します")]
+    public float animationSpeed = 4f;
 
-    [Header("補助線の太さ")]
-    public float guideWidth = 2f;
+    private float[] displayed = new float[6];
+    private float[] actual = new float[6];
+    private float[] preview = new float[6];
 
-    [Header("ゴールド")]
-    public float gold = 1000;
+    private bool initialized;
+    private bool previewing;
+
+    protected override void Start()
+    {
+        base.Start();
+
+        actual = GetActualValues();
+        displayed = (float[])actual.Clone();
+        preview = (float[])actual.Clone();
+
+        initialized = true;
+        SetVerticesDirty();
+    }
+
+    private float[] GetActualValues()
+    {
+        return new float[] { HP, ATK, DEF, Other, CRI, TEC };
+    }
+
+    private void Update()
+    {
+        if (!initialized) return;
+
+        // 現在値は実際のステータスだけを追いかける
+        bool changed = false;
+
+        for (int i = 0; i < 6; i++)
+        {
+            float next = Mathf.Lerp(
+                displayed[i],
+                actual[i],
+                Mathf.Clamp01(animationSpeed * Time.unscaledDeltaTime)
+            );
+
+            if (Mathf.Abs(next - actual[i]) < 0.05f)
+                next = actual[i];
+
+            if (!Mathf.Approximately(displayed[i], next))
+            {
+                displayed[i] = next;
+                changed = true;
+            }
+        }
+
+        if (changed)
+            SetVerticesDirty();
+    }
+
+    public void SetStatus(
+        float hp, float atk, float def,
+        float cri, float tec, float other)
+    {
+        HP = Mathf.Clamp(hp, 0f, 100f);
+        ATK = Mathf.Clamp(atk, 0f, 100f);
+        DEF = Mathf.Clamp(def, 0f, 100f);
+        CRI = Mathf.Clamp(cri, 0f, 100f);
+        TEC = Mathf.Clamp(tec, 0f, 100f);
+        Other = Mathf.Clamp(other, 0f, 100f);
+
+        actual = GetActualValues();
+        SetVerticesDirty();
+    }
+
+    public void SetPreviewStatus(
+        float hp, float atk, float def,
+        float cri, float tec, float other)
+    {
+        // プレビューは現在値と別の配列に保存
+        preview = new float[]
+        {
+            Mathf.Clamp(hp, 0f, 100f),
+            Mathf.Clamp(atk, 0f, 100f),
+            Mathf.Clamp(def, 0f, 100f),
+            Mathf.Clamp(other, 0f, 100f),
+            Mathf.Clamp(cri, 0f, 100f),
+            Mathf.Clamp(tec, 0f, 100f)
+        };
+
+        previewing = true;
+        SetVerticesDirty();
+    }
+
+    public void ClearPreview()
+    {
+        previewing = false;
+        SetVerticesDirty();
+    }
+
     protected override void OnPopulateMesh(VertexHelper vh)
     {
         vh.Clear();
@@ -47,10 +135,6 @@ public class StatusRadar : Graphic
             rectTransform.rect.width,
             rectTransform.rect.height
         ) * 0.45f;
-
-        // ========================================
-        // 六角形の方向
-        // ========================================
 
         Vector2[] directions = new Vector2[6];
 
@@ -64,235 +148,110 @@ public class StatusRadar : Graphic
             );
         }
 
-        // ========================================
-        // 最大値100の外側の六角形
-        // ========================================
+        Vector2[] frame = MakePoints(directions, radius, null);
 
-        Vector2[] framePoints = new Vector2[6];
-
-        for (int i = 0; i < 6; i++)
+        // 内側の六角形ガイド線
+        for (int level = 1; level <= guideCount; level++)
         {
-            framePoints[i] = directions[i] * radius;
+            float r = radius * level / guideCount;
+            Vector2[] guide = MakePoints(directions, r, null);
+
+            for (int i = 0; i < 6; i++)
+                DrawLine(vh, guide[i], guide[(i + 1) % 6],
+                    guideColor, guideWidth);
         }
 
-        // ========================================
-        // ステータス
-        // ========================================
+        // 中心からのガイド線
+        for (int i = 0; i < 6; i++)
+            DrawLine(vh, Vector2.zero, frame[i],
+                guideColor, guideWidth);
 
-        float[] values =
+        // 現在のステータス（オレンジ）を常に描く
+        Vector2[] currentPoints = MakePoints(directions, radius, displayed);
+        FillPolygon(vh, currentPoints, meterColor);
+        DrawPolygon(vh, currentPoints, meterLineColor, meterLineWidth);
+
+        // プレビュー中は黄色い輪郭だけを上に重ねる
+        // 現在値のオレンジ色の面は消さない
+        if (previewing)
         {
-            HP,
-            ATK,
-            DEF,
-            Other,
-            CRI,
-            TEC
-        };
+            Vector2[] previewPoints = MakePoints(directions, radius, preview);
+            DrawPolygon(vh, previewPoints, previewColor, previewLineWidth);
+        }
 
-        // ========================================
-        // 実際のステータス頂点
-        // ========================================
+        // 外枠
+        for (int i = 0; i < 6; i++)
+            DrawLine(vh, frame[i], frame[(i + 1) % 6],
+                frameColor, lineWidth);
+    }
 
+    private Vector2[] MakePoints(
+        Vector2[] directions, float radius, float[] values)
+    {
         Vector2[] points = new Vector2[6];
 
         for (int i = 0; i < 6; i++)
         {
-            float value = Mathf.Clamp01(values[i] / 100f);
+            float rate = values == null
+                ? 1f
+                : Mathf.Clamp01(values[i] / 100f);
 
-            points[i] =
-                directions[i] * radius * value;
+            points[i] = directions[i] * radius * rate;
         }
 
-        // ========================================
-        // ① 補助線
-        // ========================================
+        return points;
+    }
 
-        // 中心から各頂点へ線を引く
+    private void FillPolygon(
+        VertexHelper vh, Vector2[] points, Color color)
+    {
         for (int i = 0; i < 6; i++)
         {
-            DrawLine(
-                vh,
-                Vector2.zero,
-                framePoints[i],
-                guideColor,
-                guideWidth
-            );
-        }
-
-        // ========================================
-        // ② 外側の六角形の枠
-        // ========================================
-
-        for (int i = 0; i < 6; i++)
-        {
-            int next = (i + 1) % 6;
-
-            DrawLine(
-                vh,
-                framePoints[i],
-                framePoints[next],
-                frameColor,
-                lineWidth
-            );
-        }
-
-        // ========================================
-        // ③ メーター内部
-        // ========================================
-
-        // 0のステータスでも完全に消えないようにする
-        float minDisplayRadius = 4f;
-
-        // パラメーターの頂点を描画用に調整
-        Vector2[] displayPoints = new Vector2[6];
-
-        for (int i = 0; i < 6; i++)
-        {
-            // 元のポイント
-            Vector2 point = points[i];
-
-            // 0の場合だけ、中心から少しだけ離す
-            if (point.magnitude < 0.001f)
-            {
-                displayPoints[i] =
-                    directions[i] * minDisplayRadius;
-            }
-            else
-            {
-                displayPoints[i] = point;
-            }
-        }
-
-        // ========================================
-        // 六角形を塗りつぶす
-        // ========================================
-
-        for (int i = 0; i < 6; i++)
-        {
-            int next = (i + 1) % 6;
-
             int index = vh.currentVertCount;
 
-            AddVertex(
-                vh,
-                Vector2.zero,
-                meterColor
-            );
+            AddVertex(vh, Vector2.zero, color);
+            AddVertex(vh, points[i], color);
+            AddVertex(vh, points[(i + 1) % 6], color);
 
-            AddVertex(
-                vh,
-                displayPoints[i],
-                meterColor
-            );
-
-            AddVertex(
-                vh,
-                displayPoints[next],
-                meterColor
-            );
-
-            vh.AddTriangle(
-                index,
-                index + 1,
-                index + 2
-            );
+            vh.AddTriangle(index, index + 1, index + 2);
         }
     }
 
-    // ========================================
-    // 頂点追加
-    // ========================================
+    private void DrawPolygon(
+        VertexHelper vh, Vector2[] points, Color color, float width)
+    {
+        for (int i = 0; i < 6; i++)
+            DrawLine(vh, points[i], points[(i + 1) % 6], color, width);
+    }
 
     private void AddVertex(
-        VertexHelper vh,
-        Vector2 position,
-        Color color)
+        VertexHelper vh, Vector2 position, Color color)
     {
         UIVertex vertex = UIVertex.simpleVert;
-
         vertex.position = position;
         vertex.color = color;
-
         vh.AddVert(vertex);
     }
 
-    // ========================================
-    // 線を描く
-    // ========================================
-
     private void DrawLine(
-        VertexHelper vh,
-        Vector2 start,
-        Vector2 end,
-        Color color,
-        float width)
+        VertexHelper vh, Vector2 start, Vector2 end,
+        Color color, float width)
     {
-        Vector2 direction =
-            (end - start).normalized;
-
-        Vector2 normal =
-            new Vector2(-direction.y, direction.x)
+        Vector2 direction = (end - start).normalized;
+        Vector2 normal = new Vector2(-direction.y, direction.x)
             * width * 0.5f;
 
         int index = vh.currentVertCount;
 
-        AddVertex(
-            vh,
-            start + normal,
-            color
-        );
+        AddVertex(vh, start + normal, color);
+        AddVertex(vh, start - normal, color);
+        AddVertex(vh, end - normal, color);
+        AddVertex(vh, end + normal, color);
 
-        AddVertex(
-            vh,
-            start - normal,
-            color
-        );
-
-        AddVertex(
-            vh,
-            end - normal,
-            color
-        );
-
-        AddVertex(
-            vh,
-            end + normal,
-            color
-        );
-
-        vh.AddTriangle(
-            index,
-            index + 1,
-            index + 2
-        );
-
-        vh.AddTriangle(
-            index,
-            index + 2,
-            index + 3
-        );
-    }
-
-    // ========================================
-    // 外部からステータスを設定
-    // ========================================
-
-    public void SetStatus(
-    float hp,
-    float atk,
-    float def,
-    float cri,
-    float tec,
-    float other)
-    {
-        HP = hp;
-        ATK = atk;
-        DEF = def;
-        CRI = cri;
-        TEC = tec;
-        Other = other;
-
-        SetVerticesDirty();
+        vh.AddTriangle(index, index + 1, index + 2);
+        vh.AddTriangle(index, index + 2, index + 3);
     }
 }
+
+
 

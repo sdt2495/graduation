@@ -107,7 +107,7 @@ public class BattleManager : MonoBehaviour
     /// </summary>
     private void UpdateTimerText()
     {
-        timerText.text = Mathf.CeilToInt(reaminingTime).ToString();
+        timerText.text = reaminingTime.ToString("F2");
     }
 
     public void StartTimer()

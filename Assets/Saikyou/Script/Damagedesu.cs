@@ -23,8 +23,6 @@ public class Damagedesu : MonoBehaviour
         if (textComponent == null) return;
 
         textComponent.text = damage.ToString();
-        textComponent.color = Color.red;
-        textComponent.fontSize = 48;
         textComponent.enabled = true;
 
         timer = lifeTime;

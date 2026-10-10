@@ -707,7 +707,7 @@ MonoBehaviour:
   player: {fileID: 758857482}
   spawner: {fileID: 515253255}
   timerText: {fileID: 1469577525}
-  battleTimeLimit: 10
+  battleTimeLimit: 7.5
 --- !u!1 &515253252
 GameObject:
   m_ObjectHideFlags: 0
@@ -1607,6 +1607,7 @@ GameObject:
   - component: {fileID: 838218677}
   - component: {fileID: 838218681}
   - component: {fileID: 838218682}
+  - component: {fileID: 838218683}
   m_Layer: 5
   m_Name: UICanvas
   m_TagString: Untagged
@@ -1775,6 +1776,22 @@ MonoBehaviour:
   enemyDamageBar: {fileID: 250710735}
   hpBarDelay: 0.3
   hpBarDecreaseSpeed: 2
+--- !u!114 &838218683
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 838218676}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf00241d678fb3c47bf0c5931ea94ca9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCommandSlide
+  commandPanel: {fileID: 395582377}
+  slideDistance: 500
+  slideDuration: 0.5
+  slideEase: 3
 --- !u!1 &843311866
 GameObject:
   m_ObjectHideFlags: 0

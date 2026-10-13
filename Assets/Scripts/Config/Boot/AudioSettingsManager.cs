@@ -28,7 +28,7 @@ public class AudioSettingsManager : MonoBehaviour
     /// </summary>
     public float GetMasterVolume()
     {
-        return PlayerPrefs.GetFloat(MASTER_VOLUME_KEY, 1f);
+        return PlayerPrefs.GetFloat(MASTER_VOLUME_KEY, GameDefaultSettings.MasterVolume);
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public class AudioSettingsManager : MonoBehaviour
     /// </summary>
     public float GetBGMVolume()
     {
-        return PlayerPrefs.GetFloat(BGM_VOLUME_KEY, 1f);
+        return PlayerPrefs.GetFloat(BGM_VOLUME_KEY, GameDefaultSettings.BGMVolume);
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public class AudioSettingsManager : MonoBehaviour
     /// </summary>
     public float GetSystemSEVolume()
     {
-        return PlayerPrefs.GetFloat(SYSTEM_SE_VOLUME_KEY, 1f);
+        return PlayerPrefs.GetFloat(SYSTEM_SE_VOLUME_KEY, GameDefaultSettings.SystemSEVolume);
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ public class AudioSettingsManager : MonoBehaviour
     /// </summary>
     public float GetVoiceVolume()
     {
-        return PlayerPrefs.GetFloat(VOICE_VOLUME_KEY, 1f);
+        return PlayerPrefs.GetFloat(VOICE_VOLUME_KEY, GameDefaultSettings.VoiceVolume);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class AudioSettingsManager : MonoBehaviour
     /// </summary>
     public float GetSEVolume()
     {
-        return PlayerPrefs.GetFloat(SE_VOLUME_KEY, 1f);
+        return PlayerPrefs.GetFloat(SE_VOLUME_KEY, GameDefaultSettings.SEVolume);
     }
     #endregion
 
@@ -144,15 +144,15 @@ public class AudioSettingsManager : MonoBehaviour
     /// </summary>
     private void LoadVolume()
     {
-        SetVolume(MASTER_VOLUME_KEY, PlayerPrefs.GetFloat(MASTER_VOLUME_KEY, 1f));
+        SetVolume(MASTER_VOLUME_KEY, PlayerPrefs.GetFloat(MASTER_VOLUME_KEY, GameDefaultSettings.MasterVolume)); // マスター音量
 
-        SetVolume(BGM_VOLUME_KEY, PlayerPrefs.GetFloat(BGM_VOLUME_KEY, 1f));
+        SetVolume(BGM_VOLUME_KEY, PlayerPrefs.GetFloat(BGM_VOLUME_KEY, GameDefaultSettings.BGMVolume)); // BGM音量
 
-        SetVolume(SYSTEM_SE_VOLUME_KEY, PlayerPrefs.GetFloat(SYSTEM_SE_VOLUME_KEY, 1f));
+        SetVolume(SYSTEM_SE_VOLUME_KEY, PlayerPrefs.GetFloat(SYSTEM_SE_VOLUME_KEY, GameDefaultSettings.SEVolume)); // SE音量
 
-        SetVolume(VOICE_VOLUME_KEY, PlayerPrefs.GetFloat(VOICE_VOLUME_KEY, 1f));
+        SetVolume(VOICE_VOLUME_KEY, PlayerPrefs.GetFloat(VOICE_VOLUME_KEY, GameDefaultSettings.VoiceVolume)); // ボイス音量
 
-        SetVolume(SE_VOLUME_KEY, PlayerPrefs.GetFloat(SE_VOLUME_KEY, 1f));
+        SetVolume(SE_VOLUME_KEY, PlayerPrefs.GetFloat(SE_VOLUME_KEY, GameDefaultSettings.SEVolume)); // SE音量
     }
 
 

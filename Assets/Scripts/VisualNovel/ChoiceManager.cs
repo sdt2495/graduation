@@ -94,19 +94,34 @@ public class ChoiceManager : MonoBehaviour
         }
     }
 
+    #region 選択肢を選択
+    
+    /// <summary>
+    /// 選択肢１
+    /// </summary>
     private void OnClickChoice1()
     {
-        if (!string.IsNullOrEmpty(choice1ID))
-        {
-            OnChoiceSelected?.Invoke(choice1ID);
-        }
+        //if (!string.IsNullOrEmpty(choice1ID))
+        //{
+        //    OnChoiceSelected?.Invoke(choice1ID);
+        //}
+
+        // ジャンプ先IDが空でも、選択されたことを通知する
+        OnChoiceSelected?.Invoke(choice1ID ?? "");
     }
 
+    /// <summary>
+    /// 選択肢２
+    /// </summary>
     private void OnClickChoice2()
     {
-        if (!string.IsNullOrEmpty(choice2ID))
-        {
-            OnChoiceSelected?.Invoke(choice2ID);
-        }
+        //if (!string.IsNullOrEmpty(choice2ID))
+        //{
+        //    OnChoiceSelected?.Invoke(choice2ID);
+        //}
+
+        // ジャンプ先IDが空でも、選択されたことを通知する
+        OnChoiceSelected?.Invoke(choice2ID ?? "");
     }
+    #endregion
 }

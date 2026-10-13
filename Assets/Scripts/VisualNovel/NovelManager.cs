@@ -44,12 +44,18 @@ public class NovelManager : MonoBehaviour
     private const int COL_CHOICE2 = 22;          // 選択肢2テキスト
     private const int COL_CHOICE2_ID = 23;       // 選択肢2ジャンプID
     // ジャンプ
-    private const int COL_JUMP = 24;       // 選択肢2ジャンプID
+    private const int COL_JUMP = 24;             // 選択肢2ジャンプID
+    // カットイン (登場)
+    private const int COL_CUTIN_IMAGE = 25;          // カットイン画像
+    private const int COL_CUTIN_IN_SLIDE = 26;       // カットインスライド方向
+    private const int COL_CUTIN_IN_FADE = 27;        // カットインフェード
+    private const int COL_CUTIN_IN_TIME = 28;        // カットイン時間
+
     #endregion
 
     [Header("csvReader")]
     [SerializeField] private CSVReader csvReader;                            // CSVを読み込むスクリプト
-    // ★ テキスト ★
+    // ★ テキスト★
     [Header("TextTyper")]
     [SerializeField] private TextTyper textTyper;                            // 一文字ずつ表示するスクリプト
 
@@ -61,7 +67,7 @@ public class NovelManager : MonoBehaviour
     // ★キャラクター ★
     [Header("NovelCharacterManager")]
     [SerializeField] private NovelCharacterManager characterManager;         // 立ち絵を表示するスクリプト
-    // ★オーディオ ★
+    // ★オーディオ★
     [Header("NovelVoiceManager")]
     [SerializeField] private NovelVoiceManager voiceManager;                 // 音声を再生するスクリプト
 
@@ -73,7 +79,7 @@ public class NovelManager : MonoBehaviour
 
     [Header("NovelAmbientManager")]
     [SerializeField] private NovelAmbientManager ambientManager;             // 環境音を再生するスクリプト
-    // ★イメージ ★
+    // ★イメージ★
     [Header("NovelBackgroundManager")]
     [SerializeField] private NovelBackgroundManager backgroundManager;       // BGを表示するスクリプト
 
@@ -83,7 +89,10 @@ public class NovelManager : MonoBehaviour
     [Header("NovelScreenEffectManager")]
     [SerializeField] private NovelScreenEffectManager screenEffectManager;   // スクリーンエフェクトを表示するスクリプト
 
-    // ★選択肢 ★
+    [Header("NovelCutInManager")]
+    [SerializeField] private NovelCutInManager cutInManager;                 // カットインを表示するスクリプト
+
+    // ★選択肢★
     [Header("ChoiceManager")]
     [SerializeField] private ChoiceManager choiceManager;                    // 選択肢のスクリプト
 
@@ -97,6 +106,10 @@ public class NovelManager : MonoBehaviour
 
     [Header("ウィンドウの枠")]
     [SerializeField] private Image messageWindowImage;
+    [Space(5)]
+    [SerializeField] private Image leftTailImage;
+    [SerializeField] private Image rightTailImage;
+
     [SerializeField, Range(0f, 1f)] private float messageWindowAlpha = 0.7f;
 
     [Header("次へマーク")]
@@ -113,9 +126,6 @@ public class NovelManager : MonoBehaviour
     [SerializeField] private Color activeButtonColor = Color.green;
 
     [Header("──────────────────────────────")]
-    [Header("オートモード待機時間")]
-    [SerializeField] private float autoWaitTime = 1.5f;  // オートモード待機時間
-
     [Header("音声の終了を待つか？")]
     [SerializeField] private bool waitVoiceEnd = true;
     
@@ -139,7 +149,9 @@ public class NovelManager : MonoBehaviour
 
     private bool waitingVoice = false;       // 音声待ち
 
-    private bool isDisplayingLine = false;   //
+    private bool isDisplayingLine = false;   // 表示中の行数
+
+    private int choiceSourceLine = -1;       // 選択肢を表示した元のCSV行
 
 
     #region プロパティ
@@ -178,6 +190,11 @@ public class NovelManager : MonoBehaviour
     {
         // メッセージウィンドウ透明度設定
         SetMessageWindowAlpha();
+        // 設定変更イベント登録
+        if (TextSettingsManager.Instance != null)
+        {
+            TextSettingsManager.Instance.OnMessageWindowOpacityChanged += OnMessageWindowOpacityChanged;
+        }
 
         // イベント登録 (TextTyperの終了イベントを受け取る)
         textTyper.OnTypingFinished += OnTypingFinished;
@@ -197,9 +214,14 @@ public class NovelManager : MonoBehaviour
     void OnDestroy()
     {
         // イベント登録解除
-        textTyper.OnTypingFinished -= OnTypingFinished;
+        textTyper.OnTypingFinished -= OnTypingFinished; // 文字が表示し終わった
 
-        choiceManager.OnChoiceSelected -= OnChoiceSelected;
+        choiceManager.OnChoiceSelected -= OnChoiceSelected; // 選択肢を選んだ
+
+        if (TextSettingsManager.Instance != null)
+        {
+            TextSettingsManager.Instance.OnMessageWindowOpacityChanged -= OnMessageWindowOpacityChanged; // ウィンドウ不透明度
+        }
     }
 
     /// <summary>
@@ -251,18 +273,41 @@ public class NovelManager : MonoBehaviour
     /// </summary>
     public void OnChoiceSelected(string jumpID)
     {
-        // ジャンプ先のIDからCSV上の行番号を検索する
-        int line = FindLineByID(jumpID);
-
-        // 指定されたIDが見つからなければ処理を終了する
-        if (line == -1)
-            return;
-
-        // 表示中の選択肢を非表示にする
+        // 選択肢を非表示にする
         choiceManager.HideChoices();
 
-        // 次に表示する行をジャンプ先に変更する
-        currentLine = line;
+        int nextLine = -1;
+
+        // 優先順位1：選択された選択肢のジャンプ先ID
+        if (!string.IsNullOrEmpty(jumpID))
+        {
+            nextLine = FindLineByID(jumpID);
+        }
+
+        // 優先順位2：選択肢のジャンプ先がない場合、Jump列を確認
+        if (nextLine == -1 && choiceSourceLine >= 1)
+        {
+            string[] sourceLine = csvReader.GetLine(choiceSourceLine);
+
+            if (sourceLine != null &&
+                sourceLine.Length > COL_JUMP &&
+                !string.IsNullOrEmpty(sourceLine[COL_JUMP]))
+            {
+                nextLine = FindLineByID(sourceLine[COL_JUMP]);
+            }
+        }
+
+        // 優先順位3：どちらにも有効なジャンプ先がなければ次の行へ
+        if (nextLine == -1)
+        {
+            nextLine = choiceSourceLine + 1;
+        }
+
+        // ジャンプ先を設定
+        currentLine = nextLine;
+
+        // 元の行番号をリセット
+        choiceSourceLine = -1;
 
         // ジャンプ先の行からシナリオを再開する
         AdvanceMessage();
@@ -590,6 +635,9 @@ public class NovelManager : MonoBehaviour
             yield return characterManager.UpdateCharacters(line[COL_LEFT], line[COL_RIGHT], line[COL_ACTIVE]);
         }
 
+        // カットイン表示・退場
+        yield return ShowCutInFromCSV(line);
+
         // CG演出時間を取得 (スキップ中でも、もともとInstantならInstantのまま)
         float? cgTime = GetTransitionTime(line[COL_CG_TIME], cgTransition);
         // CG表示
@@ -695,28 +743,122 @@ public class NovelManager : MonoBehaviour
             backLogManager.AddLog(line[COL_SPEAKER], message, line[COL_VOICE]);
         }
 
-        // 次の行へ
-        currentLine++;
 
-        // 演出処理終了
-        isDisplayingLine = false;
 
-        // セリフがない行でも、選択肢があれば表示する
-        bool hasChoice = !string.IsNullOrEmpty(line[COL_CHOICE1]) || !string.IsNullOrEmpty(line[COL_CHOICE2]);
+        // 選択肢があるか確認
+        bool hasChoice =
+            !string.IsNullOrEmpty(line[COL_CHOICE1]) ||
+            !string.IsNullOrEmpty(line[COL_CHOICE2]);
 
-        // 選択肢あり
+        // 選択肢がある場合
         if (hasChoice)
         {
-            // 選択肢
+            // 選択肢を表示した元の行を記録
+            choiceSourceLine = currentLine;
+
+            // 選択肢を表示する
+            // ジャンプ先の決定は選択時に行う
+            isDisplayingLine = false;
             ShowChoices(line);
         }
-        else if (!hasMessage)
+        else
         {
+            // 選択肢がない場合はJump列を確認
+            if (!string.IsNullOrEmpty(line[COL_JUMP]))
+            {
+                int jumpLine = FindLineByID(line[COL_JUMP]);
+                
+                if (jumpLine != -1)
+                {
+                    currentLine = jumpLine;
+                }
+                else
+                {
+                    currentLine++;
+                }
+            }
+            else
+            {
+                // ジャンプ先がなければ1行進む
+                currentLine++;
+            }
+
+            // 演出処理終了
+            isDisplayingLine = false;
+
             // セリフも選択肢もない行なら自動的に次の行へ
-            AdvanceMessage();
+            if (!hasMessage)
+            {
+                AdvanceMessage();
+            }
         }
     }
     #endregion
+
+
+    #region カットイン
+
+    /// <summary>
+    /// CSVの設定に従ってカットインを登場・退場させる
+    /// </summary>
+    IEnumerator ShowCutInFromCSV(string[] line)
+    {
+        if (cutInManager == null)
+            yield break;
+
+        // カットイン画像名を取得
+        string imageName = line[COL_CUTIN_IMAGE];
+
+        // HIDEなら退場処理
+        if (imageName == "HIDE")
+        {
+            // 登場用の列を退場設定として読み込む
+
+            // 退場スライド方向
+            if (!System.Enum.TryParse(line[COL_CUTIN_IN_SLIDE], true, out NovelCutInManager.SlideDirection outDirection)) 
+            {
+                outDirection = NovelCutInManager.SlideDirection.NONE;
+            }
+
+            // 退場フェード
+            bool useFadeOut = bool.TryParse(line[COL_CUTIN_IN_FADE], out bool fadeOut) && fadeOut;
+            // 退場時間
+            float.TryParse(line[COL_CUTIN_IN_TIME], out float outTime);
+            // カットイン退場
+            cutInManager.HideCutIn(outDirection, useFadeOut, outTime);
+
+            if (outTime > 0f)
+            {
+                yield return new WaitForSeconds(outTime);
+            }
+            yield break;
+        }
+
+        // 画像名が空欄なら何もしない
+        if (string.IsNullOrEmpty(imageName))
+            yield break;
+
+        // 登場スライド方向
+        if (!System.Enum.TryParse(line[COL_CUTIN_IN_SLIDE], true, out NovelCutInManager.SlideDirection inDirection))
+        {
+            inDirection = NovelCutInManager.SlideDirection.NONE;
+        }
+        // 登場フェード
+        bool useFadeIn = bool.TryParse(line[COL_CUTIN_IN_FADE], out bool fadeIn) && fadeIn;
+        // 登場時間
+        float.TryParse(line[COL_CUTIN_IN_TIME], out float inTime);
+
+        // カットイン登場
+        cutInManager.ShowCutIn(imageName,inDirection, useFadeIn, inTime);
+
+        // アニメーション終了まで待機
+        if (inTime > 0f)
+        {
+            yield return new WaitForSeconds(inTime);
+        }
+    }
+    #endregion
+
 
 
     #region 演出時間を取得する
@@ -1030,16 +1172,49 @@ public class NovelManager : MonoBehaviour
 
 
     /// <summary>
-    /// メッセージウィンドウ(枠のみ)の透明度設定
+    /// メッセージウィンドウの透明度設定
     /// </summary>
     void SetMessageWindowAlpha()
     {
-        if (messageWindowImage == null)
+        // 設定から不透明度を取得
+        if (TextSettingsManager.Instance != null)
+        {
+            messageWindowAlpha = TextSettingsManager.Instance.GetMessageWindowOpacity();
+        }
+
+        // メッセージウィンドウ背景の透明度
+        SetImageAlpha(messageWindowImage);
+
+        // 左右のしっぽの透明度
+        SetImageAlpha(leftTailImage);
+        SetImageAlpha(rightTailImage);
+    }
+
+
+    /// <summary>
+    /// Imageの透明度を設定
+    /// </summary>
+    void SetImageAlpha(Image image)
+    {
+        if (image == null)
             return;
 
-        Color color = messageWindowImage.color;
+        Color color = image.color;
         color.a = messageWindowAlpha;
-        messageWindowImage.color = color;
+        image.color = color;
+    }
+
+
+    /// <summary>
+    /// 設定変更時に透明度を更新
+    /// </summary>
+    void OnMessageWindowOpacityChanged(float opacity)
+    {
+        messageWindowAlpha = Mathf.Clamp01(opacity);
+        // ウィンドウと一緒に吹き出し口にも反映
+        SetImageAlpha(messageWindowImage);
+        SetImageAlpha(leftTailImage);
+        SetImageAlpha(rightTailImage);
     }
     #endregion
 

@@ -63,7 +63,7 @@ public class TextTyper : MonoBehaviour
     [SerializeField] private bool shaky = true;
 
     [Tooltip("上下左右に動く最大幅")][SerializeField] private float shakyAmplitude = 3f;
-    [Tooltip("揺れが変化する速さ")][SerializeField] private float shakySpeed = 20f;
+    [Tooltip("揺れが変化する速さ")][SerializeField] private float shakySpeed = 20f;　// ←使ってない？
 
 
 

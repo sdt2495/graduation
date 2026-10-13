@@ -15,6 +15,11 @@ public class NovelCharacterManager : MonoBehaviour
     [SerializeField] private Image rightImage;
     [SerializeField] private Animator rightAnimator;
 
+    [Space(5)]
+    [Header("Message Balloon Tails")]
+    [SerializeField] private Image leftTail;
+    [SerializeField] private Image rightTail;
+
 
     // 左右2つの立ち絵表示場所
     private CharacterSlot leftSlot;
@@ -22,10 +27,13 @@ public class NovelCharacterManager : MonoBehaviour
 
     private void Awake()
     {
-        // 左の立ち絵スロットを作成
+        // 左右の立ち絵スロットを作成
         leftSlot = new CharacterSlot(leftImage, leftAnimator);
-        // 右の立ち絵スロットを作成
         rightSlot = new CharacterSlot(rightImage, rightAnimator);
+
+        // 初期状態ではしっぽを非表示
+        leftTail.gameObject.SetActive(false);
+        rightTail.gameObject.SetActive(false);
     }
 
 
@@ -50,26 +58,43 @@ public class NovelCharacterManager : MonoBehaviour
         switch (active.ToUpper())
         {
             case "LEFT":
+                // 立ち絵
                 leftSlot.SetActive(true);
                 rightSlot.SetActive(false);
+                // 吹き出しの口
+                leftTail.gameObject.SetActive(true);
+                rightTail.gameObject.SetActive(false);
                 break;
 
             case "RIGHT":
+                // 立ち絵
                 leftSlot.SetActive(false);
                 rightSlot.SetActive(true);
+                // 吹き出しの口
+                leftTail.gameObject.SetActive(false);
+                rightTail.gameObject.SetActive(true);
                 break;
 
             case "BOTH":
+                // 立ち絵
                 leftSlot.SetActive(true);
                 rightSlot.SetActive(true);
+                // 吹き出しの口
+                leftTail.gameObject.SetActive(true);
+                rightTail.gameObject.SetActive(true);
                 break;
 
             case "NONE":
+                // 立ち絵
                 leftSlot.SetActive(false);
                 rightSlot.SetActive(false);
+                // 吹き出しの口
+                leftTail.gameObject.SetActive(false);
+                rightTail.gameObject.SetActive(false);
                 break;
 
             case "":
+                // 空欄なら現在の状態を維持
                 break;
 
             default:

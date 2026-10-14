@@ -574,8 +574,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHPkari
   hp: 10000
+  criticalChance: 83.5
+  criticalMultiplier: 2
   damageTextPrefab: {fileID: 5433104768944249112, guid: 9e398037447d0e648b6717eb41c642ca, type: 3}
   damagePoint: {fileID: 1704022580}
+  targetCanvas: {fileID: 65567288}
 --- !u!1 &1791983210
 GameObject:
   m_ObjectHideFlags: 0

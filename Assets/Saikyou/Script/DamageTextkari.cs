@@ -1,29 +1,60 @@
+
 using UnityEngine;
 using TMPro;
+using System.Collections;
 
 public class DamageTextkari : MonoBehaviour
 {
-    public TMP_Text text;
+    public TextMeshProUGUI text;
 
-    void Awake()
+    [Header("à⁄ìÆê›íË")]
+    public float moveDuration = 0.6f;
+    public float moveDistanceX = 40f;
+    public float moveHeight = 80f;
+
+    private Vector2 startPosition;
+    private Color startColor;
+
+    public void ShowDamage(int damage, bool isCritical)
     {
-        if (text == null)
+        text.text = damage.ToString();
+
+        if (isCritical)
         {
-            text = GetComponentInChildren<TMP_Text>(true);
+            text.color = Color.yellow;
         }
+
+        startColor = text.color;
+
+        RectTransform rect = GetComponent<RectTransform>();
+        startPosition = rect.anchoredPosition;
+
+        StartCoroutine(AnimateDamageText(rect));
     }
 
-    public void ShowDamage(int damage)
+    private IEnumerator AnimateDamageText(RectTransform rect)
     {
-        if (text == null)
+        float timer = 0f;
+
+        while (timer < moveDuration)
         {
-            Debug.LogError("TextMeshProÇ™ê›íËÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒ");
-            return;
+            timer += Time.deltaTime;
+
+            float t = Mathf.Clamp01(timer / moveDuration);
+
+            float x = moveDistanceX * t;
+            float y = moveHeight * 4f * t * (1f - t);
+
+            rect.anchoredPosition =
+                startPosition + new Vector2(x, y);
+
+            Color color = startColor;
+            color.a = 1f - t;
+            text.color = color;
+
+            yield return null;
         }
 
-        text.text = damage.ToString();
-        text.color = Color.red;
-
-        Destroy(gameObject, 1f);
+        Destroy(gameObject);
     }
 }

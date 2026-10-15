@@ -154,3 +154,6 @@ MonoBehaviour:
   moveDuration: 0.6
   moveDistanceX: -20
   moveHeight: 80
+  baseFontSize: 60
+  fontSizePerDamage: 2
+  maxFontSize: 80

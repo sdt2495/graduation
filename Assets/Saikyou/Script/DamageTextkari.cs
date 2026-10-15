@@ -15,6 +15,11 @@ public class DamageTextkari : MonoBehaviour
     private Vector2 startPosition;
     private Color startColor;
 
+    [Header("数字の大きさ")]
+    public float baseFontSize = 30f;  //　基本の文字サイズ
+    public float fontSizePerDamage = 2f;  //　ダメージに応じて増えるサイズ
+    public float maxFontSize = 80f;  //　最大サイズ
+
     public void ShowDamage(int damage, bool isCritical)
     {
         text.text = damage.ToString();
@@ -23,6 +28,8 @@ public class DamageTextkari : MonoBehaviour
         {
             text.color = Color.yellow;
         }
+
+        text.fontSize = Mathf.Min(baseFontSize + damage *  fontSizePerDamage, maxFontSize);
 
         startColor = text.color;
 

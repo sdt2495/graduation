@@ -26,6 +26,9 @@ public class MenuButtonSelectEffect : MonoBehaviour,
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color selectedColor = Color.cyan;
 
+    [SerializeField] private bool openConfigAfterEffect = false;
+    [SerializeField] private TitleManager titleManager;
+
     private Vector3 targetScale;
     private bool isDecided = false;
     private bool isHovered = false;
@@ -118,18 +121,32 @@ public class MenuButtonSelectEffect : MonoBehaviour,
         if (isDecided) return;
 
         isDecided = true;
-        DecideEffect();
+
+        if (openConfigAfterEffect)
+        {
+            DecideEffect(() =>
+            {
+                if (titleManager != null)
+                {
+                    titleManager.OpenConfigAfterEffect();
+                }
+            });
+        }
+        else
+        {
+            DecideEffect();
+        }
     }
 
-    public void DecideEffect()
+    public void DecideEffect(System.Action onComplete = null)
     {
         if (decideCoroutine != null)
             StopCoroutine(decideCoroutine);
 
-        decideCoroutine = StartCoroutine(PlayDecideEffect());
+        decideCoroutine = StartCoroutine(PlayDecideEffect(onComplete));
     }
 
-    private IEnumerator PlayDecideEffect()
+  private IEnumerator PlayDecideEffect(System.Action onComplete)
     {
         Vector3 startScale = transform.localScale;
         Quaternion startRotation = transform.localRotation;
@@ -184,6 +201,8 @@ public class MenuButtonSelectEffect : MonoBehaviour,
 
         transform.localScale = Vector3.one * scaleNormal;
         transform.localRotation = Quaternion.identity;
+
+        onComplete?.Invoke();
 
         decideCoroutine = null;
     }

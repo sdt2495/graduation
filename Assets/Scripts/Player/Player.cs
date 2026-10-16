@@ -139,6 +139,10 @@ public class Player : MonoBehaviour
         isCommandAnimation = false;
     }
 
+    /// <summary>
+    /// “ü—Í‚ğƒ~ƒX‚µ‚½‚Ìˆ—
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator MissCommand()
     {
         isCommandAnimation = true;

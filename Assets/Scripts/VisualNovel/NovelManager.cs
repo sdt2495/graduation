@@ -164,14 +164,16 @@ public class NovelManager : MonoBehaviour
 
     #region イベント
 
-    public event System.Action OnConversationFinished;    // 会話終了時に呼び出されるイベント
+    // コールバック = 「今回この会話を呼び出した人に、会話が終わったら次の処理をしてもらう」
+    private System.Action conversationFinishedCallback;
+
     #endregion
 
     #region 指定したCSVで会話を開始する
     /// <summary>
     /// 指定したCSVで会話を開始する
     /// </summary>
-    public void StartConversation(string csvName)
+    public void StartConversation(string csvName, System.Action onFinished)
     {
         // すでに会話中なら開始しない
         if (isConversationActive)
@@ -179,7 +181,6 @@ public class NovelManager : MonoBehaviour
 
         // CSVを読み込む
         csvReader.LoadCSV(csvName);
-
         // CSVが正常に読み込めなかった場合
         if (csvReader.GetCount() <= 1)
         {
@@ -190,18 +191,19 @@ public class NovelManager : MonoBehaviour
         // 会話中にする
         isConversationActive = true;
 
+        // 会話終了後に実行する処理を保存
+        conversationFinishedCallback = onFinished;
+
         // vnContentsを表示
         vnContents.SetActive(true);
 
-        // 最初の行
+        // 最初の行(0を飛ばす)
         currentLine = 1;
-
         // 選択肢の状態をリセット
         choiceSourceLine = -1;
 
         // メッセージウィンドウを表示
         SetMessageWindow(true);
-
         // 次へマーク更新
         UpdateNextMark();
 
@@ -209,6 +211,7 @@ public class NovelManager : MonoBehaviour
         AdvanceMessage();
     }
     #endregion
+
 
     #region 会話を終了する
 
@@ -240,8 +243,11 @@ public class NovelManager : MonoBehaviour
         // vnContentsを非表示
         vnContents.SetActive(false);
 
-        // メインゲーム側へ会話終了を通知
-        OnConversationFinished?.Invoke();
+
+        // 会話終了後の処理
+        conversationFinishedCallback?.Invoke();
+        // 処理を使い終わったら消す
+        conversationFinishedCallback = null;
     }
     #endregion
 

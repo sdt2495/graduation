@@ -216,7 +216,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -224,7 +224,7 @@ PrefabInstance:
       objectReference: {fileID: 1461610721}
     - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnClickConfigButton
+      value: OnClickLoadStringSneceButton
       objectReference: {fileID: 0}
     - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument
@@ -311,8 +311,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1465451792310651660, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
+      propertyPath: titleManager
+      value: 
+      objectReference: {fileID: 1461610721}
+    - target: {fileID: 1465451792310651660, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: decideDuration
       value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1465451792310651660, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
+      propertyPath: openConfigAfterEffect
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1607453525406379957, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: m_SizeDelta.x

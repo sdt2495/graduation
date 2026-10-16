@@ -468,42 +468,69 @@ public class VerticalGauge : MonoBehaviour
     // 停止・判定
     // ==================================================
 
+
     /// <summary>
-    /// ゲージを停止し、目標位置と比較して成功・失敗を判定する
+    /// ゲージを停止し、マーク画像の範囲内に入っているか判定する
+    /// </summary>
+
+    /// <summary>
+    /// ゲージを停止し、マーク画像の大きさだけで成功判定する
     /// </summary>
     private void StopGauge()
     {
+        // ゲージを停止して判定済みにする
         isStopped = true;
         HasJudged = true;
 
-        // ゲージ値を画面上の高さに変換する
+        // ゲージとマークのRectTransformを取得
+        RectTransform gaugeRect = gaugeImage.rectTransform;
+        RectTransform markRect = targetMark.rectTransform;
+
+        // ゲージ先端の位置をゲージ領域のローカル座標で取得
         float gaugeY =
             (currentValue / maxValue) * gaugeArea.rect.height;
 
-        // 目標値を画面上の高さに変換する
-        float targetY =
-            (targetValue / maxValue) * gaugeArea.rect.height;
+        // ゲージ先端の位置をワールド座標に変換
+        Vector3 gaugeTipWorldPosition = gaugeArea.TransformPoint(
+            new Vector3(
+                0f,
+                gaugeY - gaugeArea.rect.height * gaugeArea.pivot.y,
+                0f
+            )
+        );
 
-        // 画面上の距離が許容範囲内なら成功
-        float distance = Mathf.Abs(gaugeY - targetY);
+        // ゲージ先端をマーク画像のローカル座標に変換
+        Vector3 gaugeTipLocalPosition =
+            markRect.InverseTransformPoint(gaugeTipWorldPosition);
 
-        IsSuccess = distance <= matchTolerancePixels;
+        // マーク画像そのものの矩形範囲を取得
+        Rect markRectArea = markRect.rect;
+
+        // ゲージ先端がマーク画像の矩形内にある場合だけ成功
+        IsSuccess = markRectArea.Contains(
+            new Vector2(
+                gaugeTipLocalPosition.x,
+                gaugeTipLocalPosition.y
+            )
+        );
 
         if (IsSuccess)
         {
-            Debug.Log("成功！ 目標位置に一致しました。");
+            Debug.Log("【クリア判定】ミニゲームクリア！", this);
         }
         else
         {
-            Debug.Log(
-                "失敗！ 目標位置との差：" +
-                distance.ToString(DISTANCE_FORMAT) + " px");
+            Debug.Log("【失敗判定】マーク画像の範囲外です。", this);
         }
 
         Debug.Log(
-            "現在値：" + currentValue +
-            " / 目標値：" + targetValue);
+            "ゲージ先端位置：" + gaugeTipLocalPosition +
+            " / マーク画像範囲：" + markRectArea,
+            this
+        );
     }
+
+
 
     // ==================================================
     // 再開・リセット
@@ -555,5 +582,30 @@ public class VerticalGauge : MonoBehaviour
     public float GetTargetValue()
     {
         return targetValue;
+    }
+
+
+    //メインプログラムからミニゲームを開始する
+ 
+    public void StartMiniGame()
+    {
+        //初期化
+        ResetGauge();
+    }
+
+    //判定が終わっていればtrueを返す
+
+    public bool TryGetResult(out bool success)
+    {
+        success = IsSuccess;
+        return HasJudged;
+    }
+
+
+    //終了
+
+    public void EndMiniGame()
+    {
+        isStopped = true;
     }
 }

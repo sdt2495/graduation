@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.Events;
 
 /// <summary>
 /// 円形のタイミングミニゲームを管理するクラス。
@@ -724,4 +725,72 @@ public class TimingMiniGame : MonoBehaviour
     {
         return targetStartAngle;
     }
+
+    //メインプログラムからTimingMiniGameを呼び出すための管理クラス。
+
+    public class TimingMiniGameCaller : MonoBehaviour
+    {
+        [Header("呼び出すミニゲーム")]
+        [SerializeField]
+        private TimingMiniGame timingMiniGame;
+
+        [Header("結果通知")]
+        [Tooltip("ミニゲーム成功時に呼び出す処理")]
+        [SerializeField]
+        private UnityEvent onClear;
+
+        [Tooltip("ミニゲーム失敗時に呼び出す処理")]
+        [SerializeField]
+        private UnityEvent onMiss;
+
+        private bool waitingForResult;
+
+
+        private bool resultNotified;
+
+        //呼び出し
+        public void StartTimingMiniGame()
+        {
+            if (timingMiniGame == null)
+            {
+                Debug.LogError("TimingMiniGameが設定されていません。");
+                return;
+            }
+
+            //初期化
+            waitingForResult = true;
+            resultNotified = false;
+
+            timingMiniGame.StartMiniGame();
+        }
+
+        private void Update()
+        {
+            //開始していない、または結果通知済みなら何もしない
+            if (!waitingForResult || resultNotified)
+            {
+                return;
+            }
+
+            //ミニゲームが終了していなければ待つ
+            if (!timingMiniGame.IsFinished())
+            {
+                return;
+            }
+
+            //結果通知
+            resultNotified = true;
+            waitingForResult = false;
+
+            if (timingMiniGame.IsClear())
+            {
+                onClear?.Invoke();
+            }
+            else if (timingMiniGame.IsMiss())
+            {
+                onMiss?.Invoke();
+            }
+        }
+    }
+    //呼び出しプログラム　timingMiniGameCaller.StartTimingMiniGame();
 }

@@ -421,11 +421,17 @@ MonoBehaviour:
   TEC: 40
   Other: 40
   meterColor: {r: 1, g: 0.0298337, b: 0, a: 0.5}
+  meterLineColor: {r: 1, g: 0.2, b: 0.05, a: 1}
+  meterLineWidth: 3
+  previewColor: {r: 1, g: 0.85, b: 0.1, a: 0.3}
+  previewLineWidth: 3
+  previewFillColor: {r: 1, g: 0.85, b: 0.1, a: 0.12}
   frameColor: {r: 0, g: 0, b: 0, a: 1}
-  guideColor: {r: 0, g: 0, b: 0, a: 0.3}
   lineWidth: 5
+  guideColor: {r: 0, g: 0, b: 0, a: 0.3}
   guideWidth: 3
-  gold: 1000
+  guideCount: 5
+  animationSpeed: 4
 --- !u!222 &153017748
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1713,7 +1719,7 @@ MonoBehaviour:
   tradeAmount: 10
   messageText: {fileID: 0}
   initializeTestStats: 1
-  initialStatValue: 50.6
+  initialStatValue: 36.9
 --- !u!4 &873274009
 Transform:
   m_ObjectHideFlags: 0

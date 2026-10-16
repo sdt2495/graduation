@@ -1,6 +1,4 @@
-using NUnit.Framework;
 using System.Collections.Generic;
-using TMPro.EditorUtilities;
 using UnityEngine;
 
 public enum CommandType
@@ -30,6 +28,19 @@ public class Enemy : MonoBehaviour
     [Header("HP")]
     [SerializeField] private int maxHP = 10;
 
+    [Header("ダメージ表示")]
+
+    public GameObject damageTextPrefab;
+
+    public Transform damagePoint;
+
+    public Canvas targetCanvas;
+
+    [Header("クリティカル設定")]
+    [Range(0, 100)]
+    public float criticalChance = 20f;
+    public float criticalMultiplier = 1.2f;
+
     private int currentHP;
 
     private void Awake()
@@ -43,11 +54,52 @@ public class Enemy : MonoBehaviour
 
     public void Damage(int damage)
     {
+        // クリティカル判定（敵側で実行）
+        bool isCritical = Random.Range(0f, 100f) < criticalChance;
+
+        if (isCritical)
+        {
+            damage = Mathf.RoundToInt(damage * criticalMultiplier);
+        }
+
         currentHP -= damage;
 
         if(currentHP < 0)
         {
             currentHP = 0;
+        }
+
+        // ダメージ表示
+        if (damageTextPrefab != null && damagePoint != null && targetCanvas != null)
+        {
+            GameObject obj = Instantiate(
+                damageTextPrefab,
+                targetCanvas.transform,
+                false
+            );
+
+            RectTransform rect = obj.GetComponent<RectTransform>();
+
+            Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(
+                null,
+                damagePoint.position
+            );
+
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                targetCanvas.GetComponent<RectTransform>(),
+                screenPos,
+                null,
+                out Vector2 localPos
+            );
+
+            rect.anchoredPosition = localPos;
+
+            DamageTextkari damageText = obj.GetComponent<DamageTextkari>();
+
+            if (damageText != null)
+            {
+                damageText.ShowDamage(damage, isCritical);
+            }
         }
     }
 
@@ -85,6 +137,14 @@ public class Enemy : MonoBehaviour
         currentIndex++;
 
         return CheckResult.Miss;
+    }
+
+    /// <summary>
+    /// ダメージポップアップ用キャンバス
+    /// </summary>
+    public void SetDamageCanvas(Canvas canvas)
+    {
+        targetCanvas = canvas;
     }
 
     public void SetRandomCommands()

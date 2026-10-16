@@ -156,4 +156,4 @@ MonoBehaviour:
   moveHeight: 80
   baseFontSize: 60
   fontSizePerDamage: 2
-  maxFontSize: 100000
+  maxFontSize: 1e+9

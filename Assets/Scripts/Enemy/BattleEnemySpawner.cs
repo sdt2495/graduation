@@ -9,6 +9,8 @@ public class BattleEnemySpawner : MonoBehaviour
 
     [SerializeField] private HPManager hpManager;
 
+    [SerializeField] private Canvas canvas;
+
     private Enemy battleEnemy;
 
     private void Start()
@@ -19,6 +21,9 @@ public class BattleEnemySpawner : MonoBehaviour
     private void SpawnEnemy()
     {
         battleEnemy = Instantiate(enemyPrefab, battlePoint.position, Quaternion.identity);
+
+        // ダメージポップアップの表示先を設定
+        battleEnemy.SetDamageCanvas(canvas);
 
         hpManager.SetEnemy(battleEnemy);
 

@@ -805,10 +805,10 @@ MonoBehaviour:
   maxValue: 100
   currentValue: 0
   difficultySpeeds:
+  - 50
   - 100
   - 200
   - 300
-  - 700
   initialDifficultyIndex: 2
   matchTolerancePixels: 0.5
 --- !u!1 &2137210557

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Collections;
 
 public enum CommandType
 {
@@ -43,6 +44,12 @@ public class Enemy : MonoBehaviour
 
     private int currentHP;
 
+    [Header("ダメージフラッシュ")]
+    [SerializeField] private SpriteRenderer spriteRenderer;
+    [SerializeField] private float flashDuration = 0.1f;
+
+    private Coroutine coroutine;
+
     private void Awake()
     {
         currentHP = maxHP;
@@ -68,6 +75,14 @@ public class Enemy : MonoBehaviour
         {
             currentHP = 0;
         }
+
+        // 白くフラッシュ
+        if(coroutine != null)
+        {
+            StopCoroutine(coroutine);
+        }
+
+        coroutine = StartCoroutine(FlashWhite());
 
         // ダメージ表示
         if (damageTextPrefab != null && damagePoint != null && targetCanvas != null)
@@ -101,6 +116,17 @@ public class Enemy : MonoBehaviour
                 damageText.ShowDamage(damage, isCritical);
             }
         }
+    }
+
+    private IEnumerator FlashWhite()
+    {
+        Color originalColor = spriteRenderer.color;
+
+        spriteRenderer.color = Color.white;
+
+        yield return new WaitForSeconds(flashDuration);
+
+        spriteRenderer.color = originalColor;
     }
 
     public void ResetCommand()

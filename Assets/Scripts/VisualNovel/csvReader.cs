@@ -9,17 +9,7 @@ public class CSVReader : MonoBehaviour
 {
     private List<string[]> csvData = new List<string[]>(); // CSVファイルの中身(string)を入れるリスト
 
-    #region Start()
 
-    /// <summary>
-    /// ファイルの読み込みを行う
-    /// </summary>
-    void Start()
-    {
-        // 最初に読み込むCSV
-        LoadCSV("Sample");
-    }
-    #endregion
 
 
     #region CSVを読み込む

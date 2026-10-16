@@ -98,6 +98,9 @@ public class NovelManager : MonoBehaviour
 
 
     [Header("──────────────────────────────")]
+    [Header("会話UI (全体)")]
+    [SerializeField] private GameObject vnContents;
+
     [Header("名前表示")]
     [SerializeField] private TextMeshProUGUI nameText;   // 発言者の名前
 
@@ -109,8 +112,6 @@ public class NovelManager : MonoBehaviour
     [Space(5)]
     [SerializeField] private Image leftTailImage;
     [SerializeField] private Image rightTailImage;
-
-    [SerializeField, Range(0f, 1f)] private float messageWindowAlpha = 0.7f;
 
     [Header("次へマーク")]
     [SerializeField] private GameObject nextMark;
@@ -144,19 +145,104 @@ public class NovelManager : MonoBehaviour
     private bool autoWaiting = false;        // オートタイマーが動いているか
 
     private int currentLine = 1;             // 現在読んでいる行番号 (0行目はCSVの項目名なのでスキップ)
+    private bool isDisplayingLine = false;   // 表示中の行数
 
     private bool messageVisible = true;      // ウィンドウの表示
+    private float messageWindowAlpha = 1f;   // ウィンドウ不透明度 (設定画面から設定)
 
     private bool waitingVoice = false;       // 音声待ち
 
-    private bool isDisplayingLine = false;   // 表示中の行数
-
     private int choiceSourceLine = -1;       // 選択肢を表示した元のCSV行
+
+    private bool isConversationActive = false; // イベント？関連
 
 
     #region プロパティ
     public bool IsAutoMode => playMode == PlayMode.Auto;
     public bool IsSkipMode => playMode == PlayMode.Skip;
+    #endregion
+
+    #region イベント
+
+    public event System.Action OnConversationFinished;    // 会話終了時に呼び出されるイベント
+    #endregion
+
+    #region 指定したCSVで会話を開始する
+    /// <summary>
+    /// 指定したCSVで会話を開始する
+    /// </summary>
+    public void StartConversation(string csvName)
+    {
+        // すでに会話中なら開始しない
+        if (isConversationActive)
+            return;
+
+        // CSVを読み込む
+        csvReader.LoadCSV(csvName);
+
+        // CSVが正常に読み込めなかった場合
+        if (csvReader.GetCount() <= 1)
+        {
+            Debug.LogError($"会話を開始できませんでした : {csvName}");
+            return;
+        }
+
+        // 会話中にする
+        isConversationActive = true;
+
+        // vnContentsを表示
+        vnContents.SetActive(true);
+
+        // 最初の行
+        currentLine = 1;
+
+        // 選択肢の状態をリセット
+        choiceSourceLine = -1;
+
+        // メッセージウィンドウを表示
+        SetMessageWindow(true);
+
+        // 次へマーク更新
+        UpdateNextMark();
+
+        // 会話開始
+        AdvanceMessage();
+    }
+    #endregion
+
+    #region 会話を終了する
+
+    /// <summary>
+    /// 会話を終了する
+    /// </summary>
+    public void EndConversation()
+    {
+        // 会話中でなければ何もしない
+        if (!isConversationActive)
+            return;
+
+        // 会話終了
+        isConversationActive = false;
+
+        // Auto / Skip解除
+        SetAutoMode(false);
+        SetSkipMode(false);
+
+        // 選択肢を非表示
+        choiceManager?.HideChoices();
+
+        // メッセージウィンドウを非表示
+        SetMessageWindow(false);
+
+        // 次へマーク更新
+        UpdateNextMark();
+
+        // vnContentsを非表示
+        vnContents.SetActive(false);
+
+        // メインゲーム側へ会話終了を通知
+        OnConversationFinished?.Invoke();
+    }
     #endregion
 
 
@@ -208,9 +294,11 @@ public class NovelManager : MonoBehaviour
         //「次へ」アイコン
         UpdateNextMark();
 
-        // 最初の行を表示
-        AdvanceMessage();
+
+        // 会話開始前はVNCanvasを非表示
+        vnContents.SetActive(false);
     }
+
     void OnDestroy()
     {
         // イベント登録解除
@@ -223,6 +311,10 @@ public class NovelManager : MonoBehaviour
             TextSettingsManager.Instance.OnMessageWindowOpacityChanged -= OnMessageWindowOpacityChanged; // ウィンドウ不透明度
         }
     }
+    #endregion
+
+
+    #region 文字送り終了時
 
     /// <summary>
     /// 文字送り終了時
@@ -248,7 +340,10 @@ public class NovelManager : MonoBehaviour
         // 待機開始
         BeginNextLineWait();
     }
+    #endregion
 
+
+    #region 選択肢
     /// <summary>
     /// 選択肢を画面に表示する
     /// </summary>
@@ -315,6 +410,7 @@ public class NovelManager : MonoBehaviour
     #endregion
 
 
+    #region Update()
     void Update()
     {
         // 状態遷移
@@ -332,8 +428,8 @@ public class NovelManager : MonoBehaviour
                 UpdateBackLogInput(); // バックログ中の操作
                 break;
         }
-
     }
+    #endregion
 
 
     #region Updateを分割
@@ -516,9 +612,9 @@ public class NovelManager : MonoBehaviour
         if (currentLine >= csvReader.GetCount())
         {
             Debug.Log("CSVの最後まで読みました。");
-
-            SetAutoMode(false);
-            SetSkipMode(false);
+            
+            // 会話を終了
+            EndConversation();
             return;
         }
 
@@ -549,6 +645,7 @@ public class NovelManager : MonoBehaviour
         }
 
         Debug.LogWarning("指定されたIDが見つかりません: " + id);
+
         return -1;
     }
 
@@ -858,7 +955,6 @@ public class NovelManager : MonoBehaviour
         }
     }
     #endregion
-
 
 
     #region 演出時間を取得する

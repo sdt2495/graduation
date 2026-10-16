@@ -2,6 +2,7 @@ using System.Collections;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using static TimingMiniGame;
 
 public class BattleManager : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private Player player;
     [SerializeField] private BattleEnemySpawner spawner;
 
+    [Header("タイミングミニゲーム")]
+    [SerializeField] private TimingMiniGameCaller timingMiniGameCaller;
+    
     private bool isBattle = false;
     private bool isEndingBattle = false;
     private bool isTimerStarted = false;
@@ -64,6 +68,7 @@ public class BattleManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator EnemyAttack()
     {
+        timingMiniGameCaller.StartTimingMiniGame();
         yield return null;
     }
 

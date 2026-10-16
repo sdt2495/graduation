@@ -236,6 +236,58 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 6086332407212961209, guid: c9f6543709a32004c879792d2287a0a2, type: 3}
   m_PrefabInstance: {fileID: 38236380}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &105872784
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 105872786}
+  - component: {fileID: 105872785}
+  m_Layer: 0
+  m_Name: MiniGameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &105872785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 105872784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dd28268dbd19d3449962a1f29fb1408, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TimingMiniGameCaller
+  timingMiniGamePrefab: {fileID: 1243672950}
+  miniGameParent: {fileID: 1910175206}
+  onClear:
+    m_PersistentCalls:
+      m_Calls: []
+  onMiss:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &105872786
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 105872784}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 960, y: 540, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &110284104
 GameObject:
   m_ObjectHideFlags: 0
@@ -812,6 +864,7 @@ MonoBehaviour:
   enemy: {fileID: 5640618988908233305, guid: e376c2de5ebbb294d993720a95fe8140, type: 3}
   player: {fileID: 758857482}
   spawner: {fileID: 515253255}
+  timingMiniGameCaller: {fileID: 105872785}
   timerText: {fileID: 1469577525}
   battleTimeLimit: 7.5
 --- !u!1 &515253252
@@ -2352,6 +2405,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1239806866}
   m_CullTransparentMesh: 1
+--- !u!1 &1243672950 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8632234665198774311, guid: 1b774750dcddd8944904fb973143508f, type: 3}
+  m_PrefabInstance: {fileID: 796395954}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1367846206
 GameObject:
   m_ObjectHideFlags: 0
@@ -4044,3 +4102,4 @@ SceneRoots:
   - {fileID: 1041358316}
   - {fileID: 838218680}
   - {fileID: 1910175206}
+  - {fileID: 105872786}

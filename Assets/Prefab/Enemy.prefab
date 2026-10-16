@@ -112,6 +112,8 @@ MonoBehaviour:
   targetCanvas: {fileID: 0}
   criticalChance: 20
   criticalMultiplier: 1.2
+  spriteRenderer: {fileID: 4082603920160826734}
+  flashDuration: 0.1
 --- !u!1 &3599964758595178842
 GameObject:
   m_ObjectHideFlags: 0

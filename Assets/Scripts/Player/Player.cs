@@ -54,19 +54,19 @@ public class Player : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.D))
         {
             CheckCommaned(CommandType.Left);
         }
-        else if(Input.GetKeyDown(KeyCode.RightArrow))
+        else if(Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.K))
         {
             CheckCommaned(CommandType.Right);
         }
-        else if(Input.GetKeyDown(KeyCode.UpArrow))
+        else if(Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.J))
         {
             CheckCommaned(CommandType.Up);
         }
-        else if( Input.GetKeyDown(KeyCode.DownArrow))
+        else if( Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.F))
         {
             CheckCommaned(CommandType.Down);
         }

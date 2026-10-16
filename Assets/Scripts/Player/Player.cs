@@ -148,7 +148,7 @@ public class Player : MonoBehaviour
 
         // ミスをしたらダメージを受ける
         yield return StartCoroutine(commandUI.PlayMissAnimation(missIndex, nextIndex));
-        Damage();
+        Damage(1);
 
         if(enemy.IsCommandFinished())
         { 
@@ -163,9 +163,12 @@ public class Player : MonoBehaviour
     /// <summary>
     /// プレイヤーがダメージを受ける関数
     /// </summary>
-    private void Damage()
+    public void Damage(int amont)
     {
         curretHP--;
+
+        // HPがマイナスにならないようにする
+        curretHP = Mathf.Max(0, curretHP);
 
         hpUI.UpdateHP(curretHP);
 

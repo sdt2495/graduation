@@ -14,6 +14,14 @@ public class StatusTrade : MonoBehaviour
     public int money = 100000000;
     public TMP_Text moneyText;
 
+    [Header("ステータス数値表示")]
+    public TMP_Text hpValueText;
+    public TMP_Text atkValueText;
+    public TMP_Text defValueText;
+    public TMP_Text criValueText;
+    public TMP_Text sanValueText;
+    public TMP_Text tecValueText;
+
     [Header("売買価格")]
     public int buyPrice = 100;
     public int sellPrice = 50;
@@ -300,6 +308,26 @@ public class StatusTrade : MonoBehaviour
     {
         if (moneyText != null)
             moneyText.text = "所持金：" + money.ToString("N0") + " G";
+
+        if (statusRadar == null) return;
+
+        if (hpValueText != null)
+            hpValueText.text = "HP  " + statusRadar.HP.ToString("F0");
+
+        if (atkValueText != null)
+            atkValueText.text = "ATK  " + statusRadar.ATK.ToString("F0");
+
+        if (defValueText != null)
+            defValueText.text = "DEF  " + statusRadar.DEF.ToString("F0");
+
+        if (criValueText != null)
+            criValueText.text = "CRI  " + statusRadar.CRI.ToString("F0");
+
+        if (sanValueText != null)
+            sanValueText.text = "SAN  " + statusRadar.Other.ToString("F0");
+
+        if (tecValueText != null)
+            tecValueText.text = "TEC  " + statusRadar.TEC.ToString("F0");
     }
 
     private void ShowMessage(string message)

@@ -219,7 +219,7 @@ MonoBehaviour:
   randomAngleMin: 0
   randomAngleMax: 360
   markClockwise: 1
-  needleSpeed: 1000
+  needleSpeed: 300
   needleAngleOffset: 0
   clockwise: 1
   successAngleRange: 10

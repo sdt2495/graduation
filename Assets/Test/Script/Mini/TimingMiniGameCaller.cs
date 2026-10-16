@@ -10,6 +10,9 @@ public class TimingMiniGameCaller : MonoBehaviour
     [Header("ミニゲームPrefab")]
     [SerializeField] private GameObject timingMiniGamePrefab;
 
+    [Header("縦ゲージミニゲーム")]
+    [SerializeField] private VerticalGauge verticalGaugePrefab;
+
     [Header("生成する親オブジェクト")]
     [SerializeField] private Transform miniGameParent;
 
@@ -20,6 +23,11 @@ public class TimingMiniGameCaller : MonoBehaviour
     private TimingMiniGame timingMiniGame;
     private bool waitingForResult;
     private bool resultNotified;
+
+    // 生成された縦ゲージミニゲーム
+    private VerticalGauge verticalGaugeInstance;
+    // 今回、縦ゲージを選択したかどうか
+    private bool isVerticalGaugeGame = false;
 
     /// <summary>
     /// ミニゲームPrefabを生成して開始する。
@@ -32,14 +40,7 @@ public class TimingMiniGameCaller : MonoBehaviour
 
     public void StartTimingMiniGame()
     {
-        Debug.Log("[TimingMiniGameCaller] ミニゲーム呼び出し");
-
-        // Prefabの設定確認
-        if (timingMiniGamePrefab == null)
-        {
-            Debug.LogError("ミニゲームPrefabが設定されていません。", this);
-            return;
-        }
+        Debug.Log("[TimingMiniGameCaller] ミニゲーム呼び出し", this);
 
         // 二重起動を防止
         if (waitingForResult)
@@ -55,72 +56,152 @@ public class TimingMiniGameCaller : MonoBehaviour
             return;
         }
 
-        // 呼び出された瞬間にPrefabを生成
-        GameObject miniGameObject = Instantiate(
-            timingMiniGamePrefab,
-            miniGameParent,
-            false
-        );
-
-        // ★ 生成したミニゲームのActiveをオンにする
-        miniGameObject.SetActive(true);
-
-        Debug.Log(
-            "[TimingMiniGameCaller] Prefab生成完了・Activeをオンにしました: "
-            + miniGameObject.name,
-            miniGameObject
-        );
-
-        // ミニゲーム本体を取得
-        timingMiniGame = miniGameObject.GetComponent<TimingMiniGame>();
-
-        if (timingMiniGame == null)
+        // 2種類ともPrefabが設定されているか確認
+        if (timingMiniGamePrefab == null || verticalGaugePrefab == null)
         {
             Debug.LogError(
-                "PrefabのルートにTimingMiniGameがありません。",
-                miniGameObject
+                "円形ミニゲームと縦ゲージミニゲームのPrefabを両方設定してください。",
+                this
             );
-
-            Destroy(miniGameObject);
             return;
         }
 
-        // 結果待ち状態を初期化
-        waitingForResult = true;
+        // 前回の結果をリセット
+        timingMiniGame = null;
+        verticalGaugeInstance = null;
         resultNotified = false;
+        waitingForResult = true;
 
-        // ミニゲームを開始
-        timingMiniGame.StartMiniGame();
+        // 0なら円形、1なら縦ゲージ
+        isVerticalGaugeGame = Random.Range(0, 2) == 1;
 
-        Debug.Log("[TimingMiniGameCaller] ミニゲーム開始");
+        if (isVerticalGaugeGame)
+        {
+            // 縦ゲージミニゲームを生成
+            GameObject miniGameObject = Instantiate(
+                verticalGaugePrefab.gameObject,
+                miniGameParent,
+                false
+            );
+
+            miniGameObject.SetActive(true);
+
+            verticalGaugeInstance =
+                miniGameObject.GetComponent<VerticalGauge>();
+
+            if (verticalGaugeInstance == null)
+            {
+                Debug.LogError(
+                    "縦ゲージPrefabにVerticalGaugeがありません。",
+                    miniGameObject
+                );
+
+                Destroy(miniGameObject);
+                waitingForResult = false;
+                return;
+            }
+
+            // 縦ゲージを開始
+            verticalGaugeInstance.StartMiniGame();
+
+            Debug.Log("[TimingMiniGameCaller] 縦ゲージを開始", this);
+        }
+        else
+        {
+            // 円形ミニゲームを生成
+            GameObject miniGameObject = Instantiate(
+                timingMiniGamePrefab.gameObject,
+                miniGameParent,
+                false
+            );
+
+            miniGameObject.SetActive(true);
+
+            timingMiniGame =
+                miniGameObject.GetComponent<TimingMiniGame>();
+
+            if (timingMiniGame == null)
+            {
+                Debug.LogError(
+                    "円形ミニゲームPrefabにTimingMiniGameがありません。",
+                    miniGameObject
+                );
+
+                Destroy(miniGameObject);
+                waitingForResult = false;
+                return;
+            }
+
+            // 円形ミニゲームを開始
+            timingMiniGame.StartMiniGame();
+
+            Debug.Log("[TimingMiniGameCaller] 円形ミニゲームを開始", this);
+        }
     }
-
 
     /// <summary>
     /// ミニゲームの終了を監視する。
     /// </summary>
     private void Update()
     {
-        // 結果待ち中でない、または結果通知済みなら何もしない
+        // 結果待ち中でない、または通知済みなら何もしない
         if (!waitingForResult || resultNotified)
         {
             return;
         }
 
-        // ミニゲームが破棄されていないか確認
-        if (timingMiniGame == null)
+        bool isFinished = false;
+        bool isClear = false;
+        GameObject finishedGameObject = null;
+
+        if (isVerticalGaugeGame)
         {
-            Debug.LogError(
-                "[TimingMiniGameCaller] 実行中のミニゲームが見つかりません。",
-                this
+            // 縦ゲージの存在確認
+            if (verticalGaugeInstance == null)
+            {
+                Debug.LogError(
+                    "[TimingMiniGameCaller] 縦ゲージが見つかりません。",
+                    this
+                );
+
+                waitingForResult = false;
+                return;
+            }
+
+            // 縦ゲージの結果を取得
+            isFinished = verticalGaugeInstance.TryGetResult(
+                out isClear
             );
 
-            waitingForResult = false;
-            return;
+            finishedGameObject = verticalGaugeInstance.gameObject;
+        }
+        else
+        {
+            // 円形ミニゲームの存在確認
+            if (timingMiniGame == null)
+            {
+                Debug.LogError(
+                    "[TimingMiniGameCaller] 円形ミニゲームが見つかりません。",
+                    this
+                );
+
+                waitingForResult = false;
+                return;
+            }
+
+            // 円形ミニゲームの終了を確認
+            isFinished = timingMiniGame.IsFinished();
+
+            if (isFinished)
+            {
+                isClear = timingMiniGame.IsClear();
+            }
+
+            finishedGameObject = timingMiniGame.gameObject;
         }
 
-        // ミニゲームが終了するまで待つ
-        if (!timingMiniGame.IsFinished())
+        // まだ終了していなければ待つ
+        if (!isFinished)
         {
             return;
         }
@@ -129,32 +210,24 @@ public class TimingMiniGameCaller : MonoBehaviour
         resultNotified = true;
         waitingForResult = false;
 
-        // 成功・失敗を判定して通知
-        if (timingMiniGame.IsClear())
+        // 成功・失敗を通知
+        if (isClear)
         {
-            Debug.Log(
-                "[TimingMiniGameCaller] ミニゲーム成功！ onClearを実行します。",
-                this
-            );
-
+            Debug.Log("[TimingMiniGameCaller] ミニゲーム成功！", this);
             onClear?.Invoke();
         }
-        else if (timingMiniGame.IsMiss())
+        else
         {
-            Debug.LogWarning(
-                "[TimingMiniGameCaller] ミニゲーム失敗。onMissを実行します。",
-                this
-            );
-
+            Debug.LogWarning("[TimingMiniGameCaller] ミニゲーム失敗！", this);
             onMiss?.Invoke();
         }
 
-        // 成功・失敗のどちらでもミニゲームを非アクティブにする
-        timingMiniGame.gameObject.SetActive(false);
+        // 成功・失敗どちらでも非アクティブにする
+        if (finishedGameObject != null)
+        {
+            finishedGameObject.SetActive(false);
+        }
 
-        Debug.Log(
-            "[TimingMiniGameCaller] ミニゲームを非アクティブにしました。",
-            this
-        );
+        Debug.Log("[TimingMiniGameCaller] ミニゲームを非アクティブにしました。", this);
     }
 }

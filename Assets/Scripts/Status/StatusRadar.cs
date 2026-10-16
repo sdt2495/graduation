@@ -187,15 +187,7 @@ public class StatusRadar : Graphic
 
             // 薄い黄色の面を重ねる
             FillPolygon(vh, previewPoints, previewFillColor);
-            /*
-            // 薄い黄色の輪郭線を重ねる
-            DrawPolygon(
-                vh,
-                previewPoints,
-                previewColor,
-                previewLineWidth
-            );
-            */
+            
         }
 
         // 外枠

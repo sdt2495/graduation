@@ -65,22 +65,29 @@ public class StatusTrade : MonoBehaviour
         ShowMessage("ボタンにカーソルを乗せると結果を予測できます！");
     }
 
+
     private void RegisterButton(
         string objectName, string statusName, bool isBuy)
     {
-        GameObject obj = GameObject.Find(objectName);
+        // 非表示のオブジェクトも含めてボタンを探す
+        Button[] allButtons =
+            Resources.FindObjectsOfTypeAll<Button>();
 
-        if (obj == null)
+        Button button = null;
+
+        foreach (Button candidate in allButtons)
         {
-            Debug.LogWarning("ボタンが見つかりません: " + objectName);
-            return;
+            if (candidate.gameObject.name == objectName
+                && candidate.gameObject.scene.IsValid())
+            {
+                button = candidate;
+                break;
+            }
         }
-
-        Button button = obj.GetComponent<Button>();
 
         if (button == null)
         {
-            Debug.LogWarning(objectName + " にButtonがありません！");
+            Debug.LogWarning("ボタンが見つかりません: " + objectName);
             return;
         }
 
@@ -96,10 +103,11 @@ public class StatusTrade : MonoBehaviour
         });
 
         // マウスカーソルの出入りを取得
-        EventTrigger trigger = obj.GetComponent<EventTrigger>();
+        EventTrigger trigger =
+            button.gameObject.GetComponent<EventTrigger>();
 
         if (trigger == null)
-            trigger = obj.AddComponent<EventTrigger>();
+            trigger = button.gameObject.AddComponent<EventTrigger>();
 
         AddPointerEvent(trigger, EventTriggerType.PointerEnter, () =>
         {
@@ -113,6 +121,7 @@ public class StatusTrade : MonoBehaviour
 
         Debug.Log(objectName + " の登録完了");
     }
+
 
     private void AddPointerEvent(
         EventTrigger trigger,

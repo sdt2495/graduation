@@ -32,6 +32,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3296895073148326770}
+  - {fileID: 5804551183218657069}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &4082603920160826734
@@ -105,6 +106,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa37e2711d4617d4db41d01647e6a924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  maxHP: 100
+  damageTextPrefab: {fileID: 5433104768944249112, guid: 9e398037447d0e648b6717eb41c642ca, type: 3}
+  damagePoint: {fileID: 5804551183218657069}
+  targetCanvas: {fileID: 0}
+  criticalChance: 20
+  criticalMultiplier: 1.2
 --- !u!1 &3599964758595178842
 GameObject:
   m_ObjectHideFlags: 0
@@ -344,3 +351,34 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &8463094441455642642
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5804551183218657069}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5804551183218657069
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8463094441455642642}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3070605511119424062}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

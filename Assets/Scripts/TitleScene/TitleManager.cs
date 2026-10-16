@@ -124,4 +124,8 @@ public class TitleManager : MonoBehaviour
         // 演出が終わってからシーン移動
         SceneManager.LoadScene(sceneName);
     }
+    public void OpenConfigAfterEffect()
+    {
+        StartSceneLoad("ConfigScene");
+    }
 }

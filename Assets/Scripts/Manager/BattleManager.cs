@@ -20,9 +20,14 @@ public class BattleManager : MonoBehaviour
     [Header("TimerUI")]
     [SerializeField] private TMP_Text timerText;
 
+    [SerializeField] private BattaleCommandManager battleCommandManager;
+
     // 制限時間
     [SerializeField] private float battleTimeLimit = 10.0f;
     private float reaminingTime;
+
+    // Enemy攻撃終了待ち変数
+    private bool isEnemyAttackFinished = false;
 
     private void Update()
     {
@@ -68,8 +73,14 @@ public class BattleManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator EnemyAttack()
     {
+        isEnemyAttackFinished = false;
         timingMiniGameCaller.StartTimingMiniGame();
-        yield return null;
+        
+        // ミニゲームが終わるまで待つ
+        while(!isEnemyAttackFinished)
+        {
+            yield return null;
+        }
     }
 
     /// <summary>
@@ -93,18 +104,32 @@ public class BattleManager : MonoBehaviour
 
         // 一連の処理が終わったら戦闘終了
         EndBattle();
+
+        // コマンド選択画面へ戻る
+        battleCommandManager.ShowBattleCommandSelection();
     }
 
     public void EndBattle()
     {
         isBattle = false;
     }
-
+    
+    /// <summary>
+    /// コマンド入力に成功時敵にダメージを与える
+    /// </summary>
     public void CompleteCommand()
     {
         Enemy enemy = spawner.GetBattleEnemy();
 
         enemy.Damage(1);
+    }
+
+    /// <summary>
+    /// Enemyの攻撃終了を通知する
+    /// </summary>
+    public void OnEnemyAttackFinished()
+    {
+        isEnemyAttackFinished = true;
     }
 
     /// <summary>

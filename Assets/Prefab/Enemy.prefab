@@ -105,6 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa37e2711d4617d4db41d01647e6a924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
+  maxHP: 100
 --- !u!1 &3599964758595178842
 GameObject:
   m_ObjectHideFlags: 0

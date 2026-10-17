@@ -34,6 +34,16 @@ public class ConfigSceneController : MonoBehaviour
     /// </summary>
     public void CloseConfig()
     {
-        SceneManager.UnloadSceneAsync("ConfigScene");
+        Debug.Log($"SceneCount = {SceneManager.sceneCount}");
+
+        for (int i = 0; i < SceneManager.sceneCount; i++)
+        {
+            Scene scene = SceneManager.GetSceneAt(i);
+            Debug.Log($"Loaded Scene : {scene.name}");
+        }
+
+        AsyncOperation op = SceneManager.UnloadSceneAsync("ConfigScene");
+
+        Debug.Log($"Unload Result = {op}");
     }
 }

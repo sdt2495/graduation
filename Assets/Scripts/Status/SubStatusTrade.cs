@@ -27,9 +27,12 @@ public class SubStatusTrade : MonoBehaviour
     public int sellPrice = 50;
 
     [Header("所持金・メッセージ")]
-    public TMP_Text moneyText;
     public TMP_Text messageText;
-    public int money = 100000000;
+
+    private int money =>
+    MoneyManager.Instance != null
+        ? MoneyManager.Instance.Money
+        : 0;
 
     private void Start()
     {
@@ -87,8 +90,14 @@ public class SubStatusTrade : MonoBehaviour
             return;
         }
 
+        if (MoneyManager.Instance == null ||
+    !MoneyManager.Instance.Spend(buyPrice))
+        {
+            ShowMessage("お金が足りません！");
+            return;
+        }
+
         s.value = Mathf.Min(100f, s.value + tradeAmount);
-        money -= buyPrice;
 
         UpdateUI();
         ShowMessage(s.statusName + " を購入しました！");
@@ -110,8 +119,14 @@ public class SubStatusTrade : MonoBehaviour
             return;
         }
 
+        if (MoneyManager.Instance == null)
+        {
+            ShowMessage("MoneyManager が見つかりません！");
+            return;
+        }
+
         s.value = Mathf.Max(0f, s.value - tradeAmount);
-        money += sellPrice;
+        MoneyManager.Instance.Earn(sellPrice);
 
         UpdateUI();
         ShowMessage(s.statusName + " を売却しました！");
@@ -130,8 +145,8 @@ public class SubStatusTrade : MonoBehaviour
             }
         }
 
-        if (moneyText != null)
-            moneyText.text = "所持金：" + money.ToString("N0") + " G";
+        if (MoneyManager.Instance != null)
+            MoneyManager.Instance.UpdateMoneyUI();
     }
 
     private void ShowMessage(string message)

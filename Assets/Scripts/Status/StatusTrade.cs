@@ -10,9 +10,7 @@ public class StatusTrade : MonoBehaviour
     [Header("レーダーチャート")]
     public StatusRadar statusRadar;
 
-    [Header("所持金")]
-    public int money = 100000000;
-    public TMP_Text moneyText;
+    
 
     [Header("ステータス数値表示")]
     public TMP_Text hpValueText;
@@ -36,6 +34,11 @@ public class StatusTrade : MonoBehaviour
     public bool initializeTestStats = true;
     [Range(0f, 100f)]
     public float initialStatValue = 50f;
+
+    private int money =>
+    MoneyManager.Instance != null
+        ? MoneyManager.Instance.Money
+        : 0;
 
     private void Start()
     {
@@ -233,7 +236,12 @@ public class StatusTrade : MonoBehaviour
         }
 
         float amount = Mathf.Min(tradeAmount, 100f - current);
-        money -= buyPrice;
+        if (!MoneyManager.Instance.Spend(buyPrice))
+        {
+            ShowMessage("お金が足りません！");
+            return;
+        }
+
         SetStatus(name, current + amount);
 
         UpdateUI();
@@ -259,7 +267,7 @@ public class StatusTrade : MonoBehaviour
         }
 
         float amount = Mathf.Min(tradeAmount, current);
-        money += sellPrice;
+        MoneyManager.Instance.Earn(sellPrice);
         SetStatus(name, current - amount);
 
         UpdateUI();
@@ -306,10 +314,8 @@ public class StatusTrade : MonoBehaviour
 
     private void UpdateUI()
     {
-        if (moneyText != null)
-            moneyText.text = "所持金：" + money.ToString("N0") + " G";
-
-        if (statusRadar == null) return;
+        if (MoneyManager.Instance != null)
+            MoneyManager.Instance.UpdateMoneyUI();
 
         if (hpValueText != null)
             hpValueText.text = "HP  " + statusRadar.HP.ToString("F0");
@@ -337,6 +343,8 @@ public class StatusTrade : MonoBehaviour
 
         Debug.Log(message);
     }
+
+
 }
 
 

@@ -49,6 +49,12 @@ public class Player : MonoBehaviour
             return;
         }
 
+        if(IsDead())
+        {
+            isCommandInput = false;
+            return;
+        }
+
         if(!isCommandInput)
         {
             return;
@@ -120,6 +126,10 @@ public class Player : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 最後のコマンド入力に成功したときのアニメーション
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator CompleteCommand()
     {
         isCommandAnimation = true;
@@ -140,7 +150,7 @@ public class Player : MonoBehaviour
     }
 
     /// <summary>
-    /// 入力をミスした時の処理
+    /// 入力をミスした時のアニメーションと処理
     /// </summary>
     /// <returns></returns>
     private IEnumerator MissCommand()
@@ -169,7 +179,7 @@ public class Player : MonoBehaviour
     /// </summary>
     public void Damage(int amont)
     {
-        curretHP--;
+        curretHP -= amont;
 
         // HPがマイナスにならないようにする
         curretHP = Mathf.Max(0, curretHP);
@@ -180,6 +190,21 @@ public class Player : MonoBehaviour
         commboUI.UpdateCombo(commbo);
 
         StartCoroutine(FlashRed());
+
+        // HPが0になったらコマンド入力を停止
+        if(IsDead())
+        {
+            SetCommandInput(false);
+        }
+    }
+
+    /// <summary>
+    /// プレイヤーが死亡しているか
+    /// </summary>
+    /// <returns></returns>
+    public bool IsDead()
+    {
+        return curretHP <= 0;
     }
 
     /// <summary>

@@ -1,0 +1,9 @@
+﻿ID,Speaker,Message,Voice,Left,Right,Active ,SE,BGM,Ambient,BG,BG_Effect,BG_Time,CG,CG_Effect,CG_Time,Screen,Screen_Effect,Screen_Time,Wait,Choice1,Choice1_ID,Choice2,Choice2_ID,Jump,CutIn_Image,CutIn_Slide,CutIn_Fade,CutIn_Time
+1,,……,,,,NONE,,,,,,,,,,,,,,,,,,,,,,
+2,主人公ちゃん,こ↑こ↓はど↑こ↓かゾ？,,Temp5/worried_01,,LEFT,,,,,,,,,,,,,,,,,,,,,,
+3,主人公ちゃん,！？(着信音)　(Ambient),,Temp5/shocked_01,,,,,,,,,,,,,,,,,,,,,,,,
+4,主人公ちゃん,電話ですねぇスギ?,,Temp5/worried_01,,,,,,,,,,,,,,,,,,,,,Hiromin,RIGHT,TRUE,0.3
+5,主人公ちゃん,で、出ますよ……,,Temp5/angry_02,,,,,,,,,,,,,,,,,,,,,,,,
+6,,ピッ (SE),,Temp5/worried_01,,NONE,,,,,,,,,,,,,,,,,,,,,,
+7,電話さん,もしもし (カットインではなく立ち絵),,Temp5/worried_01,,RIGHT,,,,,,,,,,,,,,,,,,,HIDE,RIGHT,TRUE,0.5
+8,主人公ちゃん,！！！！！！！！！！！！！！！！！,,Temp5/shocked_01,,LEFT,,,,,,,,,,,,,,,,,,,,,,

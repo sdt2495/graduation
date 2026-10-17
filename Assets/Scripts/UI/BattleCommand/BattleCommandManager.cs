@@ -7,7 +7,7 @@ public class BattaleCommandManager : MonoBehaviour
     // ===================================
     // バトルコマンドの管理
     // ===================================
-
+    
     [SerializeField] private CommandUI commandUI;
     [SerializeField] private BattleEnemySpawner spawner;
     [SerializeField] private Player player;
@@ -16,10 +16,18 @@ public class BattaleCommandManager : MonoBehaviour
     
     [Header("フレーム設定")]
     [SerializeField] private RectTransform selectFrame;
-    [SerializeField] private float slideSpeed = 1000f;
+    [SerializeField] private float slideDuration = 0.15f;
+    private Vector2 startFramePosition;
+    private float slideTimer;
+    private bool isSliding;
 
     [Header("選択ボタン")]
     [SerializeField] private Button[] commandButton;
+
+    [Header("選択時の拡大設定")]
+    [SerializeField] private float selectScale = 1.1f;
+    private Vector3[] originalButtonScale;
+    private Vector3 originalFrameScale;
 
     private int selectCommandIndex = 0;
     private Vector3 targetFramePosition;
@@ -29,9 +37,24 @@ public class BattaleCommandManager : MonoBehaviour
         // 最初に選択するボタンを設定
         selectCommandIndex = 0;
 
+        // ボタンの元の大きさを保存
+        originalButtonScale = new Vector3[commandButton.Length];
+
+        for(int i = 0; i < commandButton.Length; i++)
+        {
+            originalButtonScale[i] = commandButton[i].transform.localScale;
+        }
+
+        // フレームの元の大きさを保存
+        originalFrameScale = selectFrame.localScale;
+
         // フレームの移動先を最初のボタンの位置にする
         RectTransform buttonRect = commandButton[selectCommandIndex].GetComponent<RectTransform>();
         targetFramePosition = new Vector3(buttonRect.anchoredPosition.x, buttonRect.anchoredPosition.y, selectFrame.localPosition.z);
+
+        selectFrame.anchoredPosition = buttonRect.anchoredPosition;
+
+        UpdateSelectionScale();
     }
 
     private void Update()
@@ -53,8 +76,25 @@ public class BattaleCommandManager : MonoBehaviour
             commandButton[selectCommandIndex].onClick.Invoke();
         }
 
-        // 選択フレームを目標位置まで滑らかに移動させる
-        selectFrame.anchoredPosition = Vector3.MoveTowards(selectFrame.anchoredPosition, new Vector2(targetFramePosition.x, targetFramePosition.y), slideSpeed * Time.unscaledDeltaTime);
+        // 選択フレームを目標位置までイージングで移動させる
+        if(isSliding)
+        {
+            slideTimer += Time.unscaledDeltaTime;
+
+            float t = Mathf.Clamp01(slideTimer / slideDuration);
+
+            // 最初は速く、終盤はゆっくり
+            float easedT = 1f - Mathf.Pow(1f - t, 3f);
+
+            selectFrame.anchoredPosition = Vector2.Lerp(startFramePosition, new Vector2(targetFramePosition.x, targetFramePosition.y), easedT);
+
+            if(t >= 1f)
+            {
+                selectFrame.anchoredPosition = new Vector2(targetFramePosition.x, targetFramePosition.y);
+
+                isSliding = false;
+            }
+        }
     }
 
     private void MoveSelection(int direction)
@@ -79,12 +119,27 @@ public class BattaleCommandManager : MonoBehaviour
         RectTransform buttonRect = commandButton[selectCommandIndex].GetComponent<RectTransform>();
 
         targetFramePosition = new Vector3(buttonRect.anchoredPosition.x, buttonRect.anchoredPosition.y, buttonRect.localPosition.z);
-    
+
         // 端を超えたときだけ即座に移動
-        if(wrapped)
-        {
-            selectFrame.anchoredPosition = new Vector2(targetFramePosition.x, targetFramePosition.y);
-        }
+        //if(wrapped)
+        //{
+        //    selectFrame.anchoredPosition = new Vector2(targetFramePosition.x, targetFramePosition.y);
+        //    isSliding = false;
+        //}
+        //else
+        //{
+        //    // 通常移動はカーブをつけてスライド
+        //    startFramePosition = selectFrame.anchoredPosition;
+        //    slideTimer = 0f;
+        //    isSliding = true;
+        //}
+
+        // 通常移動はカーブをつけてスライド
+        startFramePosition = selectFrame.anchoredPosition;
+        slideTimer = 0f;
+        isSliding = true;
+
+        UpdateSelectionScale();
     }
 
     /// <summary>
@@ -125,5 +180,19 @@ public class BattaleCommandManager : MonoBehaviour
         commandUI.UpdateCommanedText(battleEnemy);
 
         player.SetCommandInput(true);
+    }
+
+    private void UpdateSelectionScale()
+    {
+        for(int i = 0; i < commandButton.Length; i++)
+        {
+            // 選択中のボタンだけ大きくする
+            float scale = (i == selectCommandIndex) ? selectScale : 1f;
+
+            commandButton[i].transform.localScale = originalButtonScale[i] * scale;
+        }
+
+        // 選択フレームも同じ倍率で拡大
+        selectFrame.localScale = originalFrameScale * selectScale;
     }
 }

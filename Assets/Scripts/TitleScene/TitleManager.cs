@@ -18,6 +18,8 @@ public class TitleManager : MonoBehaviour
     [SerializeField] private float moveDistance = 1920f;
 
     private bool isLoading = false;
+    private Vector2 initialTransitionPosition;
+
 
     private void Start()
     {
@@ -121,9 +123,21 @@ public class TitleManager : MonoBehaviour
             transitionImage.anchoredPosition = endPosition;
         }
 
-        // 演出が終わってからシーン移動
-        SceneManager.LoadScene(sceneName);
+        if(sceneName == "ConfigScene")
+        {
+            // 位置リセットここ?
+
+            // 無理やりだけどConfigSceneのときは特殊なロード
+            ConfigSceneController.OpenFromGame();
+        }
+        else
+        {
+            // 演出が終わってからシーン移動
+            SceneManager.LoadScene(sceneName);
+        }
     }
+
+
     public void OpenConfigAfterEffect()
     {
         StartSceneLoad("ConfigScene");

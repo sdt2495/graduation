@@ -13,5 +13,21 @@ public class PlayerAttackkari : MonoBehaviour
                 enemy.TakeDamage(1);
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (enemy != null)
+            {
+                enemy.CounterDamage(1);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            if (enemy != null)
+            {
+                enemy.FinishBlowDamage(1);
+            }
+        }
     }
 }

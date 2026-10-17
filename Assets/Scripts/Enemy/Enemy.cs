@@ -59,6 +59,10 @@ public class Enemy : MonoBehaviour
     public int CurrentHP {  get { return currentHP; } }
     public int MaxHP {  get { return maxHP; } }
 
+    /// <summary>
+    /// “G‚ªƒ_ƒ[ƒW‚ğó‚¯‚éˆ—
+    /// </summary>
+    /// <param name="damage"></param>
     public void Damage(int damage)
     {
         // ƒNƒŠƒeƒBƒJƒ‹”»’èi“G‘¤‚ÅÀsj
@@ -116,6 +120,23 @@ public class Enemy : MonoBehaviour
                 damageText.ShowDamage(damage, isCritical);
             }
         }
+    }
+
+    /// <summary>
+    /// “G‚ª€–S‚µ‚Ä‚¢‚é‚©
+    /// </summary>
+    /// <returns></returns>
+    public bool IsDead()
+    {
+        return currentHP <= 0;
+    }
+
+    /// <summary>
+    /// “G‚Ì€–Sˆ—
+    /// </summary>
+    public void Die()
+    {
+        // “G‚Ì€–Sˆ—
     }
 
     private IEnumerator FlashWhite()

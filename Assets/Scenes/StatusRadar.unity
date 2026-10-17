@@ -1442,6 +1442,11 @@ MonoBehaviour:
   modeButtons: {fileID: 632936412}
   buyButtons: {fileID: 1697032227}
   sellButtons: {fileID: 1872120607}
+  buyModeButton: {fileID: 2063531737}
+  sellModeButton: {fileID: 2002407244}
+  selectedScale: 1.4
+  normalScale: 1
+  animationDuration: 0.4
 --- !u!1 &389770966
 GameObject:
   m_ObjectHideFlags: 0
@@ -2451,9 +2456,7 @@ MonoBehaviour:
   tradeAmount: 10
   buyPrice: 100
   sellPrice: 50
-  moneyText: {fileID: 0}
   messageText: {fileID: 0}
-  money: 100000000
 --- !u!1 &511323311
 GameObject:
   m_ObjectHideFlags: 0
@@ -5372,8 +5375,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatusTrade
   statusRadar: {fileID: 153017747}
-  money: 100000
-  moneyText: {fileID: 1490342395}
   hpValueText: {fileID: 756130915}
   atkValueText: {fileID: 130151038}
   defValueText: {fileID: 423551384}
@@ -5396,6 +5397,53 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1190.6036, y: 572.9133, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &873917165
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 873917167}
+  - component: {fileID: 873917166}
+  m_Layer: 0
+  m_Name: MoneyManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &873917166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 873917165}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2afe1b3423793b649970c9d8744eeb6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MoneyManager
+  initialMoney: 100000000
+  moneyTexts:
+  - {fileID: 1490342395}
+--- !u!4 &873917167
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 873917165}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 832.75, y: 539.75, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5999,6 +6047,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PageSwitcher
   page1: {fileID: 523243608}
   page2: {fileID: 1134052321}
+  mainModeButton: {fileID: 2000561250}
+  subModeButton: {fileID: 1458793309}
+  selectedScale: 1.5
+  normalScale: 1
+  animationDuration: 0.4
 --- !u!1 &1087368637
 GameObject:
   m_ObjectHideFlags: 0
@@ -6363,6 +6416,11 @@ MonoBehaviour:
   modeButtons: {fileID: 714707617}
   buyButtons: {fileID: 115146890}
   sellButtons: {fileID: 1525101072}
+  buyModeButton: {fileID: 1999650438}
+  sellModeButton: {fileID: 557450438}
+  selectedScale: 1.5
+  normalScale: 1
+  animationDuration: 0.4
 --- !u!1 &1173433294
 GameObject:
   m_ObjectHideFlags: 0
@@ -10820,3 +10878,4 @@ SceneRoots:
   - {fileID: 298710772}
   - {fileID: 873274009}
   - {fileID: 510105768}
+  - {fileID: 873917167}

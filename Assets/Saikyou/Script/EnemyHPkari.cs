@@ -16,21 +16,8 @@ public class EnemyHPkari : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        ApplyDamage(damage, "Normal");
-    }
 
-    public void CounterDamage(int damage)
-    {
-        ApplyDamage(damage, "Counter");
-    }
-
-    public void FinishBlowDamage(int damage)
-    {
-        ApplyDamage(damage, "FinishBlow");
-    }
-
-    private void ApplyDamage(int damage, string attackType)
-    {
+        // クリティカル判定（敵側で実行）
         bool isCritical = Random.Range(0f, 100f) < criticalChance;
 
         if (isCritical)
@@ -39,11 +26,11 @@ public class EnemyHPkari : MonoBehaviour
         }
 
         hp -= damage;
+
         Debug.Log("エネミーのHP：" + hp);
 
-        if (damageTextPrefab != null &&
-            damagePoint != null &&
-            targetCanvas != null)
+        // ダメージ表示
+        if (damageTextPrefab != null && damagePoint != null && targetCanvas != null)
         {
             GameObject obj = Instantiate(
                 damageTextPrefab,
@@ -71,7 +58,7 @@ public class EnemyHPkari : MonoBehaviour
 
             if (damageText != null)
             {
-                damageText.ShowDamage(damage, isCritical, attackType);
+                damageText.ShowDamage(damage, isCritical);
             }
         }
 

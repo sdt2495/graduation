@@ -33,6 +33,13 @@ public class BattleManager : MonoBehaviour
     {
         if(!isBattle || isEndingBattle || !isTimerStarted) return;
 
+        // プレイヤーが死亡していたらタイマーを停止
+        if(player.IsDead())
+        {
+            PlayerDeath();
+            return;
+        }
+
         reaminingTime -= Time.deltaTime;
 
         if( reaminingTime < 0 )
@@ -99,8 +106,28 @@ public class BattleManager : MonoBehaviour
             yield return null;
         }
 
-        // Enemyの攻撃処理
-        yield return StartCoroutine(EnemyAttack());
+        // プレイヤーが倒れていたら戦闘終了
+        if(player.IsDead())
+        {
+            EndBattle();
+            yield break;
+        }
+
+        // 敵が倒れていなければ敵の攻撃処理
+        Enemy battleEnemy = spawner.GetBattleEnemy();
+
+        if(battleEnemy != null && !battleEnemy.IsDead())
+        {
+            // Enemyの攻撃処理
+            yield return StartCoroutine(EnemyAttack());
+        }
+
+        // 敵の攻撃後にプレイヤーが倒れた場合も考慮
+        if(player.IsDead())
+        {
+            EndBattle();
+            yield break;
+        }
 
         // 一連の処理が終わったら戦闘終了
         EndBattle();
@@ -122,6 +149,12 @@ public class BattleManager : MonoBehaviour
         Enemy enemy = spawner.GetBattleEnemy();
 
         enemy.Damage(1);
+
+        if(enemy.IsDead())
+        {
+            enemy.Die();
+            EnemyDeath();
+        }
     }
 
     /// <summary>
@@ -145,5 +178,46 @@ public class BattleManager : MonoBehaviour
         if (!isBattle || isTimerStarted || isEndingBattle) return;
 
         isTimerStarted = true;
+    }
+
+    /// <summary>
+    /// プレイヤー死亡時の処理
+    /// </summary>
+    private void PlayerDeath()
+    {
+        // 二重実行を防ぐ
+        if(isEndingBattle) return ;
+
+        isEndingBattle = true;
+
+        // 入力とタイマーを停止
+        player.SetCommandInput(false);
+        isTimerStarted = false;
+
+        // 戦闘終了
+        EndBattle();
+
+        // ゲームオーバー処理を呼ぶ
+    }
+
+    /// <summary>
+    /// Enemy死亡時の処理
+    /// </summary>
+    private void EnemyDeath()
+    {
+        // 二重実行を防ぐ
+        if (isEndingBattle) return;
+
+        isEndingBattle = true;
+
+        // 入力とタイマーを停止
+        player.SetCommandInput(false);
+        isTimerStarted = false;
+
+        // 戦闘終了
+        EndBattle();
+
+        // 敵死亡後の処理
+
     }
 }

@@ -91,7 +91,7 @@ public class CharacterSlot
     /// <summary>
     /// 立ち絵を変更する
     /// </summary>
-    public IEnumerator SetCharacter(string character)
+    public IEnumerator SetCharacter(string character, bool fastExit = false)
     {
         // 空欄なら変更しない
         if (string.IsNullOrEmpty(character))
@@ -103,7 +103,7 @@ public class CharacterSlot
             // 現在キャラクターが表示されている場合
             if (image.enabled)
             {
-                yield return ExitCharacter(false);
+                yield return ExitCharacter(fastExit);
             }
 
             currentCharacter = "";
@@ -181,7 +181,7 @@ public class CharacterSlot
     #endregion
 
 
-    #region 登場・退場
+    #region 登場
 
     /// <summary>
     /// 画面外から登場
@@ -225,12 +225,15 @@ public class CharacterSlot
         // 通常速度へ戻す
         animator.speed = NORMAL_ANIMATION_SPEED;
     }
+    #endregion
 
+
+    #region 退場
 
     /// <summary>
     /// 画面外へ退場
     /// </summary>
-    private IEnumerator ExitCharacter(bool isCharacterSwitch)
+    private IEnumerator ExitCharacter(bool isCharacterSwitch, bool fastExit = false)
     {
         if (animator == null)
         {
@@ -239,7 +242,14 @@ public class CharacterSlot
         }
 
         // 現在のAnimator速度を設定
-        SetAnimatorSpeed(isCharacterSwitch);
+        if (fastExit)
+        {
+            animator.speed = SWITCH_ANIMATION_SPEED;
+        }
+        else
+        {
+            SetAnimatorSpeed(isCharacterSwitch);
+        }
 
         // 退場アニメーション開始
         animator.ResetTrigger("Enter");
@@ -287,6 +297,19 @@ public class CharacterSlot
         {
             animator.speed = NORMAL_ANIMATION_SPEED;
         }
+    }
+    
+    /// <summary>
+    /// 高速退場
+    /// </summary>
+    public IEnumerator ExitCharacterFast()
+    {
+        if (image.enabled)
+        {
+            yield return ExitCharacter(true);
+        }
+
+        currentCharacter = "";
     }
     #endregion
 

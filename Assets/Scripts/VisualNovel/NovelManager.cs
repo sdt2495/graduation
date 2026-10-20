@@ -100,6 +100,10 @@ public class NovelManager : MonoBehaviour
     [Header("──────────────────────────────")]
     [Header("会話UI (全体)")]
     [SerializeField] private GameObject vnContents;
+    [Header("会話全体フェード")]
+    [SerializeField] private CanvasGroup conversationCanvasGroup;
+    [SerializeField] private float conversationFadeTime = 0.3f;  // フェードイン＆アウト完了時間
+    [Space(5)]
 
     [Header("名前表示")]
     [SerializeField] private TextMeshProUGUI nameText;   // 発言者の名前
@@ -169,6 +173,7 @@ public class NovelManager : MonoBehaviour
 
     #endregion
 
+
     #region 指定したCSVで会話を開始する
     /// <summary>
     /// 指定したCSVで会話を開始する
@@ -197,8 +202,13 @@ public class NovelManager : MonoBehaviour
         // vnContentsを表示
         vnContents.SetActive(true);
 
+        // フェードイン
+        conversationCanvasGroup.alpha = 0f;
+        StartCoroutine(FadeInConversation());
+
         // 最初の行(0を飛ばす)
         currentLine = 1;
+
         // 選択肢の状態をリセット
         choiceSourceLine = -1;
 
@@ -224,7 +234,14 @@ public class NovelManager : MonoBehaviour
         if (!isConversationActive)
             return;
 
-        // 会話終了
+        // フェードアウトコルーチン開始
+        StartCoroutine(EndConversationCoroutine());
+    }
+
+
+    private IEnumerator EndConversationCoroutine()
+    {
+        // 会話終了状態にする
         isConversationActive = false;
 
         // Auto / Skip解除
@@ -240,14 +257,87 @@ public class NovelManager : MonoBehaviour
         // 次へマーク更新
         UpdateNextMark();
 
-        // vnContentsを非表示
-        vnContents.SetActive(false);
+        // 立ち絵を画面外へ退場
+        if (characterManager != null)
+        {
+            //立ち絵を退場させる
+            yield return characterManager.ExitAllCharactersFast();
+        }
 
+        // Canvas全体をフェードアウト
+        yield return FadeOutConversation();
+
+        // Canvasを非表示
+        vnContents.SetActive(false);
 
         // 会話終了後の処理
         conversationFinishedCallback?.Invoke();
+
         // 処理を使い終わったら消す
         conversationFinishedCallback = null;
+    }
+    #endregion
+
+
+    #region 会話全体フェード
+
+    /// <summary>
+    /// 会話Canvas全体を透明な状態から徐々に表示する
+    /// </summary>
+    IEnumerator FadeInConversation()
+    {
+        // CanvasGroupが設定されていない場合は処理しない
+        if (conversationCanvasGroup == null)
+            yield break;
+
+        // 開始時は完全に透明
+        conversationCanvasGroup.alpha = 0f;
+
+        // 経過時間
+        float time = 0f;
+        // 指定したフェード時間が経過するまで繰り返す
+        while (time < conversationFadeTime)
+        {
+            // 経過時間を加算
+            time += Time.deltaTime;
+            // 経過時間に応じて透明度を0 → 1へ変化させる
+            conversationCanvasGroup.alpha = Mathf.Lerp(0f, 1f, time / conversationFadeTime);
+
+            // 1フレーム待つ
+            yield return null;
+        }
+        // 最後に完全に表示する
+        conversationCanvasGroup.alpha = 1f;
+    }
+
+
+    /// <summary>
+    /// 会話Canvas全体を徐々に透明にして非表示にする
+    /// </summary>
+    IEnumerator FadeOutConversation()
+    {
+        // CanvasGroupが設定されていない場合は処理しない
+        if (conversationCanvasGroup == null)
+            yield break;
+
+        // フェード開始時の透明度を取得
+        float startAlpha = conversationCanvasGroup.alpha;
+
+        // 経過時間
+        float time = 0f;
+        // 指定したフェード時間が経過するまで繰り返す
+        while (time < conversationFadeTime)
+        {
+            // 経過時間を加算
+            time += Time.deltaTime;
+            // 経過時間に応じて現在の透明度 → 0へ変化させる
+            conversationCanvasGroup.alpha = Mathf.Lerp(startAlpha, 0f, time / conversationFadeTime);
+
+            // 1フレーム待つ
+            yield return null;
+        }
+        // 最後に完全に透明にする
+        conversationCanvasGroup.alpha = 0f;
     }
     #endregion
 

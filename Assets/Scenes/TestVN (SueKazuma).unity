@@ -653,6 +653,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 843355503}
+  - component: {fileID: 843355504}
   m_Layer: 5
   m_Name: VNContents
   m_TagString: Untagged
@@ -688,6 +689,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!225 &843355504
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 843355502}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &913992653
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3374,6 +3387,8 @@ MonoBehaviour:
   cutInManager: {fileID: 8118122784340472943}
   choiceManager: {fileID: 1578076317}
   vnContents: {fileID: 843355502}
+  conversationCanvasGroup: {fileID: 843355504}
+  conversationFadeTime: 0.3
   nameText: {fileID: 7506424747354139560}
   messageUI: {fileID: 2719745499481968285}
   messageWindowImage: {fileID: 2932685710791309718}

@@ -130,6 +130,16 @@ public class VerticalGauge : MonoBehaviour
     // 目標マークの位置をゲージ値で保持する
     private float targetValue = MIN_GAUGE_VALUE;
 
+    private bool canReceiveInput = true;
+
+    /// <summary>
+    /// 外部から操作対象を切り替える
+    /// </summary>
+    public void SetInputEnabled(bool enabled)
+    {
+        canReceiveInput = enabled;
+    }
+
     // ==================================================
     // 外部公開情報
     // ==================================================
@@ -174,11 +184,20 @@ public class VerticalGauge : MonoBehaviour
         UpdateGauge();
     }
 
-    private void Update()
+ 
+     private void Update()
     {
         // 停止中は何もしない
         if (isStopped)
         {
+            return;
+        }
+
+        // 操作対象でないゲージはSpaceキーを受け付けない
+        if (!canReceiveInput)
+        {
+            // 操作対象外でもゲージの動きは維持する
+            MoveGauge();
             return;
         }
 
@@ -193,6 +212,7 @@ public class VerticalGauge : MonoBehaviour
         // ゲージを上下に動かす
         MoveGauge();
     }
+
 
     // ==================================================
     // 設定チェック
@@ -419,6 +439,9 @@ public class VerticalGauge : MonoBehaviour
     /// <summary>
     /// 目標マークをランダムな高さに配置する
     /// </summary>
+    /// <summary>
+    /// 目標マークをゲージ範囲内のランダムな高さに配置する
+    /// </summary>
     private void GenerateTargetMark()
     {
         if (gaugeArea == null || targetMark == null)
@@ -426,18 +449,39 @@ public class VerticalGauge : MonoBehaviour
             return;
         }
 
-        // ゲージの0～最大値の範囲から目標値を抽選
-        targetValue = Random.Range(MIN_GAUGE_VALUE, maxValue);
+        // ゲージ範囲の高さを取得
+        float areaHeight = gaugeArea.rect.height;
 
-        // 目標値を高さの割合に変換
-        float normalizedValue = targetValue / maxValue;
+        if (areaHeight <= MIN_GAUGE_VALUE)
+        {
+            Debug.LogError(
+                "VerticalGauge：ゲージ範囲の高さが0です。",
+                this);
+            return;
+        }
 
-        // ゲージ領域の下端から目標位置までの距離
-        float targetY = normalizedValue * gaugeArea.rect.height;
-
-        // マークの位置をゲージ領域の下端基準で設定
+        // マーカーの高さを考慮して、範囲内に収まる位置を決める
         RectTransform markRect = targetMark.rectTransform;
 
+        float halfMarkHeight = markRect.rect.height * 0.5f;
+
+        float minY = halfMarkHeight;
+        float maxY = areaHeight - halfMarkHeight;
+
+        // マーカーが大きすぎる場合は中央に配置する
+        if (maxY < minY)
+        {
+            minY = areaHeight * CENTER_X;
+            maxY = minY;
+        }
+
+        // マーカーの高さを考慮した範囲内で抽選
+        float targetY = Random.Range(minY, maxY);
+
+        // 位置をゲージ値として保存
+        targetValue = (targetY / areaHeight) * maxValue;
+
+        // ゲージ範囲と同じ親領域を基準に配置する
         markRect.anchorMin = new Vector2(
             MARK_ANCHOR_MIN_X,
             BOTTOM_Y);
@@ -454,15 +498,19 @@ public class VerticalGauge : MonoBehaviour
             MARK_POSITION_X,
             targetY);
 
-        // 横線をゲージ領域いっぱいに表示する
+        // 横幅を親領域いっぱいにする
         markRect.sizeDelta = new Vector2(
             MARK_WIDTH,
             markRect.sizeDelta.y);
 
         targetMark.gameObject.SetActive(true);
 
-        Debug.Log("目標位置：" + targetValue);
+        Debug.Log(
+            "目標マーカー位置：" + targetY +
+            " / ゲージ範囲の高さ：" + areaHeight,
+            this);
     }
+
 
     // ==================================================
     // 停止・判定

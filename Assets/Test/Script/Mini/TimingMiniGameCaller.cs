@@ -1,150 +1,537 @@
-
+﻿
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
+using TMPro;
+using UnityEngine.InputSystem;
 
-/// <summary>
-/// �~�j�Q�[��Prefab�𐶐����A�J�n�ƌ��ʒʒm���Ǘ�����N���X�B
-/// </summary>
+
 public class TimingMiniGameCaller : MonoBehaviour
 {
-    [Header("�~�j�Q�[��Prefab")]
-    [SerializeField] private GameObject timingMiniGamePrefab;
+    // ==================================================
+    // ミニゲームの種類
+    // ==================================================
 
-    [Header("�c�Q�[�W�~�j�Q�[��")]
-    [SerializeField] private VerticalGauge verticalGaugePrefab;
+    private enum MiniGameType
+    {
+        Circular,
+        VerticalGauge,
+        ArrowInput
+    }
 
-    [Header("��������e�I�u�W�F�N�g")]
-    [SerializeField] private Transform miniGameParent;
+    private const int MINI_GAME_TYPE_COUNT = 3;
 
-    [Header("���ʒʒm")]
-    [SerializeField] private UnityEvent onClear;
-    [SerializeField] private UnityEvent onMiss;
+    // ==================================================
+    // 開始方法
+    // ==================================================
+
+    public enum StartMode
+    {
+        AutoStart,
+        FirstArrowInput
+    }
+
+    // ==================================================
+    // Inspector設定：ミニゲームPrefab
+    // ==================================================
+
+    [Header("円形ミニゲームPrefab")]
+    [SerializeField]
+    private GameObject timingMiniGamePrefab;
+
+    [Header("4本の縦ゲージミニゲームPrefab")]
+    [SerializeField]
+    private VerticalGaugeManager verticalGaugeManagerPrefab;
+
+    [Header("矢印入力ミニゲームPrefab")]
+    [SerializeField]
+    private GameObject arrowInputMiniGamePrefab;
+
+    [Header("生成する親オブジェクト")]
+    [SerializeField]
+    private Transform miniGameParent;
+
+    // ==================================================
+    // Inspector設定：開始方法
+    // ==================================================
+
+    [Header("開始方法")]
+    [Tooltip("AutoStart：ゲーム開始後に自動開始\nFirstArrowInput：矢印キー入力で開始")]
+    [SerializeField]
+    private StartMode startMode = StartMode.AutoStart;
+
+    [Header("開始までの待ち時間")]
+    [Tooltip("自動開始時、ミニゲームを開始するまでの待ち時間（秒）")]
+    [SerializeField, Min(0f)]
+    private float startDelay = 0f;
+
+    // ==================================================
+    // Inspector設定：カウントダウン
+    // ==================================================
+
+    [Header("カウントダウン設定")]
+    [Tooltip("カウントダウンを表示するか")]
+    [SerializeField]
+    private bool showCountdown = false;
+
+    [Tooltip("カウントダウンの開始数字")]
+    [SerializeField, Min(1)]
+    private int countdownStartNumber = 3;
+
+    [Tooltip("数字を切り替える間隔（秒）")]
+    [SerializeField, Min(0.1f)]
+    private float countdownStepDuration = 1f;
+
+    [Tooltip("カウントダウン表示用TextMeshPro")]
+    [SerializeField]
+    private TMP_Text countdownText;
+
+    // ==================================================
+    // Inspector設定：開始用矢印
+    // ==================================================
+
+    [Header("開始用矢印の設定")]
+    [Tooltip("開始待ちのときに表示するTextMeshPro")]
+    [SerializeField]
+    private TMP_Text startArrowText;
+
+    [Tooltip("開始待ちのときに表示する文字")]
+    [SerializeField]
+    private string startArrowSymbol = "▶";
+
+    // ==================================================
+    // Inspector設定：結果通知
+    // ==================================================
+
+    [Header("結果通知")]
+    [SerializeField]
+    private UnityEvent onClear;
+
+    [SerializeField]
+    private UnityEvent onMiss;
+
+    // ==================================================
+    // 内部状態
+    // ==================================================
 
     private TimingMiniGame timingMiniGame;
+
+    private VerticalGaugeManager verticalGaugeManagerInstance;
+
+    private ArrowInputMiniGame1 arrowInputMiniGame;
+
+    private MiniGameType currentMiniGameType;
+
     private bool waitingForResult;
     private bool resultNotified;
 
-    // �������ꂽ�c�Q�[�W�~�j�Q�[��
-    private VerticalGauge verticalGaugeInstance;
-    // ����A�c�Q�[�W��I���������ǂ���
-    private bool isVerticalGaugeGame = false;
+    // 開始演出中かどうか
+    private bool isStarting;
 
-    /// <summary>
-    /// �~�j�Q�[��Prefab�𐶐����ĊJ�n����B
-    /// </summary>
+    // 最初の矢印入力を受け取って開始処理に入ったか
+    private bool isWaitingForArrowStart;
 
-    /// <summary>
-    /// �G�̍U�����ɌĂяo����A
-    /// �~�j�Q�[��Prefab�𐶐����ĊJ�n����B
-    /// </summary>
+    // 開始演出用コルーチン
+    private Coroutine startCoroutine;
 
-    public void StartTimingMiniGame()
+    // ==================================================
+    // 初期化
+    // ==================================================
+
+    private void Start()
     {
-        Debug.Log("[TimingMiniGameCaller] �~�j�Q�[���Ăяo��", this);
+        // シーン開始時は開始用UIを非表示にする。
+        // ミニゲームの開始はバトルマネージャーからの呼び出しに任せる。
+        HideStartUI();
+    }
 
-        // ��d�N����h�~
-        if (waitingForResult)
+    // ==================================================
+    // 最初の矢印入力を監視
+    // ==================================================
+
+    private void Update()
+    {
+        // 矢印入力で開始するモード以外は監視しない
+        if (startMode != StartMode.FirstArrowInput)
         {
-            Debug.LogWarning("�~�j�Q�[���͂��łɎ��s���ł��B", this);
             return;
         }
 
-        // ������̊m�F
-        if (miniGameParent == null)
+        // 開始演出中・プレイ中・開始処理中は受け付けない
+        if (isStarting || isWaitingForArrowStart || waitingForResult)
         {
-            Debug.LogError("Mini Game Parent���ݒ肳��Ă��܂���B", this);
             return;
         }
 
-        // 2��ނƂ�Prefab���ݒ肳��Ă��邩�m�F
-        if (timingMiniGamePrefab == null || verticalGaugePrefab == null)
+        // キーボードが存在しない場合は何もしない
+        if (Keyboard.current == null)
         {
-            Debug.LogError(
-                "�~�`�~�j�Q�[���Əc�Q�[�W�~�j�Q�[����Prefab�𗼕��ݒ肵�Ă��������B",
-                this
-            );
             return;
         }
 
-        // �O��̌��ʂ����Z�b�g
-        timingMiniGame = null;
-        verticalGaugeInstance = null;
-        resultNotified = false;
-        waitingForResult = true;
+        // いずれかの矢印キーが押されたか確認
+        bool arrowPressed =
+            Keyboard.current.upArrowKey.wasPressedThisFrame ||
+            Keyboard.current.downArrowKey.wasPressedThisFrame ||
+            Keyboard.current.leftArrowKey.wasPressedThisFrame ||
+            Keyboard.current.rightArrowKey.wasPressedThisFrame;
 
-        // 0�Ȃ�~�`�A1�Ȃ�c�Q�[�W
-        isVerticalGaugeGame = Random.Range(0, 2) == 1;
-
-        if (isVerticalGaugeGame)
+        if (!arrowPressed)
         {
-            // �c�Q�[�W�~�j�Q�[���𐶐�
-            GameObject miniGameObject = Instantiate(
-                verticalGaugePrefab.gameObject,
-                miniGameParent,
-                false
-            );
-
-            miniGameObject.SetActive(true);
-
-            verticalGaugeInstance =
-                miniGameObject.GetComponent<VerticalGauge>();
-
-            if (verticalGaugeInstance == null)
-            {
-                Debug.LogError(
-                    "�c�Q�[�WPrefab��VerticalGauge������܂���B",
-                    miniGameObject
-                );
-
-                Destroy(miniGameObject);
-                waitingForResult = false;
-                return;
-            }
-
-            // �c�Q�[�W���J�n
-            verticalGaugeInstance.StartMiniGame();
-
-            Debug.Log("[TimingMiniGameCaller] �c�Q�[�W���J�n", this);
+            return;
         }
-        else
+
+        // 二重受付を防ぐ
+        isWaitingForArrowStart = true;
+
+        // 開始用矢印を非表示にする
+        if (startArrowText != null)
         {
-            // �~�`�~�j�Q�[���𐶐�
-            GameObject miniGameObject = Instantiate(
-                timingMiniGamePrefab.gameObject,
-                miniGameParent,
-                false
-            );
-
-            miniGameObject.SetActive(true);
-
-            timingMiniGame =
-                miniGameObject.GetComponent<TimingMiniGame>();
-
-            if (timingMiniGame == null)
-            {
-                Debug.LogError(
-                    "�~�`�~�j�Q�[��Prefab��TimingMiniGame������܂���B",
-                    miniGameObject
-                );
-
-                Destroy(miniGameObject);
-                waitingForResult = false;
-                return;
-            }
-
-            // �~�`�~�j�Q�[�����J�n
-            timingMiniGame.StartMiniGame();
-
-            Debug.Log("[TimingMiniGameCaller] �~�`�~�j�Q�[�����J�n", this);
+            startArrowText.gameObject.SetActive(false);
         }
+
+        // 次のフレームで開始し、開始キーの誤入力を防ぐ
+        startCoroutine = StartCoroutine(StartAfterArrowInput());
+    }
+
+    // ==================================================
+    // 開始演出の開始
+    // ==================================================
+
+    /// <summary>
+    /// 自動開始用の開始演出を開始する。
+    /// </summary>
+    private void BeginStartSequence()
+    {
+        if (isStarting || waitingForResult)
+        {
+            return;
+        }
+
+        isStarting = true;
+        startCoroutine = StartCoroutine(StartMiniGameRoutine());
     }
 
     /// <summary>
-    /// �~�j�Q�[���̏I�����Ď�����B
+    /// 開始用矢印を表示する。
     /// </summary>
-    private void Update()
+    private void ShowStartArrow()
     {
-        // ���ʑ҂����łȂ��A�܂��͒ʒm�ς݂Ȃ牽�����Ȃ�
+        if (startArrowText == null)
+        {
+            Debug.LogWarning(
+                "TimingMiniGameCaller：開始用矢印Textが未設定です。",
+                this);
+
+            return;
+        }
+
+        startArrowText.text = startArrowSymbol;
+        startArrowText.gameObject.SetActive(true);
+    }
+
+    // ==================================================
+    // 自動開始コルーチン
+    // ==================================================
+
+    /// <summary>
+    /// 待ち時間とカウントダウンの後にミニゲームを開始する。
+    /// </summary>
+    private IEnumerator StartMiniGameRoutine()
+    {
+        // 指定時間だけ待つ
+        if (startDelay > 0f)
+        {
+            yield return new WaitForSecondsRealtime(startDelay);
+        }
+
+        // カウントダウンを表示する設定の場合
+        if (showCountdown)
+        {
+            if (countdownText == null)
+            {
+                Debug.LogWarning(
+                    "TimingMiniGameCaller：カウントダウン用Textが未設定です。",
+                    this);
+            }
+            else
+            {
+                countdownText.gameObject.SetActive(true);
+
+                // 3、2、1など、設定された数字からカウントする
+                int startNumber = Mathf.Max(1, countdownStartNumber);
+
+                for (int count = startNumber; count > 0; count--)
+                {
+                    countdownText.text = count.ToString();
+
+                    yield return new WaitForSecondsRealtime(
+                        Mathf.Max(0.1f, countdownStepDuration));
+                }
+
+                countdownText.gameObject.SetActive(false);
+            }
+        }
+
+        // 念のため、開始演出用UIを非表示にする
+        HideStartUI();
+
+        // ランダムなミニゲームを開始する
+        StartTimingMiniGame();
+
+        isStarting = false;
+        startCoroutine = null;
+    }
+
+    // ==================================================
+    // 矢印入力後の開始コルーチン
+    // ==================================================
+
+    /// <summary>
+    /// 開始に使用した矢印キーがミニゲーム側に渡らないよう、
+    /// 次のフレームで開始する。
+    /// </summary>
+    private IEnumerator StartAfterArrowInput()
+    {
+        yield return null;
+
+        // 開始演出用UIを非表示にする
+        HideStartUI();
+
+        // ランダムなミニゲームを開始する
+        StartTimingMiniGame();
+
+        isWaitingForArrowStart = false;
+        startCoroutine = null;
+    }
+
+    // ==================================================
+    // 開始演出用UIの非表示
+    // ==================================================
+
+    private void HideStartUI()
+    {
+        if (startArrowText != null)
+        {
+            startArrowText.gameObject.SetActive(false);
+        }
+
+        if (countdownText != null)
+        {
+            countdownText.gameObject.SetActive(false);
+        }
+    }
+
+    // ==================================================
+    // ミニゲーム開始
+    // ==================================================
+
+    /// <summary>
+    /// 3種類のミニゲームからランダムに1つを開始する。
+    /// 敵の攻撃時など、外部からも呼び出せる。
+    /// </summary>
+    public void StartTimingMiniGame()
+    {
+        Debug.Log("[TimingMiniGameCaller] ミニゲーム呼び出し", this);
+
+        // 二重起動を防止
+        if (waitingForResult)
+        {
+            Debug.LogWarning("ミニゲームはすでに実行中です。", this);
+            return;
+        }
+
+        // 開始演出中の外部呼び出しを防止
+        if (isStarting && startCoroutine == null)
+        {
+            Debug.LogWarning("ミニゲームの開始演出中です。", this);
+            return;
+        }
+
+        // 生成先を確認
+        if (miniGameParent == null)
+        {
+            Debug.LogError(
+                "Mini Game Parentが設定されていません。",
+                this);
+            return;
+        }
+
+        // 前回の情報をリセット
+        timingMiniGame = null;
+        verticalGaugeManagerInstance = null;
+        arrowInputMiniGame = null;
+
+        resultNotified = false;
+
+        // 3種類からランダムに選択
+        currentMiniGameType =
+            (MiniGameType)Random.Range(0, MINI_GAME_TYPE_COUNT);
+
+        switch (currentMiniGameType)
+        {
+            case MiniGameType.Circular:
+                StartCircularGame();
+                break;
+
+            case MiniGameType.VerticalGauge:
+                StartVerticalGaugeGame();
+                break;
+
+            case MiniGameType.ArrowInput:
+                StartArrowInputGame();
+                break;
+        }
+    }
+
+    // ==================================================
+    // 円形ミニゲーム開始
+    // ==================================================
+
+    private void StartCircularGame()
+    {
+        if (timingMiniGamePrefab == null)
+        {
+            Debug.LogError(
+                "円形ミニゲームPrefabが設定されていません。",
+                this);
+            return;
+        }
+
+        GameObject miniGameObject = Instantiate(
+            timingMiniGamePrefab,
+            miniGameParent,
+            false);
+
+        miniGameObject.SetActive(true);
+
+        timingMiniGame =
+            miniGameObject.GetComponent<TimingMiniGame>();
+
+        if (timingMiniGame == null)
+        {
+            Debug.LogError(
+                "円形ミニゲームPrefabにTimingMiniGameがありません。",
+                miniGameObject);
+
+            Destroy(miniGameObject);
+            return;
+        }
+
+        // 円形ミニゲームを開始
+        timingMiniGame.StartMiniGame();
+
+        waitingForResult = true;
+
+        Debug.Log(
+            "[TimingMiniGameCaller] 円形ミニゲームを開始",
+            this);
+    }
+
+    // ==================================================
+    // 4本の縦ゲージミニゲーム開始
+    // ==================================================
+
+    private void StartVerticalGaugeGame()
+    {
+        if (verticalGaugeManagerPrefab == null)
+        {
+            Debug.LogError(
+                "4本の縦ゲージミニゲームPrefabが設定されていません。",
+                this);
+            return;
+        }
+
+        GameObject miniGameObject = Instantiate(
+            verticalGaugeManagerPrefab.gameObject,
+            miniGameParent,
+            false);
+
+        miniGameObject.SetActive(true);
+
+        verticalGaugeManagerInstance =
+            miniGameObject.GetComponent<VerticalGaugeManager>();
+
+        if (verticalGaugeManagerInstance == null)
+        {
+            Debug.LogError(
+                "縦ゲージPrefabにVerticalGaugeManagerがありません。",
+                miniGameObject);
+
+            Destroy(miniGameObject);
+            return;
+        }
+
+        // 4本の縦ゲージを開始
+        if (!verticalGaugeManagerInstance.StartMiniGame())
+        {
+            Debug.LogError(
+                "縦ゲージミニゲームを開始できませんでした。",
+                miniGameObject);
+
+            Destroy(miniGameObject);
+            verticalGaugeManagerInstance = null;
+            return;
+        }
+
+        waitingForResult = true;
+
+        Debug.Log(
+            "[TimingMiniGameCaller] 4本の縦ゲージを開始",
+            this);
+    }
+
+    // ==================================================
+    // 矢印入力ミニゲーム開始
+    // ==================================================
+
+    private void StartArrowInputGame()
+    {
+        if (arrowInputMiniGamePrefab == null)
+        {
+            Debug.LogError(
+                "矢印入力ミニゲームPrefabが設定されていません。",
+                this);
+            return;
+        }
+
+        GameObject miniGameObject = Instantiate(
+            arrowInputMiniGamePrefab,
+            miniGameParent,
+            false);
+
+        miniGameObject.SetActive(true);
+
+        arrowInputMiniGame =
+            miniGameObject.GetComponent<ArrowInputMiniGame1>();
+
+        if (arrowInputMiniGame == null)
+        {
+            Debug.LogError(
+                "矢印入力PrefabにArrowInputMiniGame1がありません。",
+                miniGameObject);
+
+            Destroy(miniGameObject);
+            return;
+        }
+
+        // 矢印入力ミニゲームを開始
+        arrowInputMiniGame.StartArrowMiniGame();
+
+        waitingForResult = true;
+
+        Debug.Log(
+            "[TimingMiniGameCaller] 矢印入力ミニゲームを開始",
+            this);
+    }
+
+    // ==================================================
+    // 結果確認
+    // ==================================================
+
+    private void LateUpdate()
+    {
+        // 結果待ち中でなければ何もしない
         if (!waitingForResult || resultNotified)
         {
             return;
@@ -154,80 +541,130 @@ public class TimingMiniGameCaller : MonoBehaviour
         bool isClear = false;
         GameObject finishedGameObject = null;
 
-        if (isVerticalGaugeGame)
+        // ----------------------------------------------
+        // 円形ミニゲーム
+        // ----------------------------------------------
+
+        if (currentMiniGameType == MiniGameType.Circular)
         {
-            // �c�Q�[�W�̑��݊m�F
-            if (verticalGaugeInstance == null)
-            {
-                Debug.LogError(
-                    "[TimingMiniGameCaller] �c�Q�[�W��������܂���B",
-                    this
-                );
-
-                waitingForResult = false;
-                return;
-            }
-
-            // �c�Q�[�W�̌��ʂ��擾
-            isFinished = verticalGaugeInstance.TryGetResult(
-                out isClear
-            );
-
-            finishedGameObject = verticalGaugeInstance.gameObject;
-        }
-        else
-        {
-            // �~�`�~�j�Q�[���̑��݊m�F
             if (timingMiniGame == null)
             {
-                Debug.LogError(
-                    "[TimingMiniGameCaller] �~�`�~�j�Q�[����������܂���B",
-                    this
-                );
-
-                waitingForResult = false;
+                HandleMissingMiniGame("円形ミニゲーム");
                 return;
             }
 
-            // �~�`�~�j�Q�[���̏I�����m�F
             isFinished = timingMiniGame.IsFinished();
 
             if (isFinished)
             {
                 isClear = timingMiniGame.IsClear();
+                finishedGameObject = timingMiniGame.gameObject;
             }
-
-            finishedGameObject = timingMiniGame.gameObject;
         }
 
-        // �܂��I�����Ă��Ȃ���Α҂�
+        // ----------------------------------------------
+        // 4本の縦ゲージミニゲーム
+        // ----------------------------------------------
+
+        else if (currentMiniGameType == MiniGameType.VerticalGauge)
+        {
+            if (verticalGaugeManagerInstance == null)
+            {
+                HandleMissingMiniGame("縦ゲージミニゲーム");
+                return;
+            }
+
+            isFinished = verticalGaugeManagerInstance.IsFinished();
+
+            if (isFinished)
+            {
+                isClear = verticalGaugeManagerInstance.IsClear();
+
+                finishedGameObject =
+                    verticalGaugeManagerInstance.gameObject;
+            }
+        }
+
+        // ----------------------------------------------
+        // 矢印入力ミニゲーム
+        // ----------------------------------------------
+
+        else if (currentMiniGameType == MiniGameType.ArrowInput)
+        {
+            if (arrowInputMiniGame == null)
+            {
+                HandleMissingMiniGame("矢印入力ミニゲーム");
+                return;
+            }
+
+            isFinished = arrowInputMiniGame.IsFinished;
+
+            if (isFinished)
+            {
+                isClear = arrowInputMiniGame.IsClear;
+
+                finishedGameObject =
+                    arrowInputMiniGame.gameObject;
+            }
+        }
+
+        // まだ終了していなければ待つ
         if (!isFinished)
         {
             return;
         }
 
-        // ���ʂ̓�d�ʒm��h�~
+        // 結果の二重通知を防止
         resultNotified = true;
         waitingForResult = false;
 
-        // �����E���s��ʒm
+        // ----------------------------------------------
+        // 成功・失敗を通知
+        // ----------------------------------------------
+
         if (isClear)
         {
-            Debug.Log("[TimingMiniGameCaller] �~�j�Q�[�������I", this);
+            Debug.Log(
+                "[TimingMiniGameCaller] ミニゲーム成功！",
+                this);
+
             onClear?.Invoke();
         }
         else
         {
-            Debug.LogWarning("[TimingMiniGameCaller] �~�j�Q�[�����s�I", this);
+            Debug.LogWarning(
+                "[TimingMiniGameCaller] ミニゲーム失敗！",
+                this);
+
             onMiss?.Invoke();
         }
 
-        // �����E���s�ǂ���ł���A�N�e�B�u�ɂ���
+        // 終了したミニゲームを非アクティブにする
         if (finishedGameObject != null)
         {
             finishedGameObject.SetActive(false);
         }
 
-        Debug.Log("[TimingMiniGameCaller] �~�j�Q�[�����A�N�e�B�u�ɂ��܂����B", this);
+        // 次回の起動に備えて参照を解除
+        timingMiniGame = null;
+        verticalGaugeManagerInstance = null;
+        arrowInputMiniGame = null;
+
+        Debug.Log(
+            "[TimingMiniGameCaller] ミニゲームを非アクティブにしました。",
+            this);
+    }
+
+    // ==================================================
+    // ミニゲームが見つからない場合
+    // ==================================================
+
+    private void HandleMissingMiniGame(string miniGameName)
+    {
+        Debug.LogError(
+            $"[TimingMiniGameCaller] {miniGameName}が見つかりません。",
+            this);
+
+        waitingForResult = false;
     }
 }

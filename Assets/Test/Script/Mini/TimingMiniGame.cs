@@ -52,6 +52,17 @@ public class TimingMiniGame : MonoBehaviour
         ReverseDirectionThreeTimes
     }
 
+    /// <summary>
+    /// スキルチェックの難易度。
+    /// </summary>
+    public enum DifficultyType
+    {
+        Easy,
+        Normal,
+        Hard,
+        Expert
+    }
+
     private enum GameState
     {
         Waiting,
@@ -162,6 +173,12 @@ public class TimingMiniGame : MonoBehaviour
     private float currentNeedleAngle;
 
     // マークの開始角度
+
+    [Header("難易度設定")]
+    [Tooltip("使用する難易度")]
+    [SerializeField]
+    private DifficultyType difficultyType = DifficultyType.Normal;
+
     private float targetStartAngle;
 
     // 現在までの成功回数
@@ -185,7 +202,45 @@ public class TimingMiniGame : MonoBehaviour
     // 円の頂点から開始する角度
     private const float StartNeedleAngle = 0f;
 
- 
+    [System.Serializable]
+    private struct DifficultySettings
+    {
+        [Tooltip("針の回転速度")]
+        public float needleSpeed;
+
+        [Tooltip("マークの角度")]
+        public float markAngle;
+    }
+
+    [Header("難易度ごとの設定")]
+    [SerializeField]
+    private DifficultySettings easySettings = new DifficultySettings
+    {
+        needleSpeed = 250f,
+        markAngle = 45f
+    };
+
+    [SerializeField]
+    private DifficultySettings normalSettings = new DifficultySettings
+    {
+        needleSpeed = 400f,
+        markAngle = 30f
+    };
+
+    [SerializeField]
+    private DifficultySettings hardSettings = new DifficultySettings
+    {
+        needleSpeed = 600f,
+        markAngle = 20f
+    };
+
+    [SerializeField]
+    private DifficultySettings expertSettings = new DifficultySettings
+    {
+        needleSpeed = 800f,
+        markAngle = 10f
+    };
+
     private void Start()
     {
         // 針のImageを取得する
@@ -254,6 +309,8 @@ public class TimingMiniGame : MonoBehaviour
     /// </summary>
     public void StartMiniGame()
     {
+        ApplyDifficulty();
+
         // 残っている待機処理を停止する
         if (successCoroutine != null)
         {
@@ -725,5 +782,39 @@ public class TimingMiniGame : MonoBehaviour
     public float GetTargetAngle()
     {
         return targetStartAngle;
+    }
+
+    /// <summary>
+    /// 選択された難易度の設定を適用する。
+    /// </summary>
+    private void ApplyDifficulty()
+    {
+        DifficultySettings settings;
+
+        switch (difficultyType)
+        {
+            case DifficultyType.Easy:
+                settings = easySettings;
+                break;
+
+            case DifficultyType.Normal:
+                settings = normalSettings;
+                break;
+
+            case DifficultyType.Hard:
+                settings = hardSettings;
+                break;
+
+            case DifficultyType.Expert:
+                settings = expertSettings;
+                break;
+
+            default:
+                settings = normalSettings;
+                break;
+        }
+
+        needleSpeed = settings.needleSpeed;
+        markAngle = settings.markAngle;
     }
 }

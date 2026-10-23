@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class BattaleCommandManager : MonoBehaviour
 {
@@ -31,6 +32,10 @@ public class BattaleCommandManager : MonoBehaviour
     private int selectCommandIndex = 0;
     private Vector3 targetFramePosition;
 
+    [Header("入力設定")]
+    [SerializeField] private InputActionReference navigateAction;
+    [SerializeField] private InputActionReference submitAction;
+
     private void Start()
     {
         // 最初に選択するボタンを設定
@@ -61,22 +66,27 @@ public class BattaleCommandManager : MonoBehaviour
         if(battleCommandUI == null || !battleCommandUI.activeSelf) return;
         if(commandButton == null || commandButton.Length == 0 || selectFrame == null ) return;
 
-        if(Input.GetKeyDown(KeyCode.LeftArrow))
+        if (navigateAction.action.WasPressedThisFrame())
         {
-            MoveSelection(-1);
-        }
-        else if(Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            MoveSelection(1);
+            Vector2 navigate = navigateAction.action.ReadValue<Vector2>();
+
+            if (navigate.x < -0.5f)
+            {
+                MoveSelection(-1);
+            }
+            else if (navigate.x > 0.5f)
+            {
+                MoveSelection(1);
+            }
         }
 
-        if(Input.GetKeyDown(KeyCode.Space))
+        if (submitAction.action.WasPressedThisFrame())
         {
             commandButton[selectCommandIndex].onClick.Invoke();
         }
 
         // 選択フレームを目標位置までイージングで移動させる
-        if(isSliding)
+        if (isSliding)
         {
             slideTimer += Time.unscaledDeltaTime;
 
@@ -87,7 +97,7 @@ public class BattaleCommandManager : MonoBehaviour
 
             selectFrame.anchoredPosition = Vector2.Lerp(startFramePosition, new Vector2(targetFramePosition.x, targetFramePosition.y), easedT);
 
-            if(t >= 1f)
+            if (t >= 1f)
             {
                 selectFrame.anchoredPosition = new Vector2(targetFramePosition.x, targetFramePosition.y);
 

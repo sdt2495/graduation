@@ -53,7 +53,8 @@ public class EnemySpawner : MonoBehaviour
     /// <returns></returns>
     private Enemy SpawnEnemy(Transform point)
     {
-        Enemy enemy = Instantiate(enemyPrefab, point.position, Quaternion.identity);
+        Enemy enemy = Instantiate(enemyPrefab, point.position, Quaternion.Euler(0f,180f,0f));
+        Debug.Log($"ê∂ê¨íºå„ÇÃâÒì]{enemy.transform.eulerAngles}");
 
         enemy.SetRandomCommands();
 

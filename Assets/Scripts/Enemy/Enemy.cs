@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections;
+using System.Runtime.CompilerServices;
 
 public enum CommandType
 {
@@ -47,6 +48,8 @@ public class Enemy : MonoBehaviour
     [Header("ダメージフラッシュ")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float flashDuration = 0.1f;
+    [SerializeField] private Color normalColor = Color.white;
+    [SerializeField] private Color flashColor = Color.red;
 
     private Coroutine coroutine;
 
@@ -141,13 +144,13 @@ public class Enemy : MonoBehaviour
 
     private IEnumerator FlashWhite()
     {
-        Color originalColor = spriteRenderer.color;
-
-        spriteRenderer.color = Color.white;
+        spriteRenderer.color = flashColor;
 
         yield return new WaitForSeconds(flashDuration);
 
-        spriteRenderer.color = originalColor;
+        spriteRenderer.color = normalColor;
+
+        coroutine = null;
     }
 
     public void ResetCommand()

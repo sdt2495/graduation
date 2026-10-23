@@ -142,4 +142,30 @@ public class TitleManager : MonoBehaviour
     {
         StartSceneLoad("ConfigScene");
     }
+
+    // 画面切り替え演出を初期状態に戻す
+    public void ResetTransition()
+    {
+        StopAllCoroutines();
+
+        isLoading = false;
+
+        if (transitionImage != null)
+        {
+            // アニメーション画像を非表示にする
+            transitionImage.gameObject.SetActive(false);
+
+            // 画面左外の初期位置に戻す
+            RectTransform canvasRect =
+                transitionImage.parent as RectTransform;
+
+            float canvasWidth = canvasRect.rect.width;
+            float imageWidth = transitionImage.rect.width;
+
+            transitionImage.anchoredPosition = new Vector2(
+                -canvasWidth / 2f - imageWidth / 2f,
+                0f
+            );
+        }
+    }
 }

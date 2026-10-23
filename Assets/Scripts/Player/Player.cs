@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
@@ -23,6 +24,9 @@ public class Player : MonoBehaviour
 
     private bool isCommandAnimation = false;
     private bool isCommandInput = false;
+
+    [Header("ì¸óÕê›íË")]
+    [SerializeField] private InputActionReference moveAction;
 
     // äOïîéQè∆óp
     public int CurrentHP { get { return curretHP; } }
@@ -58,21 +62,32 @@ public class Player : MonoBehaviour
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.D))
+        if(moveAction.action.WasPressedThisFrame())
         {
-            CheckCommaned(CommandType.Left);
-        }
-        else if(Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.K))
-        {
-            CheckCommaned(CommandType.Right);
-        }
-        else if(Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.J))
-        {
-            CheckCommaned(CommandType.Up);
-        }
-        else if( Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.F))
-        {
-            CheckCommaned(CommandType.Down);
+            Vector2 input = moveAction.action.ReadValue<Vector2>();
+
+            if(Mathf.Abs(input.x) > Mathf.Abs(input.y))
+            {
+                if(input.x < -0.5f)
+                {
+                    CheckCommaned(CommandType.Left);
+                }
+                else if(input.x > 0.5f)
+                {
+                    CheckCommaned(CommandType.Right);
+                }
+            }
+            else
+            {
+                if(input.y > 0.5f)
+                {
+                    CheckCommaned(CommandType.Up);
+                }
+                else if(input.y < -0.5f)
+                {
+                    CheckCommaned(CommandType.Down);
+                }
+            }
         }
     }
 

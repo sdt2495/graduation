@@ -13,6 +13,7 @@ public class BattaleCommandManager : MonoBehaviour
     [SerializeField] private Player player;
     [SerializeField] private BattleManager battleManager;
     [SerializeField] private GameObject battleCommandUI;
+    [SerializeField] private GameObject timerUI;
     
     [Header("フレーム設定")]
     [SerializeField] private RectTransform selectFrame;
@@ -129,20 +130,6 @@ public class BattaleCommandManager : MonoBehaviour
 
         targetFramePosition = new Vector3(buttonRect.anchoredPosition.x, buttonRect.anchoredPosition.y, buttonRect.localPosition.z);
 
-        // 端を超えたときだけ即座に移動
-        //if(wrapped)
-        //{
-        //    selectFrame.anchoredPosition = new Vector2(targetFramePosition.x, targetFramePosition.y);
-        //    isSliding = false;
-        //}
-        //else
-        //{
-        //    // 通常移動はカーブをつけてスライド
-        //    startFramePosition = selectFrame.anchoredPosition;
-        //    slideTimer = 0f;
-        //    isSliding = true;
-        //}
-
         // 通常移動はカーブをつけてスライド
         startFramePosition = selectFrame.anchoredPosition;
         slideTimer = 0f;
@@ -177,6 +164,9 @@ public class BattaleCommandManager : MonoBehaviour
     {
         // コマンド選択UIを非表示にする
         battleCommandUI.SetActive(false);
+
+        // タイマー系UIを表示する
+        timerUI.SetActive(true);
 
         // 戦闘開始
         battleManager.StartBattle();

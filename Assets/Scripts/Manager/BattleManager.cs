@@ -18,6 +18,13 @@ public class BattleManager : MonoBehaviour
 
     [Header("TimerUI")]
     [SerializeField] private TMP_Text timerText;
+    [Header("Timerの色設定")]
+    [SerializeField] private Color noramlColor = Color.white;
+    [SerializeField] private Color warningColor = Color.yellow;
+    [SerializeField] private Color dangerColor = Color.red;
+
+    [Header("TimerBar")]
+    [SerializeField] private UnityEngine.UI.Image timerBarFill;
 
     [SerializeField] private BattaleCommandManager battleCommandManager;
 
@@ -170,6 +177,31 @@ public class BattleManager : MonoBehaviour
     private void UpdateTimerText()
     {
         timerText.text = reaminingTime.ToString("F2");
+        Color currentColor;
+
+        if(reaminingTime > 2f)
+        {
+            // 残り時間が2秒より多い場合は通常色
+            currentColor = noramlColor;
+        }
+        else if(reaminingTime > 1f)
+        {
+            // 残り２秒から１秒にかけて黄色から赤色へ変化
+            float t = 2f - reaminingTime;
+            currentColor = Color.Lerp(warningColor, dangerColor, t);
+        }
+        else
+        {
+            // 残り１秒以下は赤色
+            currentColor = dangerColor;
+        }
+
+        // テキストとバーの色を同期
+        timerText.color = currentColor;
+        timerBarFill.color = currentColor;
+
+        // 残り時間に応じてバーを短くする
+        timerBarFill.fillAmount = Mathf.Clamp01(reaminingTime / battleTimeLimit);
     }
 
     public void StartTimer()

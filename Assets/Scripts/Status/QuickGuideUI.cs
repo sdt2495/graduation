@@ -20,19 +20,29 @@ public class QuickGuideUI : MonoBehaviour
     public GameObject quickGuidePanel;
     public Button closeButton;
 
-    [Header("スクロール一覧")]
+    [Header("切り替えボタン")]
+    public Button StatusTabButton;
+    public Button ActionTabButton;
+
+    [Header("スクロール")]
     public ScrollRect statusScrollRect;
+    public GameObject StatusList;
+    public GameObject ActionList;
 
     [Header("表示欄")]
     public TMP_Text statusNameText;
     public TMP_Text statusDescriptionText;
     public Image statusImage;
 
-    [Header("ステータス選択ボタン")]
-    public Button[] statusButtons;
+    [Header("ステータス")]
+    public Button[] StatusButtons;
+    public StatusInfo[] StatusInfos;
 
-    [Header("説明データ（ボタンと同じ順番）")]
-    public StatusInfo[] statusInfos;
+    [Header("アクション")]
+    public Button[] ActionButtons;
+    public StatusInfo[] ActionInfos;
+
+    private bool showingMain = true;
 
     private void Start()
     {
@@ -42,19 +52,35 @@ public class QuickGuideUI : MonoBehaviour
         if (closeButton != null)
             closeButton.onClick.AddListener(CloseGuide);
 
-        if (statusButtons != null)
-        {
-            for (int i = 0; i < statusButtons.Length; i++)
-            {
-                int index = i;
+        if (StatusTabButton != null)
+            StatusTabButton.onClick.AddListener(ShowMainStatuses);
 
-                if (statusButtons[i] != null)
-                {
-                    statusButtons[i].onClick.AddListener(
-                        () => ShowStatus(index)
-                    );
-                }
-            }
+        if (ActionTabButton != null)
+            ActionTabButton.onClick.AddListener(ShowSubStatuses);
+
+        RegisterStatusButtons(StatusButtons, true);
+        RegisterStatusButtons(ActionButtons, false);
+
+        UpdateStatusLists();
+    }
+
+    private void RegisterStatusButtons(Button[] buttons, bool isMain)
+    {
+        if (buttons == null) return;
+
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            if (buttons[i] == null) continue;
+
+            int index = i;
+
+            buttons[i].onClick.AddListener(() =>
+            {
+                if (isMain)
+                    ShowStatus(StatusInfos, index);
+                else
+                    ShowStatus(ActionInfos, index);
+            });
         }
     }
 
@@ -63,14 +89,7 @@ public class QuickGuideUI : MonoBehaviour
         if (quickGuidePanel != null)
             quickGuidePanel.SetActive(true);
 
-        // スクロール位置を一番上に戻す
-        if (statusScrollRect != null)
-        {
-            statusScrollRect.StopMovement();
-            statusScrollRect.verticalNormalizedPosition = 1f;
-        }
-
-        ShowStatus(0);
+        ShowMainStatuses();
     }
 
     public void CloseGuide()
@@ -79,14 +98,64 @@ public class QuickGuideUI : MonoBehaviour
             quickGuidePanel.SetActive(false);
     }
 
-    public void ShowStatus(int index)
+    public void ShowMainStatuses()
     {
-        if (statusInfos == null ||
+        showingMain = true;
+        UpdateStatusLists();
+
+        ResetScroll();
+
+        ShowStatus(StatusInfos, 0);
+    }
+
+    public void ShowSubStatuses()
+    {
+        showingMain = false;
+        UpdateStatusLists();
+
+        ResetScroll();
+
+        ShowStatus(ActionInfos, 0);
+    }
+
+    private void UpdateStatusLists()
+    {
+        if (StatusList != null)
+            StatusList.SetActive(showingMain);
+
+        if (ActionList != null)
+            ActionList.SetActive(!showingMain);
+
+        // 選択中のタブを少し大きくする
+        SetTabScale(StatusTabButton, showingMain);
+        SetTabScale(ActionTabButton, !showingMain);
+    }
+
+    private void SetTabScale(Button button, bool selected)
+    {
+        if (button == null) return;
+
+        float scale = selected ? 1.1f : 1.0f;
+        button.transform.localScale = new Vector3(scale, scale, 1f);
+    }
+
+    private void ResetScroll()
+    {
+        if (statusScrollRect == null) return;
+
+        Canvas.ForceUpdateCanvases();
+        statusScrollRect.StopMovement();
+        statusScrollRect.verticalNormalizedPosition = 1f;
+    }
+
+    private void ShowStatus(StatusInfo[] infos, int index)
+    {
+        if (infos == null ||
             index < 0 ||
-            index >= statusInfos.Length)
+            index >= infos.Length)
             return;
 
-        StatusInfo info = statusInfos[index];
+        StatusInfo info = infos[index];
 
         if (statusNameText != null)
             statusNameText.text = info.statusName;

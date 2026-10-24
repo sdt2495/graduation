@@ -25,4 +25,4 @@ MonoBehaviour:
     message: "\u3050\u306F\u3063\uFF01"
   - type: 3
     face: 1
-    message: "<color=green>\u56DE\u5FA9\u3042\u308A\u304C\u3068\u3046\u306D\u3047\uFF01</color>"
+    message: "<color=green>\u56DE\u5FA9<wait=0.3>\u3042\u308A\u304C\u3068\u3046\u306D\u3047\uFF01</color>"

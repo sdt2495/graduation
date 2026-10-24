@@ -17,20 +17,20 @@ public class biimTest : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        // Aキー：攻撃
-        if (Input.GetKeyDown(KeyCode.A))
+        // 1：攻撃
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             gameMessageManager.ShowMessage(thisCharacter, GameMessageType.Attack);
         }
 
-        // Dキー：ダメージ
-        if (Input.GetKeyDown(KeyCode.D))
+        // 2：ダメージ
+        if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             gameMessageManager.ShowMessage(thisCharacter, GameMessageType.Damage);
         }
 
-        // Hキー：ヒール
-        if (Input.GetKeyDown(KeyCode.H))
+        // 3：ヒール
+        if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             gameMessageManager.ShowMessage(thisCharacter, GameMessageType.Heal);
         }

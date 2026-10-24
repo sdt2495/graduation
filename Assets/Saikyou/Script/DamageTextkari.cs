@@ -5,7 +5,6 @@ using System.Collections;
 public class DamageTextkari : MonoBehaviour
 {
     public TextMeshProUGUI text;
-    public TextMeshProUGUI attackTypeText;
 
     [Header("à⁄ìÆê›íË")]
     public float moveDuration = 0.6f;
@@ -52,39 +51,6 @@ public class DamageTextkari : MonoBehaviour
         text.gameObject.SetActive(true);
         text.text = damage.ToString();
 
-        if (attackTypeText != null)
-        {
-            attackTypeText.gameObject.SetActive(true);
-
-            if (attackType == "Counter")
-            {
-                attackTypeText.text = "Counter!";
-                attackTypeText.color = counterColor;
-            }
-            else if (attackType == "FinishBlow")
-            {
-                attackTypeText.text = "Finish Blow!";
-                attackTypeText.color = finishBlowColor;
-            }
-            else if (isCritical)
-            {
-                attackTypeText.text = "Critical!";
-                attackTypeText.color = criticalColor;
-            }
-            else
-            {
-                attackTypeText.text = "";
-            }
-
-            Color labelColor = attackTypeText.color;
-            labelColor.a = 1f;
-            attackTypeText.color = labelColor;
-            attackTypeText.fontSize = 24f;
-        }
-        else
-        {
-            Debug.LogError("AttackTypeTextÇ™ê›íËÇ≥ÇÍÇƒÇ¢Ç‹ÇπÇÒÅI");
-        }
 
         switch (attackType)
         {
@@ -187,12 +153,7 @@ public class DamageTextkari : MonoBehaviour
             color.a = 1f - t;
             text.color = color;
 
-            if (attackTypeText != null)
-            {
-                Color labelColor = attackTypeText.color;
-                labelColor.a = 1f - t;
-                attackTypeText.color = labelColor;
-            }
+            
 
             yield return null;
         }

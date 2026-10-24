@@ -29,7 +29,7 @@ public class CameraShake : MonoBehaviour
         while (timer < duration)
         {
             float x = UnityEngine.Random.Range(-1f, 1f) * magnitude;
-            float y = UnityEngine.Random.Range(-1f, 1f) * magnitude;
+            float y = UnityEngine.Random.Range(-1f, 1f) * magnitude * 0.2f;
 
             transform.localPosition = originPos + new Vector3(x, y, 0);
 

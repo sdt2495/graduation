@@ -107,18 +107,15 @@ public class CommandUI : MonoBehaviour
             CommandUIElement element = Instantiate(commandPrefab, parent);
 
             element.SetCommand(commands[i]);
-
-            // Battleはひし形表示・Nextは非表示
-            element.SetDiamondVisible(parent != nextCommandParent);
+    
+            bool isBattle = parent == commandParent;
+            element.SetDiamondVisible(isBattle);
 
             // Battleの1個目だけをピンクのひし形の表示
             bool isFirst = i == 0 && parent == commandParent;
             element.SetActiveDiamondVisible(isFirst);
 
-            if(isFirst)
-            {
-                acitiveDiamond = element.GetActiveDiamondTransform();
-            }
+            element.SetScale(normalScale);
 
             // 横方向に配置
             RectTransform rectTransform = element.GetComponent<RectTransform>();
@@ -135,17 +132,16 @@ public class CommandUI : MonoBehaviour
     /// <param name="currentIndex"></param>
     public void UpdateActiveComand(int currentIndex)
     {
-        if(acitiveDiamond == null)
-        {
-            return;
-        }
-
         if(currentIndex >= commandElements.Count)
         {
             return;
         }
 
-        StartCoroutine(MoveActiveDiamond(currentIndex));
+        UpdateCommandScale(currentIndex);
+
+        // 現在の矢印に入力待ち枠を表示する
+        // 成功・失敗の枠は上書きしない
+        commandElements[currentIndex].SetWaitingFrame();
     }
 
     private IEnumerator MoveActiveDiamond(int currentIndex)
@@ -223,6 +219,17 @@ public class CommandUI : MonoBehaviour
     }
 
     /// <summary>
+    /// 指定したコマンドを成功状態にする
+    /// </summary>
+    /// <param name="index"></param>
+    public void SetSuccessComand(int index)
+    {
+        if(index < 0 || index >= commandElements.Count) { return; }
+
+        commandElements[index].SetSucces();
+    }
+
+    /// <summary>
     /// 指定したコマンドのひし形をミス色に変更する
     /// </summary>
     /// <param name="index"></param>
@@ -233,7 +240,7 @@ public class CommandUI : MonoBehaviour
             return;
         }
 
-        commandElements[index].SetDiamondColor(missColor);
+        commandElements[index].SetMiss();
     }
 
     public IEnumerator  PlayMissAnimation(int missIndex, int nextIndex)
@@ -257,6 +264,9 @@ public class CommandUI : MonoBehaviour
         if(missIndex < 0 || missIndex >= commandElements.Count) { yield break; }
 
         CommandUIElement missElement = commandElements[missIndex];
+
+        // 枠と矢印を赤色にする
+        missElement.SetMiss();
 
         // 白くフラッシュ
         missElement.SetDiamondColor(Color.white);

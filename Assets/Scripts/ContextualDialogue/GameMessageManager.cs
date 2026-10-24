@@ -10,6 +10,7 @@ using UnityEngine.UI;
 /// </summary>
 public class GameMessageManager : MonoBehaviour
 {
+    #region 文字に適用する特殊エフェクトの種類
     /// <summary>
     /// 文字に適用する特殊エフェクトの種類
     /// </summary>
@@ -19,6 +20,17 @@ public class GameMessageManager : MonoBehaviour
         Wavy,   // 波揺れ
         Shaky   // 震え
     }
+    #endregion
+
+    #region <wait=>対応
+    /// <wait=>対応
+    private class WaitPoint
+    {
+        public int characterIndex;
+        public float waitTime;
+    }
+    private List<WaitPoint> waitPoints = new();
+    #endregion
 
     [Header("メッセージUI")]
     [SerializeField] private GameObject messagePanel;
@@ -46,7 +58,20 @@ public class GameMessageManager : MonoBehaviour
     [SerializeField] private float shakyAmplitude = 3f;
     [SerializeField] private float shakySpeed = 20f;
 
-    
+    [Header("──────────────────────────────")]
+    [Header("Letter Pop")]
+    [SerializeField] private bool letterPop = true;
+
+    [Tooltip("表示開始時の文字サイズ")]
+    [SerializeField] private float letterPopStartScale = 0f;
+
+    [Tooltip("一瞬だけ大きくなる最大倍率")]
+    [SerializeField] private float letterPopOvershootScale = 1.0f;
+
+    [Header("拡大が最大になる位置（0～1）")]
+    [SerializeField, Range(0f, 1f)] private float letterPopPeakPosition = 1.0f;
+
+
     private CharacterEffect[] characterEffects; // 各文字に適用するエフェクト
 
     private Vector3[][] originalVertices;    // 各文字の元の頂点位置
@@ -181,23 +206,31 @@ public class GameMessageManager : MonoBehaviour
     #region 特殊文字タグの解析
 
     /// <summary>
-    /// WavyとShakyのタグを解析し、タグ自体をテキストから取り除く
-    /// 対象の文字に対応するエフェクト番号を保存する
+    /// Wavy / Shaky / Waitタグを解析し、特殊タグをテキストから取り除く
+    /// Wavy / Shakyは各文字のエフェクトを保存
+    /// Waitは指定位置と待機時間を保存
     /// </summary>
     private void ParseSpecialCharacterTags(ref string message)
     {
         // タグを取り除いた文字列を作成する
         StringBuilder result = new StringBuilder();
 
-        // 文字ごとのエフェクト番号を保存するリスト
+        // 文字ごとのエフェクトを保存
         List<CharacterEffect> effects = new List<CharacterEffect>();
-        // 現在有効になっているエフェクト(0 = 通常、1 = Wavy、2 = Shaky)
+
+        // 待機情報を初期化
+        waitPoints.Clear();
+
+        // 現在有効になっているエフェクト
         CharacterEffect currentEffect = CharacterEffect.Normal;
 
-        // 元の文字列を先頭から解析する
+        // 解析する文字列上の位置
+        int displayCharacterIndex = 0;
+
+        // 元の文字列を先頭から解析
         for (int i = 0; i < message.Length;)
         {
-            // タグの開始位置を見つけた場合
+            // タグの開始位置
             if (message[i] == '<')
             {
                 // タグの終わりを探す
@@ -209,32 +242,70 @@ public class GameMessageManager : MonoBehaviour
                     // タグ全体を取得
                     string tag = message.Substring(i, tagEnd - i + 1);
 
+                    // Wavy開始
                     if (tag == "<wavy>")
+                    {
                         currentEffect = CharacterEffect.Wavy;
+                    }
+                    // Wavy終了
                     else if (tag == "</wavy>")
+                    {
                         currentEffect = CharacterEffect.Normal;
+                    }
+                    // Shaky開始
                     else if (tag == "<shaky>")
+                    {
                         currentEffect = CharacterEffect.Shaky;
+                    }
+                    // Shaky終了
                     else if (tag == "</shaky>")
+                    {
                         currentEffect = CharacterEffect.Normal;
+                    }
+                    // Wait
+                    else if (tag.StartsWith("<wait=") && tag.EndsWith(">"))
+                    {
+                        // <wait= と > の間を取得
+                        string waitTimeText = tag.Substring("<wait=".Length, tag.Length - "<wait=".Length - 1);
+
+                        // 数値として読み取れた場合
+                        if (float.TryParse(waitTimeText, out float waitTime))
+                        {
+                            if (waitTime > 0f)
+                            {
+                                waitPoints.Add(new WaitPoint
+                                {
+                                    characterIndex = displayCharacterIndex,
+                                    waitTime = waitTime
+                                });
+                            }
+                        }
+                    }
                     else
                     {
-                        // colorなど、TextMeshProの通常のリッチテキストタグは残す
+                        // colorなど、通常のTextMeshProリッチテキストタグは残す
                         result.Append(tag);
                     }
-                    // 処理済みのタグの次から解析を続ける
+
+                    // タグの次から解析
                     i = tagEnd + 1;
                     continue;
                 }
             }
+
             // 通常の文字を追加
             result.Append(message[i]);
+
             // その文字に適用するエフェクトを保存
             effects.Add(currentEffect);
 
+            // 表示文字数を1増やす
+            displayCharacterIndex++;
+
             i++;
         }
-        // 特殊文字タグを取り除いた文字列に置き換える
+
+        // タグを取り除いた文字列に置き換える
         message = result.ToString();
 
         // 文字ごとのエフェクトを配列に変換
@@ -410,6 +481,9 @@ public class GameMessageManager : MonoBehaviour
         // 各文字の元の色を保存する
         Color32[][] originalColors = new Color32[characterCount][];
 
+        // 各文字の元の頂点位置を保存
+        Vector3[][] originalScaleVertices = new Vector3[characterCount][];
+
         // すべての文字を最初は透明にする
         for (int i = 0; i < characterCount; i++)
         {
@@ -423,9 +497,13 @@ public class GameMessageManager : MonoBehaviour
             int materialIndex = charInfo.materialReferenceIndex;
 
             Color32[] colors = textInfo.meshInfo[materialIndex].colors32;
+            Vector3[] vertices = textInfo.meshInfo[materialIndex].vertices;
 
             // 1文字につき4頂点分の色を保存
             originalColors[i] = new Color32[4];
+
+            // 1文字につき4頂点分の元位置を保存
+            originalScaleVertices[i] = new Vector3[4];
 
             for (int j = 0; j < 4; j++)
             {
@@ -436,6 +514,22 @@ public class GameMessageManager : MonoBehaviour
                 Color32 color = colors[vertexIndex + j];
                 color.a = 0;
                 colors[vertexIndex + j] = color;
+
+                // 元の頂点位置を保存
+                originalScaleVertices[i][j] = vertices[vertexIndex + j];
+            }
+
+            // Letter Popを使う場合
+            if (letterPop)
+            {
+                // 文字の中心座標
+                Vector3 center = (originalScaleVertices[i][0] + originalScaleVertices[i][2]) * 0.5f;
+
+                // 最初のサイズに設定
+                for (int j = 0; j < 4; j++)
+                {
+                    vertices[vertexIndex + j] = center + (originalScaleVertices[i][j] - center) * letterPopStartScale;
+                }
             }
         }
 
@@ -445,15 +539,31 @@ public class GameMessageManager : MonoBehaviour
         // 各文字のフェード開始時刻を記録
         float[] startTimes = new float[characterCount];
 
+        // 現在までの文字送り時間
+        float currentTime = 0f;
+
+        // 文字ごとの開始時間を計算
         for (int i = 0; i < characterCount; i++)
         {
-            // 0文字目は即座に開始し、その後は一定間隔で開始する
-            startTimes[i] = i * characterInterval;
+            // この文字の表示開始時間を保存
+            startTimes[i] = currentTime;
+
+            // 次の文字へ進む
+            currentTime += characterInterval;
+
+            // この文字の後に待機が設定されているか確認
+            foreach (WaitPoint waitPoint in waitPoints)
+            {
+                if (waitPoint.characterIndex == i + 1)
+                {
+                    currentTime += waitPoint.waitTime;
+                    break;
+                }
+            }
         }
 
         // 全文のフェードが完了するまでの時間
-        float totalDuration =
-            (characterCount > 0 ? (characterCount - 1) * characterInterval : 0f) + characterFadeTime;
+        float totalDuration = characterCount > 0 ? startTimes[characterCount - 1] + characterFadeTime : 0f;
 
         float elapsed = 0f;
 
@@ -476,8 +586,38 @@ public class GameMessageManager : MonoBehaviour
                 Color32[] colors = textInfo.meshInfo[materialIndex].colors32;
 
                 // その文字のフェード進行度を計算
-                // 文字ごとに開始時刻が異なるため、フェードが重なって進む
                 float alpha = characterFadeTime > 0f ? Mathf.Clamp01((elapsed - startTimes[i]) / characterFadeTime) : 1f;
+
+                // Letter Pop：文字を拡大してから通常サイズへ戻す
+                if (letterPop)
+                {
+                    float scale;
+
+                    if (alpha < letterPopPeakPosition)
+                    {
+                        // 開始サイズ → 最大サイズ
+                        float progress = letterPopPeakPosition > 0f ? alpha / letterPopPeakPosition : 1f;
+
+                        scale = Mathf.Lerp(letterPopStartScale, letterPopOvershootScale, progress);
+                    }
+                    else
+                    {
+                        // 最大サイズ → 通常サイズ
+                        float progress = letterPopPeakPosition < 1f ? (alpha - letterPopPeakPosition) / (1f - letterPopPeakPosition) : 1f;
+
+                        scale = Mathf.Lerp(letterPopOvershootScale, 1f, progress);
+                    }
+
+                    // 文字の中心を基準に拡大・縮小
+                    Vector3 center = (originalScaleVertices[i][0] + originalScaleVertices[i][2]) * 0.5f;
+
+                    for (int j = 0; j < 4; j++)
+                    {
+                        Vector3 originalVertex = originalScaleVertices[i][j];
+
+                        textInfo.meshInfo[materialIndex].vertices[vertexIndex + j] = center + (originalVertex - center) * scale;
+                    }
+                }
 
                 // 元の色を維持しながら透明度だけを変更
                 for (int j = 0; j < 4; j++)

@@ -904,7 +904,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3673cdcfa228eb44d9fe60102b266de9, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 98b9c713ef6aeae43a9b9bc81c8347a0, type: 3}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -973,7 +973,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VNTest
   novelManager: {fileID: 3087721613134683416}
-  csvName: Tutorial
+  csvName: GPTImage
 --- !u!4 &1468637722
 Transform:
   m_ObjectHideFlags: 0
@@ -1556,7 +1556,7 @@ PrefabInstance:
     - target: {fileID: 2541600945072552072, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 2884a09cfecd2ba47828b1738b5244d7, type: 3}
+      objectReference: {fileID: 21300000, guid: 06574988b658a5d42a0b16ab89b96e95, type: 3}
     - target: {fileID: 2541600945072552072, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
       propertyPath: m_UseSpriteMesh
       value: 0
@@ -4912,9 +4912,9 @@ MonoBehaviour:
   messageText: {fileID: 6541541832953592173}
   fadeInCharacter: 1
   letterPop: 1
-  letterPopStartScale: 0.7
-  letterPopOvershootScale: 1.15
-  letterPopPeakPosition: 0.75
+  letterPopStartScale: 0.5
+  letterPopOvershootScale: 1.5
+  letterPopPeakPosition: 0.5
   commaPauseMultiplier: 5
   periodPauseMultiplier: 5
   wavy: 1
@@ -4923,6 +4923,9 @@ MonoBehaviour:
   shaky: 1
   shakyAmplitude: 3
   shakySpeed: 20
+  shakyNoiseXScale: 10
+  shakyNoiseYScale: 20
+  shakyNoiseMultiplier: 2
 --- !u!114 &6541541832953592173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5216,7 +5219,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 3673cdcfa228eb44d9fe60102b266de9, type: 3}
+  m_Sprite: {fileID: 0}
   m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
@@ -5241,7 +5244,7 @@ PrefabInstance:
     - target: {fileID: 2541600945072552072, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
       propertyPath: m_Sprite
       value: 
-      objectReference: {fileID: 21300000, guid: 65ea2559136d3814398acd7b76913356, type: 3}
+      objectReference: {fileID: 21300000, guid: bb260ee0eee562b43a08d9ef00b8ecf1, type: 3}
     - target: {fileID: 2541600945072552072, guid: 86da83bb1b4ca2a40a6c3bb7f65414ad, type: 3}
       propertyPath: m_PreserveAspect
       value: 1

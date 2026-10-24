@@ -15,13 +15,12 @@ public class TextTyper : MonoBehaviour
 
     private const string SHAKY_TAG = "<shaky>";
     private const string SHAKY_END_TAG = "</shaky>";
+
+    private const string WAIT_TAG_PREFIX = "<wait=";
     #endregion
 
     [Header("表示するテキスト")]
     [SerializeField] private TextMeshProUGUI messageText;
-
-    //[Header("文字送り速度（秒）")]
-    //[SerializeField] private float textSpeed = 0.1f;
 
     [Header("──────────────────────────────")]
     [Header("文字フェード")]
@@ -32,13 +31,13 @@ public class TextTyper : MonoBehaviour
     [SerializeField] private bool letterPop = true;
 
     [Tooltip("表示開始時の文字サイズ")]
-    [SerializeField] private float letterPopStartScale = 0.7f;
+    [SerializeField] private float letterPopStartScale = 0.5f;
 
     [Tooltip("一瞬だけ大きくなる倍率")]
-    [SerializeField] private float letterPopOvershootScale = 1.15f;
+    [SerializeField] private float letterPopOvershootScale = 1.0f;
 
-    [Tooltip("Letter Popの拡大が終わる位置（0～1）")]
-    [SerializeField, Range(0f, 1f)] private float letterPopPeakPosition = 0.5f;
+    [Header("Letter Popの拡大が終わる位置（0～1）")]
+    [SerializeField, Range(0f, 1f)] private float letterPopPeakPosition = 1.0f;
 
     [Header("──────────────────────────────")]
 
@@ -59,11 +58,24 @@ public class TextTyper : MonoBehaviour
     [Tooltip("上下に動く幅")][SerializeField] private float wavyAmplitude = 5f;
     [Tooltip("波の速さ")][SerializeField] private float wavySpeed = 5f;
 
+    [Header("──────────────────────────────")]
     [Header("Shaky")]
     [SerializeField] private bool shaky = true;
 
-    [Tooltip("上下左右に動く最大幅")][SerializeField] private float shakyAmplitude = 3f;
-    [Tooltip("揺れが変化する速さ")][SerializeField] private float shakySpeed = 20f;　// ←使ってない？
+    [Tooltip("上下左右に動く最大幅")]
+    [SerializeField] private float shakyAmplitude = 3f;
+
+    [Tooltip("揺れが変化する速さ")]
+    [SerializeField] private float shakySpeed = 20f;
+
+    [Tooltip("X方向のノイズ間隔")]
+    [SerializeField] private float shakyNoiseXScale = 10f;
+
+    [Tooltip("Y方向のノイズ間隔")]
+    [SerializeField] private float shakyNoiseYScale = 20f;
+
+    [Tooltip("Perlin Noiseの中心を0にするための倍率")]
+    [SerializeField] private float shakyNoiseMultiplier = 2f;
 
 
 
@@ -73,6 +85,8 @@ public class TextTyper : MonoBehaviour
 
     private string currentMessage;           // 現在表示している全文を保存
     private Coroutine typingCoroutine;       // 文字送りのCoroutineを保存
+
+    private int typingVersion = 0;           // 何これ
 
     public event Action OnTypingFinished;    // 文字送り終了時に呼ばれるイベント
 
@@ -104,12 +118,13 @@ public class TextTyper : MonoBehaviour
     #endregion
 
 
-
+    #region Update()
 
     private void Update()
     {
         UpdateSpecialCharacters();
     }
+    #endregion
 
 
     #region 特殊文字を毎フレーム動かす
@@ -192,9 +207,10 @@ public class TextTyper : MonoBehaviour
 
             // 元の頂点を取得
             Vector3[] original = originalVertices[characterIndex];
-
-            // 上下左右のランダムな移動量
-            Vector2 offset = UnityEngine.Random.insideUnitCircle * shakyAmplitude;
+            // 上下左右に滑らかに揺れる移動量
+            float x = (Mathf.PerlinNoise(Time.time * shakySpeed, characterIndex * shakyNoiseXScale) - 0.5f) * shakyNoiseMultiplier;
+            float y = (Mathf.PerlinNoise(characterIndex * shakyNoiseYScale, Time.time * shakySpeed) - 0.5f) * shakyNoiseMultiplier;
+            Vector2 offset = new Vector2(x, y) * shakyAmplitude;
             // 元の位置から移動
             for (int j = 0; j < 4; j++)
             {
@@ -214,6 +230,9 @@ public class TextTyper : MonoBehaviour
     /// </summary>
     public void StartTyping(string message)
     {
+        // 文字送り処理の世代を更新
+        typingVersion++;
+
         // 表示する文章を保存
         currentMessage = message;
 
@@ -225,20 +244,21 @@ public class TextTyper : MonoBehaviour
         isWavy = false;
         isShaky = false;
 
-        // もし前回の文字送りがまだ動いていたら止める
+        // 前の文字送りを停止
         if (typingCoroutine != null)
         {
             StopCoroutine(typingCoroutine);
+            typingCoroutine = null;
         }
 
         // 一文字ずつ表示開始
-        typingCoroutine = StartCoroutine(TypeText());
+        typingCoroutine = StartCoroutine(TypeText(typingVersion));
     }
 
     /// <summary>
     /// 一文字ずつ表示するCoroutine
     /// </summary>
-    IEnumerator TypeText()
+    IEnumerator TypeText(int version)
     {
         // 文字送り速度を設定から取得
         float textSpeed = TextSettingsManager.Instance.GetTextSpeed();
@@ -251,9 +271,37 @@ public class TextTyper : MonoBehaviour
         // 現在の文章を一文字ずつ処理
         for (int i = 0; i < currentMessage.Length; i++)
         {
+            if (version != typingVersion)
+                yield break;
+
             // Rich Text / 特殊演出タグを検出
             if (currentMessage[i] == '<')
             {
+                // 待機タグ <wait=秒数>
+                if (currentMessage.Substring(i).StartsWith(WAIT_TAG_PREFIX))
+                {
+                    int waitTagEnd = currentMessage.IndexOf('>', i);
+
+                    if (waitTagEnd != -1)
+                    {
+                        // <wait= と > の間の数値を取得
+                        string waitTimeText = currentMessage.Substring(i + WAIT_TAG_PREFIX.Length, waitTagEnd - (i + WAIT_TAG_PREFIX.Length));
+
+                        // 数値として読み取れた場合
+                        if (float.TryParse(waitTimeText, out float waitTime))
+                        {
+                            // タグ自体は表示しない
+                            i = waitTagEnd;
+                            // 指定秒数待機
+                            if (waitTime > 0f)
+                            {
+                                yield return new WaitForSeconds(waitTime);
+                            }
+                            continue;
+                        }
+                    }
+                }
+
                 // Wavy開始タグ
                 if (currentMessage.Substring(i).StartsWith(WAVY_TAG))
                 {
@@ -446,25 +494,54 @@ public class TextTyper : MonoBehaviour
 
     #region 文字送りスキップ
     /// <summary>
-    /// 文字送りスキップ (クリック時など)
+    /// 文字送りをスキップして全文表示する
     /// </summary>
     public void Skip(bool callEvent = true)
     {
         // 文字送り中でなければ何もしない
-        if (!IsTyping) return;
+        if (!IsTyping)
+            return;
+
+        // 現在の文字送りを無効化
+        typingVersion++;
 
         // Coroutineを停止
-        StopCoroutine(typingCoroutine);
+        if (typingCoroutine != null)
+        {
+            StopCoroutine(typingCoroutine);
+            typingCoroutine = null;
+        }
 
-        // 全文表示
-        RebuildSpecialCharacters();
-
-        // 文字送り終了
+        // 現在の文章を全文表示
         IsTyping = false;
 
+        // 特殊演出を含めて全文を再構築
+        RebuildSpecialCharacters();
+
+        // TMPを更新
+        messageText.ForceMeshUpdate();
+
+        // 全文字を完全表示
+        for (int i = 0; i < messageText.textInfo.characterCount; i++)
+        {
+            TMP_CharacterInfo charInfo = messageText.textInfo.characterInfo[i];
+
+            if (!charInfo.isVisible)
+                continue;
+
+            // 元の頂点を保存
+            SaveOriginalVertices(i);
+
+            // 透明度を完全に表示
+            SetCharacterAlpha(i, 1f);
+        }
+
+        // 頂点・色を反映
+        messageText.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices | TMP_VertexDataUpdateFlags.Colors32);
+
+        // 文字送り終了を通知
         if (callEvent)
         {
-            //「文字送り終了」を通知 (イベント)
             OnTypingFinished?.Invoke();
         }
     }
@@ -474,30 +551,61 @@ public class TextTyper : MonoBehaviour
     #region 全文表示
 
     /// <summary>
-    /// 文章を一瞬で表示する
+    /// 文章を一瞬で全文表示する
     /// </summary>
     public void ShowInstant(string message)
     {
-        // Coroutine停止
+        // 現在の文字送りを完全に無効化
+        typingVersion++;
+
+        // 文字送りCoroutineを停止
         if (typingCoroutine != null)
         {
             StopCoroutine(typingCoroutine);
+            typingCoroutine = null;
         }
 
-        currentMessage = message;
+        // 文字送り中なら、すでにcurrentMessageに全文が入っているので引数messageで上書きしない
+        if (!IsTyping)
+        {
+            currentMessage = message;
+        }
 
-        // 全文表示 + 特殊演出対象を再構築
+        // 文字送り中ではない状態にする
+        IsTyping = false;
+
+        // 特殊演出情報を再構築
         RebuildSpecialCharacters();
 
-        // 文字送り終了
-        IsTyping = false;
-        //「文字送り終了」を通知 (イベント)
+        // TMPを確実に更新
+        messageText.ForceMeshUpdate();
+
+        // 全文字を完全表示
+        for (int i = 0; i < messageText.textInfo.characterCount; i++)
+        {
+            TMP_CharacterInfo charInfo = messageText.textInfo.characterInfo[i];
+
+            if (!charInfo.isVisible)
+                continue;
+
+            // 元の頂点を保存
+            SaveOriginalVertices(i);
+
+            // 完全表示
+            SetCharacterAlpha(i, 1f);
+        }
+
+        // 頂点情報を反映
+        messageText.UpdateVertexData(TMP_VertexDataUpdateFlags.Vertices | TMP_VertexDataUpdateFlags.Colors32);
+
+        // 文字送り終了を通知
         OnTypingFinished?.Invoke();
     }
+
     #endregion
 
 
-    #region
+    #region 全文表示後のWavy / Shaky対象文字を再構築する
 
     /// <summary>
     /// 全文表示後のWavy / Shaky対象文字を再構築する
@@ -513,7 +621,9 @@ public class TextTyper : MonoBehaviour
         bool shakyActive = false;
 
         // 特殊演出タグを除去した表示用文字列を作る
-        string displayMessage = currentMessage
+        string displayMessage = RemoveWaitTags(currentMessage);
+
+        displayMessage = displayMessage
             .Replace(WAVY_TAG, "")
             .Replace(WAVY_END_TAG, "")
             .Replace(SHAKY_TAG, "")
@@ -534,6 +644,17 @@ public class TextTyper : MonoBehaviour
             // タグなら処理
             if (currentMessage[i] == '<')
             {
+                // WAIT
+                if (currentMessage.Substring(i).StartsWith(WAIT_TAG_PREFIX))
+                {
+                    int waitTagEnd = currentMessage.IndexOf('>', i);
+                    if (waitTagEnd != -1)
+                    {
+                        i = waitTagEnd;
+                        continue;
+                    }
+                }
+
                 // WAVY
                 if (currentMessage.Substring(i).StartsWith(WAVY_TAG))
                 {
@@ -598,6 +719,28 @@ public class TextTyper : MonoBehaviour
             characterIndex++;
         }
     }
+
+    /// <summary>
+    /// <wait=秒数>タグをすべて除去する
+    /// </summary>
+    private string RemoveWaitTags(string text)
+    {
+        while (true)
+        {
+            int start = text.IndexOf(WAIT_TAG_PREFIX);
+
+            if (start == -1)
+                break;
+
+            int end = text.IndexOf('>', start);
+
+            if (end == -1)
+                break;
+            // <wait= xxx > の部分を削除
+            text = text.Remove(start, end - start + 1);
+        }
+        return text;
+    }
     #endregion
 
 
@@ -650,7 +793,7 @@ public class TextTyper : MonoBehaviour
         Vector3[] vertices = messageText.textInfo.meshInfo[materialIndex].vertices;
 
         // 文字の中心座標を計算
-        Vector3 center = (vertices[vertexIndex + 0] + vertices[vertexIndex + 2]) * 0.5f;
+        Vector3 center = (originalCharacterVertices[0] + originalCharacterVertices[2]) * 0.5f;
 
         // 保存した「元の頂点」から毎回計算する
         for (int i = 0; i < 4; i++)

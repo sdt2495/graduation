@@ -607,7 +607,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u6587\u5B57\u9001\u308A\n\u8272\u6587\u5B57\n\u6587\u5B57\u306E\u5927\u304D\u3055\n\u30A8\u30D5\u30A7\u30AF\u30C8\n\u30DC\u30A4\u30B9\n\u8907\u6570\u8868\u793A\uFF1F\n\u8868\u793A\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\n\n\u30BB\u30EA\u30D5\u306F\u30E9\u30F3\u30C0\u30E0\u3060\u3051\u3069\u8868\u60C5\u306F\u56FA\u5B9A"
+  m_text: "\u30DC\u30A4\u30B9\n\u8907\u6570\u8868\u793A\uFF1F\n\u8868\u793A\u30A2\u30CB\u30E1\u30FC\u30B7\u30E7\u30F3\n\n\u30BB\u30EA\u30D5\u306F\u30E9\u30F3\u30C0\u30E0\u3060\u3051\u3069\u8868\u60C5\u306F\u56FA\u5B9A"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
@@ -948,6 +948,14 @@ MonoBehaviour:
   characterInterval: 0.04
   characterFadeTime: 0.1
   displayTime: 2
+  wavyAmplitude: 5
+  wavySpeed: 5
+  shakyAmplitude: 3
+  shakySpeed: 20
+  letterPop: 1
+  letterPopStartScale: 0
+  letterPopOvershootScale: 3
+  letterPopPeakPosition: 0.5
 --- !u!4 &1168949370
 Transform:
   m_ObjectHideFlags: 0

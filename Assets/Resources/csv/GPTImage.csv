@@ -1,0 +1,17 @@
+﻿ID,Speaker,Message,Voice,Left,Right,Active ,SE,BGM,Ambient,BG,BG_Effect,BG_Time,CG,CG_Effect,CG_Time,Screen,Screen_Effect,Screen_Time,Wait,Choice1,Choice1_ID,Choice2,Choice2_ID,Jump,CutIn_Image,CutIn_Slide,CutIn_Fade,CutIn_Time
+1,黒髪,お前やりますねスギ♪,,GPT/黒髪,GPT/赤髪,LEFT,,,,,,,,,,,,,,,,,,,,,,
+2,赤髪,<shaky><color=#BC1A33>田所浩治！<wait=0.5>タッ！<wait=0.2>タッ！<wait=0.2>田所浩治！</color></shaky>,,,,RIGHT,,,,,,,,,,,,,,,,,,,,,,
+3,黒髪,<wavy>お前 やりま～<wait=0.4>すねスギ♪</wavy>,,,,LEFT,,,,,,,,,,,,,,,,,,,,,,
+4,赤髪,<shaky><color=#BC1A33>田所浩治！<wait=0.5>タッ！<wait=0.2>タッ！<wait=0.2>田所浩治！</color></shaky>,,,,RIGHT,,,,,,,,,,,,,,,,,,,,,,
+5,黒髪,<wavy>お前 やりまぁ～<wait=0.5>すねスギ♪</wavy>,,,,LEFT,,,,,,,,,,,,,,,,,,,,,,
+6,黒髪,<wavy>ジュッセンパイヤー<wait=0.1> 一生ネットの宝物♪</wavy>,,,,LEFT,,,,,,,,,,,,,,,,,,,,,,
+7,二人,<wavy>♪～</wavy>,,,,NONE,,,,,,,,,,,,,,,,,,,,,,
+8,黒髪,<wavy>一生～ <wait=0.8>ネットの宝物♪</wavy>,,,,LEFT,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,0.5
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,0.5

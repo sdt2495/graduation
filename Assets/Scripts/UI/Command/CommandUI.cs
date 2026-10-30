@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 // ===================================
 // コマンド列全体の管理
@@ -26,6 +28,11 @@ public class CommandUI : MonoBehaviour
     [SerializeField] private Color normalColor = Color.black;
     [SerializeField] private Color missColor = Color.red;
 
+    [Header("出現アニメーション")]
+    [SerializeField] private float appearDuration = 0.2f;
+    [SerializeField] private float appearInterval = 0.08f;
+    [SerializeField] private float appearOvershot = 1.2f;
+
     [Header("ミス演出")]
     [SerializeField] private float missFlashDuration = 0.05f;
     [SerializeField] private float missTiltAngle = 15f;
@@ -39,6 +46,9 @@ public class CommandUI : MonoBehaviour
     private List<CommandType> nextCommand = new List<CommandType>();
 
     private RectTransform acitiveDiamond;
+    private Coroutine appearCoroutine;
+
+    private int currentActiveIndex = 0;
 
     /// <summary>
     /// 現在のコマンドとNextコマンドのUIを更新する
@@ -88,6 +98,12 @@ public class CommandUI : MonoBehaviour
     /// <param name="elements"></param>
     private void CreateCommandElements(List<CommandType> commands, Transform parent, List<CommandUIElement> elements)
     {
+        if(parent == commandParent && appearCoroutine != null)
+        {
+            StopCoroutine(appearCoroutine);
+            appearCoroutine = null;
+        }
+
         // 既存のUIを削除
         foreach(CommandUIElement element in elements)
         {
@@ -95,6 +111,11 @@ public class CommandUI : MonoBehaviour
         }
 
         elements.Clear();
+
+        if(parent == commandParent)
+        {
+            currentActiveIndex = 0;
+        }
 
         int count = commands.Count;
 
@@ -115,7 +136,16 @@ public class CommandUI : MonoBehaviour
             bool isFirst = i == 0 && parent == commandParent;
             element.SetActiveDiamondVisible(isFirst);
 
-            element.SetScale(normalScale);
+            if (parent == commandParent)
+            {
+                element.SetScale(normalScale);
+                element.SetAppearScale(0.1f);
+            }
+            else
+            {
+                element.SetScale(normalScale);
+                element.SetAppearScale(1f);
+            }
 
             // 横方向に配置
             RectTransform rectTransform = element.GetComponent<RectTransform>();
@@ -124,6 +154,64 @@ public class CommandUI : MonoBehaviour
 
             elements.Add(element);
         }
+
+        if(parent == commandParent)
+        {
+            StartAppearAnimation();
+        }
+    }
+
+    /// <summary>
+    /// 矢印出現アニメーションの開始関数
+    /// </summary>
+    private void StartAppearAnimation()
+    {
+        if(appearCoroutine != null)
+        {
+            StopCoroutine(appearCoroutine);
+        }
+
+        appearCoroutine = StartCoroutine(PlayeAppearAnimation());
+    }
+
+    /// <summary>
+    /// 矢印出現アニメーション
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="System.NotImplementedException"></exception>
+    private IEnumerator PlayeAppearAnimation()
+    {
+        for(int i = 0; i < commandElements.Count; i++)
+        {
+            float time = 0f;
+
+            while(time < appearDuration)
+            {
+                time += Time.deltaTime;
+                float t = Mathf.Clamp01(time / appearDuration);
+
+                float scale;
+
+                if(t < 0.8f)
+                {
+                    scale = Mathf.Lerp(0.1f, appearOvershot, t / 0.8f);
+                }
+                else
+                {
+                    scale = Mathf.Lerp(appearOvershot, 1f, (t - 0.8f) / 0.2f);
+                }
+
+                commandElements[i].SetAppearScale(scale);
+
+                yield return null;
+            }
+
+            commandElements[i].SetAppearScale(1f);
+
+            yield return new WaitForSeconds(appearInterval);
+        }
+
+        appearCoroutine = null;
     }
 
     /// <summary>
@@ -144,55 +232,13 @@ public class CommandUI : MonoBehaviour
         commandElements[currentIndex].SetWaitingFrame();
     }
 
-    private IEnumerator MoveActiveDiamond(int currentIndex)
-    {
-        UpdateCommandScale(currentIndex);
-
-        // 移動先のElement
-        CommandUIElement targetElement = commandElements[currentIndex];
-
-        RectTransform target = targetElement.GetComponent<RectTransform>();
-
-        // 現在位置
-        Vector3 startPosition = acitiveDiamond.position;
-
-        // 移動先
-        Vector3 targetPosition = target.position;
-
-        // 移動時間
-        float time = 0f;
-
-        while (time < activeDiamondMoveDuration)
-        {
-            time += Time.deltaTime;
-            float t = time / activeDiamondMoveDuration;
-
-            // スッと加速して、最後に減速
-            float curveValue = activeDiamondMoveCurve.Evaluate(t);
-
-            acitiveDiamond.position = Vector3.Lerp(startPosition, targetPosition, curveValue);
-
-            yield return null;
-        }
-
-        // 最後に正確な位置へ
-        acitiveDiamond.position = targetPosition;
-
-        // ピンクのひし形を移動先のElementの子にする
-        acitiveDiamond.SetParent(target);
-
-        // Elementの中央に配置
-        acitiveDiamond.localPosition = Vector3.zero;
-
-        // 移動してきたピンクをArrowの直前にする
-        acitiveDiamond.SetSiblingIndex(1);
-    }
-
     private void UpdateCommandScale(int currentIndex)
     {
+        currentActiveIndex = currentIndex;
+
         for (int i = 0; i < commandElements.Count; i++)
         {
-            if (i == currentIndex)
+            if(i == currentIndex)
             {
                 commandElements[i].SetScale(activeScale);
             }
@@ -309,26 +355,25 @@ public class CommandUI : MonoBehaviour
     /// <returns></returns>
     private IEnumerator CompleteAnimation(int completeIndex)
     {
-        float time = 0f;
-
-        while(time < completeAnimationDuration)
+       if(appearCoroutine != null)
         {
-            time += Time.deltaTime;
-
-            float t = time / completeAnimationDuration;
-            float scale = Mathf.Lerp(1f, 0f, t);
-
-            foreach(CommandUIElement element in commandElements)
-            {
-                element.SetVerticalScale(scale);
-            }
-
-            yield return null;
+            StopCoroutine(appearCoroutine);
+            appearCoroutine = null;
         }
 
-        foreach (CommandUIElement element in commandElements)
+       // コマンド全体をグレーアウト
+       foreach(CommandUIElement element in commandElements)
         {
-            element.SetVerticalScale(0f);
+            element.SetGrayOut();
+        }
+
+        // グレーアウトを一瞬見せる
+        yield return new WaitForSeconds(0.1f);
+
+        // 全コマンドを一斉に非表示
+        foreach(CommandUIElement element1 in commandElements)
+        {
+            element1.gameObject.SetActive(false);
         }
     }
 }

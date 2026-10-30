@@ -28,6 +28,15 @@ public class AttackTextkari : MonoBehaviour
     private RectTransform rect;
     private Coroutine animationCoroutine;
 
+    [Header("出現位置設定")]
+    public float spawnOffsetX = -200f;
+    public float criticalOffsetY = 30f;
+
+    [Header("サイズアニメーション")]
+    public float normalScale = 1.0f;
+    public float maxScale = 1.2f;
+    public float popDuration = 0.15f;
+
     public void SetEnemyPoint(Transform point)
     {
         enemyPoint = point;
@@ -104,6 +113,15 @@ public class AttackTextkari : MonoBehaviour
             out Vector2 startPosition
         );
 
+        // 敵の位置から右側にずらす
+        startPosition += new Vector2(spawnOffsetX, 0f);
+
+        // クリティカルの場合だけ少し上にずらす
+        if (text.text == "CRITICAL!")
+        {
+            startPosition.y += criticalOffsetY;
+        }
+
         // 指定したUI位置をCanvas内の座標に変換
         Vector2 targetScreenPosition =
             RectTransformUtility.WorldToScreenPoint(
@@ -118,8 +136,14 @@ public class AttackTextkari : MonoBehaviour
             out Vector2 endPosition
         );
 
-        // 敵の位置からスタート
+        // 移動先のY座標を出現位置と統一する
+        endPosition.y = startPosition.y;
+
+        // 敵の右側からスタート
         rect.anchoredPosition = startPosition;
+
+        // 通常サイズでスタート
+        rect.localScale = Vector3.one * normalScale;
 
         Color color = text.color;
         color.a = 0f;
@@ -127,13 +151,43 @@ public class AttackTextkari : MonoBehaviour
 
         float timer = 0f;
 
-        // 登場：敵から指定位置へ移動しながらフェードイン
+        color.a = 1f;
+        text.color = color;
+
+        while (timer < popDuration)
+        {
+            timer += Time.deltaTime;
+            float t = Mathf.Clamp01(timer / popDuration);
+
+            float scale;
+
+            if (t < 0.3f)
+            {
+                // 大きくする
+                float scaleT = t / 0.3f;
+                scale = Mathf.Lerp(normalScale, maxScale, scaleT);
+            }
+            else
+            {
+                // 元のサイズに戻す
+                float scaleT = (t - 0.3f) / 0.7f;
+                scale = Mathf.Lerp(maxScale, normalScale, scaleT);
+            }
+
+            rect.localScale = Vector3.one * scale;
+
+            yield return null;
+        }
+
+        rect.localScale = Vector3.one * normalScale;
+
+        timer = 0f;
+
         while (timer < showDuration)
         {
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / showDuration);
 
-            // 滑らかに減速
             float eased = 1f - Mathf.Pow(1f - t, 3f);
 
             rect.anchoredPosition = Vector2.Lerp(
@@ -142,36 +196,38 @@ public class AttackTextkari : MonoBehaviour
                 eased
             );
 
-            color.a = t;
-            text.color = color;
-
             yield return null;
         }
 
         rect.anchoredPosition = endPosition;
-        color.a = 1f;
-        text.color = color;
-
         // 指定した秒数だけ表示
         yield return new WaitForSeconds(displayDuration);
 
-        // 退場：登場時と逆方向に戻りながらフェードアウト
+        // 退場：左に移動しながらフェードアウト
         timer = 0f;
+
+        // 現在の位置を保存
+        Vector2 exitStartPosition = rect.anchoredPosition;
+
+        // 左に移動する距離
+        Vector2 exitEndPosition = exitStartPosition + new Vector2(-200f, 0f);
 
         while (timer < returnDuration)
         {
             timer += Time.deltaTime;
             float t = Mathf.Clamp01(timer / returnDuration);
 
-            // 滑らかに加速して戻る
+            // 滑らかに加速
             float eased = t * t;
 
+            // 左に移動
             rect.anchoredPosition = Vector2.Lerp(
-                endPosition,
-                startPosition,
+                exitStartPosition,
+                exitEndPosition,
                 eased
             );
 
+            // フェードアウト
             color.a = 1f - t;
             text.color = color;
 

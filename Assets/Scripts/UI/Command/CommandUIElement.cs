@@ -39,8 +39,13 @@ public class CommandUIElement : MonoBehaviour
     [SerializeField] private float succesScale = 1.25f;
     [SerializeField] private float succesDuration = 0.12f;
 
+    private float appearScale = 1f;
+    private float commandScale = 1f;
+    private float SuccessScale = 1f;
+
     private Vector3 diamondOriginalScale;
     private Vector3 arrowOriginalScale;
+    private Vector3 activeDiamondOriginalScale;
     private Coroutine successCoroutine;
 
     // 枠の状態
@@ -58,6 +63,8 @@ public class CommandUIElement : MonoBehaviour
     {
         diamondOriginalScale = diamondImage.transform.localScale;
         arrowOriginalScale = arrowImage.transform.localScale;
+        activeDiamondOriginalScale = activeDiamondImage.transform.localScale;
+
         activeDiamondImage.gameObject.SetActive(false);
     }
 
@@ -103,6 +110,11 @@ public class CommandUIElement : MonoBehaviour
         arrowImage.transform.localScale = arrowOriginalScale;
         transform.rotation = Quaternion.identity;
         transform.localScale = Vector3.one;
+        appearScale = 1f;
+        commandScale = 1f;
+        SuccessScale = 1f;
+
+        UpdateScale();
     }
 
     /// <summary>
@@ -175,7 +187,8 @@ public class CommandUIElement : MonoBehaviour
         activeDiamondImage.gameObject.SetActive(true);
 
         arrowImage.color = missColor;
-        arrowImage.transform.localScale = arrowOriginalScale;
+        SuccessScale = 1f;
+        UpdateScale();
     }
 
     /// <summary>
@@ -193,19 +206,19 @@ public class CommandUIElement : MonoBehaviour
             float t = Mathf.Clamp01(time / succesDuration);
 
             // 前半で拡大して、後半で元に戻す
-            float scale;
             if(t < 0.5f)
             {
-                scale = Mathf.Lerp(1f, succesScale, t * 2f);
+                SuccessScale = Mathf.Lerp(1f, succesScale, t * 2f);
             }
             else
             {
-                scale = Mathf.Lerp(succesScale, 1f, (t - 0.5f) * 2f);
+                SuccessScale = Mathf.Lerp(succesScale, 1f, (t - 0.5f) * 2f);
             }
-            arrowImage.transform.localScale = arrowOriginalScale * scale;
+            UpdateScale();
             yield return null;
         }
-        arrowImage.transform.localScale = arrowOriginalScale;
+        SuccessScale = 1f;
+        UpdateScale();
         successCoroutine = null;
     }
 
@@ -224,18 +237,33 @@ public class CommandUIElement : MonoBehaviour
     /// <param name="scale"></param>
     public void SetScale(float scale)
     {
-        diamondImage.transform.localScale = diamondOriginalScale * scale;
-        arrowImage.transform.localScale = arrowOriginalScale * scale;
+        commandScale = scale;
+        UpdateScale();
     }
 
-    /// <summary>
-    /// コマンドを縦方向に縮める
-    /// </summary>
-    /// <param name="scale"></param>
-    public void SetVerticalScale(float scale)
+    public void SetAppearScale(float scale)
     {
-        transform.localScale = new Vector3(1f, scale, 1f);
+        appearScale = scale;
+        UpdateScale();
     }
+
+    private void UpdateScale()
+    {
+        float scale = commandScale * appearScale;
+
+        diamondImage.transform.localScale = diamondOriginalScale * scale;
+        arrowImage.transform.localScale = arrowOriginalScale * scale * SuccessScale;
+        activeDiamondImage.transform.localScale = activeDiamondOriginalScale * scale;
+    }
+
+    ///// <summary>
+    ///// コマンドを縦方向に縮める
+    ///// </summary>
+    ///// <param name="scale"></param>
+    //public void SetVerticalScale(float scale)
+    //{
+    //    transform.localScale = new Vector3(1f, scale, 1f);
+    //}
 
     /// <summary>
     /// 色を設定
@@ -244,5 +272,15 @@ public class CommandUIElement : MonoBehaviour
     public void SetDiamondColor(Color color)
     {
         diamondImage.color = color;
+    }
+
+    /// <summary>
+    /// コマンド全体をグレーアウトさせる
+    /// </summary>
+    public void SetGrayOut()
+    {
+        diamondImage.color = Color.gray;
+        arrowImage.color = Color.gray;
+        activeDiamondImage.color = Color.gray;
     }
 }

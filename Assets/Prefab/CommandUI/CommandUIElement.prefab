@@ -210,7 +210,7 @@ MonoBehaviour:
   rightSprite: {fileID: 21300000, guid: 29f60ad49eaaa8f48afdd9bbd3c6fd82, type: 3}
   waitingFrameSprite: {fileID: 21300000, guid: bb01616aae3258544aaebad87c084d70, type: 3}
   succesFrameSprite: {fileID: 21300000, guid: e9d4f7e18ad59d6458a94f9439adb4ae, type: 3}
-  missFrameSprite: {fileID: 21300000, guid: 29b745846c61d094cb8a665a20b28397, type: 3}
+  missFrameSprite: {fileID: 21300000, guid: 28902d37eef8f9a4595674a853c6172c, type: 3}
   normalArrowColor: {r: 1, g: 1, b: 1, a: 1}
   succesColor: {r: 0.25, g: 0.9, b: 1, a: 1}
   missColor: {r: 1, g: 0, b: 0, a: 1}

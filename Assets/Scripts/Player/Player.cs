@@ -8,7 +8,6 @@ public class Player : MonoBehaviour
     [SerializeField] private SpriteRenderer renderer;
 
     [Header("HP")]
-    [SerializeField] private HPUI hpUI;
     [SerializeField] private int maxHP = 10;
     private int curretHP;
 
@@ -24,6 +23,7 @@ public class Player : MonoBehaviour
 
     private bool isCommandAnimation = false;
     private bool isCommandInput = false;
+    private bool isCommandFailed = false;
 
     [Header("入力設定")]
     [SerializeField] private InputActionReference moveAction;
@@ -35,7 +35,6 @@ public class Player : MonoBehaviour
     private void Start()
     {
         curretHP = maxHP;
-        hpUI.UpdateHP(curretHP);
         commboUI.UpdateCombo(commbo);
     }
 
@@ -114,14 +113,16 @@ public class Player : MonoBehaviour
         switch (result)
         {
             case CheckResult.Success:
-                // 小さい画面揺れ
-                CameraShake.instance.Shake(0.08f, 0.05f);
 
                 // Enemyにダメージ
                 battleManager.CompleteCommand();
 
+                // 成功した矢印を水色にする
+                commandUI.SetSuccessComand(enemy.GetCurrentIndex() - 1);
+
                 commbo++;
                 commboUI.UpdateCombo(commbo);
+
                 commandUI.UpdateActiveComand(enemy.GetCurrentIndex());
                 break;
 
@@ -130,10 +131,14 @@ public class Player : MonoBehaviour
                 // Enemyにダメージ
                 battleManager.CompleteCommand();
 
+                // 最後の矢印も成功状態にする
+                commandUI.SetSuccessComand(enemy.GetCurrentIndex() - 1);
+
                 StartCoroutine(CompleteCommand());
                 break;
 
             case CheckResult.Miss:
+                isCommandFailed = true;
                 StartCoroutine(MissCommand());
                 break;
         }
@@ -147,8 +152,11 @@ public class Player : MonoBehaviour
     {
         isCommandAnimation = true;
 
-        // 大きい画面揺れ
-        CameraShake.instance.Shake(0.18f, 0.2f);
+        // 一度もミスをしていない場合のみ大きく揺らす
+        if (!isCommandFailed)
+        {
+            CameraShake.instance.Shake(0.14f, 0.2f);
+        }
 
         yield return StartCoroutine(commandUI.PlayCompleteAnimation(enemy.GetCurrentIndex() - 1));
 
@@ -159,6 +167,7 @@ public class Player : MonoBehaviour
         commandUI.UpdateNextCommand();
         commandUI.UpdateCommanedText(enemy);
 
+        isCommandFailed = false;
         isCommandAnimation = false;
     }
 
@@ -180,6 +189,7 @@ public class Player : MonoBehaviour
         if(enemy.IsCommandFinished())
         { 
             enemy.SetRandomCommands();
+            isCommandFailed = false;
 
             commandUI.UpdateCommanedText(enemy);
         }
@@ -196,8 +206,6 @@ public class Player : MonoBehaviour
 
         // HPがマイナスにならないようにする
         curretHP = Mathf.Max(0, curretHP);
-
-        hpUI.UpdateHP(curretHP);
 
         commbo = 0;
         commboUI.UpdateCombo(commbo);

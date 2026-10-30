@@ -26,6 +26,15 @@ public class NovelBackgroundManager : MonoBehaviour
     {
         // nextBackgroundImage‚ªŒ³X‚¢‚½Hierarchyã‚ÌˆÊ’u‚ğ‹L‰¯
         originalSiblingIndex = nextBackgroundImage.transform.GetSiblingIndex();
+
+        // ƒQ[ƒ€ŠJn‚É”wŒi‰æ‘œ‚ªw’è‚³‚ê‚Ä‚¢‚È‚¯‚ê‚Î“§–¾‚É‚·‚é
+        if (backgroundImage.sprite == null)
+        {
+            backgroundImage.enabled = false;
+        }
+
+        // Ÿ‚Ì”wŒi‚à‰Šúó‘Ô‚Å‚Í”ñ•\¦
+        nextBackgroundImage.enabled = false;
     }
 
     /// <summary>
@@ -132,8 +141,13 @@ public class NovelBackgroundManager : MonoBehaviour
     {
         // Ÿ‚Ì”wŒi‚ğŒ»İ‚Ì”wŒi‚Éİ’è
         backgroundImage.sprite = nextBackgroundImage.sprite;
-        backgroundImage.color = Color.white;
         backgroundImage.enabled = true;
+
+        // ”wŒi‰æ‘œ‚ğŠ®‘S‚É•\¦
+        Color color = backgroundImage.color;
+        color.a = 1f;
+        backgroundImage.color = color;
+
         // Ÿ‚Ì”wŒi‚ğÁ‚·
         nextBackgroundImage.sprite = null;
         nextBackgroundImage.enabled = false;

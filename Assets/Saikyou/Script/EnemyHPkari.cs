@@ -16,6 +16,14 @@ public class EnemyHPkari : MonoBehaviour
     public Transform damagePoint;
     public Canvas targetCanvas;
 
+    [Header("ダメージテキスト")]
+    public AttackTextkari criticalTextPrefab;
+    public AttackTextkari counterTextPrefab;
+    public AttackTextkari finishblowTextPrefab;
+    public Transform criticalTextPoint;
+    public Transform counterTextPoint;
+    public Transform finishblowTextPoint;
+
     // 通常ダメージ
     public void TakeDamage(int damage)
     {
@@ -92,6 +100,63 @@ public class EnemyHPkari : MonoBehaviour
                     attackType
                 );
             }
+        }
+
+        // クリティカル表示
+        if (isCritical && criticalTextPrefab != null)
+        {
+            AttackTextkari obj = Instantiate(
+                criticalTextPrefab,
+                targetCanvas.transform,
+                false
+            );
+
+            obj.SetEnemyPoint(transform);
+            obj.targetPoint = criticalTextPoint as RectTransform;
+
+            obj.ShowText("CRITICAL!");
+        }
+
+        // カウンター表示
+        if (attackType == "Counter" &&
+            counterTextPrefab != null &&
+            counterTextPoint != null &&
+            targetCanvas != null)
+        {
+            AttackTextkari obj = Instantiate(
+                counterTextPrefab,
+                targetCanvas.transform,
+                false
+            );
+
+            // 敵の位置を移動元に設定
+            obj.SetEnemyPoint(transform);
+
+            // Canvas内のUIオブジェクトを移動先に設定
+            obj.targetPoint = counterTextPoint as RectTransform;
+
+            obj.ShowText("COUNTER!");
+        }
+
+        // フィニッシュブロー表示
+        if (attackType == "FinishBlow" &&
+            finishblowTextPrefab != null &&
+            finishblowTextPoint != null &&
+            targetCanvas != null)
+        {
+            AttackTextkari obj = Instantiate(
+                finishblowTextPrefab,
+                targetCanvas.transform,
+                false
+            );
+
+            // 敵の位置を移動元に設定
+            obj.SetEnemyPoint(transform);
+
+            // Canvas内のUIオブジェクトを移動先に設定
+            obj.targetPoint = finishblowTextPoint as RectTransform;
+
+            obj.ShowText("FINISHBLOW!");
         }
 
         // HPが0以下なら敵を破壊

@@ -28,6 +28,18 @@ public class PageSwitcher : MonoBehaviour
         ShowPage1();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            ShowPage1();
+        }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            ShowPage2();
+        }
+    }
+
     public void ShowPage1()
     {
         if (page1 != null) page1.SetActive(true);

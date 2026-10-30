@@ -13,12 +13,18 @@ public class BattleEnemySpawner : MonoBehaviour
 
     private Enemy battleEnemy;
 
+    [Header("Debug")]
+    [SerializeField] private bool spawnOnStart = false;
+
     private void Start()
     {
-        SpawnEnemy();
+        if(spawnOnStart)
+        {
+            SpawnEnemy();
+        }
     }
 
-    private void SpawnEnemy()
+    public void SpawnEnemy()
     {
         battleEnemy = Instantiate(enemyPrefab, battlePoint.position, Quaternion.identity);
 

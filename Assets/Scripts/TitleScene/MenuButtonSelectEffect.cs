@@ -1,4 +1,3 @@
-
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -20,7 +19,6 @@ public class MenuButtonSelectEffect : MonoBehaviour,
     [SerializeField] private float stayDuration = 0.1f;
     [SerializeField] private float returnDuration = 0.25f;
 
-
     [Header("êFê›íË")]
     [SerializeField] private Image visualImage;
     [SerializeField] private Color normalColor = Color.white;
@@ -30,22 +28,18 @@ public class MenuButtonSelectEffect : MonoBehaviour,
     [SerializeField] private TitleManager titleManager;
 
     private Vector3 targetScale;
-    private bool isDecided = false;
-    private bool isHovered = false;
-    private bool isSelected = false;
+    private bool isDecided;
+    private bool isHovered;
+    private bool isSelected;
 
     private Button button;
     private Coroutine decideCoroutine;
 
     private void Start()
     {
-        targetScale = Vector3.one * scaleNormal;
         button = GetComponent<Button>();
 
-        if (visualImage != null)
-        {
-            visualImage.color = normalColor;
-        }
+        ResetButtonState();
 
         if (button != null)
         {
@@ -60,7 +54,7 @@ public class MenuButtonSelectEffect : MonoBehaviour,
         transform.localScale = Vector3.Lerp(
             transform.localScale,
             targetScale,
-            lerpSpeed * Time.deltaTime
+            lerpSpeed * Time.unscaledDeltaTime
         );
     }
 
@@ -143,39 +137,44 @@ public class MenuButtonSelectEffect : MonoBehaviour,
         if (decideCoroutine != null)
             StopCoroutine(decideCoroutine);
 
-        decideCoroutine = StartCoroutine(PlayDecideEffect(onComplete));
+        decideCoroutine = StartCoroutine(
+            PlayDecideEffect(onComplete)
+        );
     }
 
-  private IEnumerator PlayDecideEffect(System.Action onComplete)
+    private IEnumerator PlayDecideEffect(System.Action onComplete)
     {
         Vector3 startScale = transform.localScale;
         Quaternion startRotation = transform.localRotation;
 
-        Vector3 targetScale = Vector3.one * scaleDecided;
-        Quaternion targetRotation =
+        Vector3 decidedScale = Vector3.one * scaleDecided;
+        Quaternion decidedRotation =
             Quaternion.Euler(0f, 0f, rotateDecided);
 
-        // ägëÂÇµÇ»Ç™ÇÁåXÇ≠
         float elapsed = 0f;
 
+        // ägëÂÇµÇ»Ç™ÇÁåXÇ≠
         while (elapsed < decideDuration)
         {
             elapsed += Time.unscaledDeltaTime;
 
-            float t = Mathf.Clamp01(elapsed / decideDuration);
+            float t = decideDuration > 0f
+                ? Mathf.Clamp01(elapsed / decideDuration)
+                : 1f;
+
             float smoothT = Mathf.SmoothStep(0f, 1f, t);
 
             transform.localScale =
-                Vector3.Lerp(startScale, targetScale, smoothT);
+                Vector3.Lerp(startScale, decidedScale, smoothT);
 
             transform.localRotation =
-                Quaternion.Slerp(startRotation, targetRotation, smoothT);
+                Quaternion.Slerp(startRotation, decidedRotation, smoothT);
 
             yield return null;
         }
 
-        transform.localScale = targetScale;
-        transform.localRotation = targetRotation;
+        transform.localScale = decidedScale;
+        transform.localRotation = decidedRotation;
 
         // åXÇ¢ÇΩèÛë‘Çè≠Çµà€éù
         yield return new WaitForSecondsRealtime(stayDuration);
@@ -187,14 +186,23 @@ public class MenuButtonSelectEffect : MonoBehaviour,
         {
             elapsed += Time.unscaledDeltaTime;
 
-            float t = Mathf.Clamp01(elapsed / returnDuration);
+            float t = returnDuration > 0f
+                ? Mathf.Clamp01(elapsed / returnDuration)
+                : 1f;
+
             float smoothT = Mathf.SmoothStep(0f, 1f, t);
 
-            transform.localScale =
-                Vector3.Lerp(targetScale, Vector3.one * scaleNormal, smoothT);
+            transform.localScale = Vector3.Lerp(
+                decidedScale,
+                Vector3.one * scaleNormal,
+                smoothT
+            );
 
-            transform.localRotation =
-                Quaternion.Slerp(targetRotation, Quaternion.identity, smoothT);
+            transform.localRotation = Quaternion.Slerp(
+                decidedRotation,
+                Quaternion.identity,
+                smoothT
+            );
 
             yield return null;
         }
@@ -202,14 +210,38 @@ public class MenuButtonSelectEffect : MonoBehaviour,
         transform.localScale = Vector3.one * scaleNormal;
         transform.localRotation = Quaternion.identity;
 
-        onComplete?.Invoke();
-
         decideCoroutine = null;
+
+        onComplete?.Invoke();
+    }
+
+    // É{É^ÉìèÛë‘Çèâä˙âª
+    public void ResetButtonState()
+    {
+        if (decideCoroutine != null)
+        {
+            StopCoroutine(decideCoroutine);
+            decideCoroutine = null;
+        }
+
+        isDecided = false;
+        isHovered = false;
+        isSelected = false;
+
+        targetScale = Vector3.one * scaleNormal;
+
+        transform.localScale = targetScale;
+        transform.localRotation = Quaternion.identity;
+
+        if (visualImage != null)
+            visualImage.color = normalColor;
     }
 
     private void OnDestroy()
     {
         if (button != null)
+        {
             button.onClick.RemoveListener(OnDecided);
+        }
     }
 }

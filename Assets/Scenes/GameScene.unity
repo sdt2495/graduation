@@ -863,6 +863,7 @@ MonoBehaviour:
   player: {fileID: 758857482}
   hpManager: {fileID: 838218682}
   canvas: {fileID: 855068726}
+  spawnOnStart: 1
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1409,7 +1410,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Player
   enemy: {fileID: 0}
   renderer: {fileID: 758857480}
-  hpUI: {fileID: 0}
   maxHP: 100
   commboUI: {fileID: 833779302}
   commandUI: {fileID: 838218681}
@@ -1763,7 +1763,7 @@ MonoBehaviour:
   commandPrefab: {fileID: 3923778264351662874, guid: c70b2aa988732b047a23fde805226b08, type: 3}
   commandParent: {fileID: 576119644}
   nextCommandParent: {fileID: 1938692528}
-  spacing: 180
+  spacing: 130
   activeDiamondMoveDuration: 0.12
   activeDiamondMoveCurve:
     serializedVersion: 2
@@ -1789,10 +1789,13 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  normalScale: 1
-  activeScale: 1.2
+  normalScale: 1.2
+  activeScale: 1.5
   normalColor: {r: 0, g: 0, b: 0, a: 1}
   missColor: {r: 1, g: 0, b: 0, a: 1}
+  appearDuration: 0.06
+  appearInterval: 0.0025
+  appearOvershot: 1.2
   missFlashDuration: 0.05
   missTiltAngle: 15
   missTiltDuration: 0.1

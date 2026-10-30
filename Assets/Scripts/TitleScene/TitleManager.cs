@@ -1,7 +1,7 @@
-
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -14,32 +14,14 @@ public class TitleManager : MonoBehaviour
     [SerializeField] private float buttonEffectDelay = 0.1f;
     [SerializeField] private float moveDuration = 0.7f;
 
-    // 移動距離の調整
+    [Header("移動距離の調整")]
     [SerializeField] private float moveDistance = 1920f;
 
-    private bool isLoading = false;
-    private Vector2 initialTransitionPosition;
-
+    private bool isLoading;
 
     private void Start()
     {
-        if (transitionImage != null)
-        {
-            // 画像を画面の左外に配置
-            RectTransform canvasRect =
-                transitionImage.parent as RectTransform;
-
-            float canvasWidth = canvasRect.rect.width;
-            float imageWidth = transitionImage.rect.width;
-
-            transitionImage.anchoredPosition = new Vector2(
-                -canvasWidth / 2f - imageWidth / 2f,
-                0f
-            );
-
-            // 最初は非表示
-            transitionImage.gameObject.SetActive(false);
-        }
+        ResetTransition();
     }
 
     // ゲーム開始
@@ -48,12 +30,17 @@ public class TitleManager : MonoBehaviour
         StartSceneLoad("GameScene");
     }
 
-    // 設定画面
+    // 設定画面を開く
     public void OnClickConfigButton()
     {
-        ConfigSceneController.OpenFromGame();
+        StartSceneLoad("ConfigScene");
     }
 
+    // ボタンの決定演出後に設定画面を開く
+    public void OpenConfigAfterEffect()
+    {
+        StartSceneLoad("ConfigScene");
+    }
     // ゲーム終了
     public void OnClickQuitGameButton()
     {
@@ -70,6 +57,7 @@ public class TitleManager : MonoBehaviour
         StartSceneLoad(sceneName);
     }
 
+    // シーン移動開始
     private void StartSceneLoad(string sceneName)
     {
         if (isLoading) return;
@@ -78,30 +66,31 @@ public class TitleManager : MonoBehaviour
         StartCoroutine(PlayTransition(sceneName));
     }
 
+    // 画面切り替えアニメーション
     private IEnumerator PlayTransition(string sceneName)
     {
-        // ボタンの拡大演出を少し見せる
-        yield return new WaitForSeconds(buttonEffectDelay);
+        yield return new WaitForSecondsRealtime(buttonEffectDelay);
 
         if (transitionImage != null)
         {
-            transitionImage.gameObject.SetActive(true);
-
             RectTransform canvasRect =
                 transitionImage.parent as RectTransform;
 
-            float canvasWidth = canvasRect.rect.width;
-            float imageWidth = transitionImage.rect.width;
+            if (canvasRect == null)
+            {
+                Debug.LogError(
+                    "Transition Image の親にCanvasのRectTransformがありません。"
+                );
 
-            Vector2 startPosition = new Vector2(
-                 -moveDistance,
-                 0f
-             );
+                isLoading = false;
+                yield break;
+            }
 
-            Vector2 endPosition = new Vector2(
-                moveDistance,
-                0f
-            );
+            Vector2 startPosition = new Vector2(-moveDistance, 0f);
+            Vector2 endPosition = new Vector2(moveDistance, 0f);
+
+            transitionImage.anchoredPosition = startPosition;
+            transitionImage.gameObject.SetActive(true);
 
             float elapsed = 0f;
 
@@ -109,9 +98,10 @@ public class TitleManager : MonoBehaviour
             {
                 elapsed += Time.unscaledDeltaTime;
 
-                float t = Mathf.Clamp01(elapsed / moveDuration);
+                float t = moveDuration > 0f
+                    ? Mathf.Clamp01(elapsed / moveDuration)
+                    : 1f;
 
-                // なめらかに加速・減速
                 float easedT = Mathf.SmoothStep(0f, 1f, t);
 
                 transitionImage.anchoredPosition =
@@ -123,49 +113,64 @@ public class TitleManager : MonoBehaviour
             transitionImage.anchoredPosition = endPosition;
         }
 
-        if(sceneName == "ConfigScene")
+        // アニメーション完了後にシーンを切り替える
+        if (sceneName == "ConfigScene")
         {
-            // 位置リセットここ?
-
-            // 無理やりだけどConfigSceneのときは特殊なロード
             ConfigSceneController.OpenFromGame();
         }
         else
         {
-            // 演出が終わってからシーン移動
             SceneManager.LoadScene(sceneName);
         }
     }
 
-
-    public void OpenConfigAfterEffect()
+    // 設定画面から戻ったとき
+    public void OnReturnFromConfig()
     {
-        StartSceneLoad("ConfigScene");
+        ResetTransition();
+
+        // タイトル画面のボタンを初期化
+        MenuButtonSelectEffect[] buttons =
+            FindObjectsByType<MenuButtonSelectEffect>(
+                FindObjectsSortMode.None
+            );
+
+        foreach (MenuButtonSelectEffect menuButton in buttons)
+        {
+            menuButton.ResetButtonState();
+        }
+
+        // EventSystemの選択状態を解除
+        EventSystem.current?.SetSelectedGameObject(null);
     }
 
-    // 画面切り替え演出を初期状態に戻す
+    // 遷移画像を初期状態に戻す
     public void ResetTransition()
     {
-        StopAllCoroutines();
-
         isLoading = false;
 
-        if (transitionImage != null)
+        if (transitionImage == null)
+            return;
+
+        RectTransform canvasRect =
+            transitionImage.parent as RectTransform;
+
+        if (canvasRect == null)
         {
-            // アニメーション画像を非表示にする
-            transitionImage.gameObject.SetActive(false);
-
-            // 画面左外の初期位置に戻す
-            RectTransform canvasRect =
-                transitionImage.parent as RectTransform;
-
-            float canvasWidth = canvasRect.rect.width;
-            float imageWidth = transitionImage.rect.width;
-
-            transitionImage.anchoredPosition = new Vector2(
-                -canvasWidth / 2f - imageWidth / 2f,
-                0f
+            Debug.LogError(
+                "Transition Image の親にCanvasのRectTransformがありません。"
             );
+            return;
         }
+
+        float canvasWidth = canvasRect.rect.width;
+        float imageWidth = transitionImage.rect.width;
+
+        transitionImage.anchoredPosition = new Vector2(
+            -canvasWidth / 2f - imageWidth / 2f,
+            0f
+        );
+
+        transitionImage.gameObject.SetActive(false);
     }
 }

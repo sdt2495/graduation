@@ -2212,7 +2212,7 @@ MonoBehaviour:
   leftGroup: {fileID: 2051791404}
   rightGroup: {fileID: 971134475}
   breakEffect: {fileID: 949635420}
-  duration: 0.55
+  duration: 0.3
 --- !u!1 &838218676
 GameObject:
   m_ObjectHideFlags: 0

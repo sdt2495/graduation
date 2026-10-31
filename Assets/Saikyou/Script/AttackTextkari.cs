@@ -36,6 +36,7 @@ public class AttackTextkari : MonoBehaviour
     public float normalScale = 1.0f;
     public float maxScale = 1.2f;
     public float popDuration = 0.15f;
+    public float stopDuration = 0.1f;
 
     public void SetEnemyPoint(Transform point)
     {
@@ -145,15 +146,15 @@ public class AttackTextkari : MonoBehaviour
         // 通常サイズでスタート
         rect.localScale = Vector3.one * normalScale;
 
+        yield return new WaitForSeconds(stopDuration);
+
         Color color = text.color;
-        color.a = 0f;
+        color.a = 1f;
         text.color = color;
 
         float timer = 0f;
 
-        color.a = 1f;
-        text.color = color;
-
+        // その場で大きくなって元に戻る
         while (timer < popDuration)
         {
             timer += Time.deltaTime;
@@ -163,13 +164,11 @@ public class AttackTextkari : MonoBehaviour
 
             if (t < 0.3f)
             {
-                // 大きくする
                 float scaleT = t / 0.3f;
                 scale = Mathf.Lerp(normalScale, maxScale, scaleT);
             }
             else
             {
-                // 元のサイズに戻す
                 float scaleT = (t - 0.3f) / 0.7f;
                 scale = Mathf.Lerp(maxScale, normalScale, scaleT);
             }
@@ -178,6 +177,12 @@ public class AttackTextkari : MonoBehaviour
 
             yield return null;
         }
+
+        // 元のサイズに戻す
+        rect.localScale = Vector3.one * normalScale;
+
+        // 元のサイズで一瞬停止
+        yield return new WaitForSeconds(stopDuration);
 
         rect.localScale = Vector3.one * normalScale;
 
@@ -199,6 +204,8 @@ public class AttackTextkari : MonoBehaviour
             yield return null;
         }
 
+        // yield return new WaitForSeconds(displayDuration); 左に移動するやつ消すなら上のWhile文消してこれ入れる
+
         rect.anchoredPosition = endPosition;
         // 指定した秒数だけ表示
         yield return new WaitForSeconds(displayDuration);
@@ -209,8 +216,8 @@ public class AttackTextkari : MonoBehaviour
         // 現在の位置を保存
         Vector2 exitStartPosition = rect.anchoredPosition;
 
-        // 左に移動する距離
-        Vector2 exitEndPosition = exitStartPosition + new Vector2(-200f, 0f);
+        // 左上に移動する距離
+        Vector2 exitEndPosition = exitStartPosition + new Vector2(-200f, 150f);
 
         while (timer < returnDuration)
         {

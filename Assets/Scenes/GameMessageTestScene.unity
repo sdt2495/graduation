@@ -209,6 +209,7 @@ GameObject:
   - component: {fileID: 130370974}
   - component: {fileID: 130370976}
   - component: {fileID: 130370975}
+  - component: {fileID: 130370977}
   m_Layer: 5
   m_Name: GameMessagePanel
   m_TagString: Untagged
@@ -276,6 +277,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 130370973}
   m_CullTransparentMesh: 1
+--- !u!225 &130370977
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 130370973}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &224762540
 GameObject:
   m_ObjectHideFlags: 0
@@ -781,6 +794,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1168949370}
   - {fileID: 130370974}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -939,6 +953,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48ffe352be21fca4ebc53124e90b29cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameMessageManager
+  messageCanvasGroup: {fileID: 130370977}
+  fadeInDuration: 0.2
+  fadeOutDuration: 0.5
   messagePanel: {fileID: 130370973}
   characterImage: {fileID: 1009937826}
   messageText: {fileID: 243041685}
@@ -969,7 +986,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 680688580}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1220598530
 GameObject:
@@ -1054,5 +1071,4 @@ SceneRoots:
   - {fileID: 224762543}
   - {fileID: 680688580}
   - {fileID: 17735942}
-  - {fileID: 1168949370}
   - {fileID: 707818636}

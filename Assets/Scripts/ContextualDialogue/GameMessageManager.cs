@@ -32,6 +32,13 @@ public class GameMessageManager : MonoBehaviour
     private List<WaitPoint> waitPoints = new();
     #endregion
 
+    [Header("フェード")]
+    [SerializeField] private CanvasGroup messageCanvasGroup;
+    [SerializeField] private float fadeInDuration = 0.25f;
+    [SerializeField] private float fadeOutDuration = 0.25f;
+
+
+    [Header("──────────────────────────────")]
     [Header("メッセージUI")]
     [SerializeField] private GameObject messagePanel;
     [Space(5)]
@@ -78,6 +85,159 @@ public class GameMessageManager : MonoBehaviour
 
     private Coroutine specialCharacterCoroutine; // セリフ表示と自動非表示を管理するコルーチン
     private Coroutine messageCoroutine; // 現在実行中の自動非表示コルーチン
+
+
+    private Coroutine fadeCoroutine;     // 現在実行中のフェード処理を管理するコルーチン
+    private bool isMessageVisible;      // メッセージが表示状態かどうか
+    private bool isFadingOut;            // フェードアウト中かどうか
+
+
+    #region Awake()
+
+    private void Awake()
+    {
+        // CanvasGroupが設定されている場合
+        if (messageCanvasGroup != null)
+        {
+            // 初期状態では完全に透明にする
+            messageCanvasGroup.alpha = 0f;
+
+            // 初期状態ではUIへの操作を受け付けない
+            messageCanvasGroup.interactable = false;
+            messageCanvasGroup.blocksRaycasts = false;
+        }
+
+        // メッセージパネルが設定されている場合
+        if (messagePanel != null)
+        {
+            // ゲーム開始時はメッセージパネルを非表示にする
+            messagePanel.SetActive(false);
+        }
+        // メッセージが非表示の状態として初期化
+        isMessageVisible = false;
+        isFadingOut = false;
+    }
+    #endregion
+
+
+    #region CANVASのフェード
+
+    /// <summary>
+    /// 現在の透明度から指定した透明度までフェードする
+    /// </summary>
+    /// <param name="targetAlpha">フェード終了時の透明度（0：透明、1：不透明）</param>
+    /// <param name="duration">フェードにかける時間（秒）</param>
+    private IEnumerator FadeCanvasGroup(float targetAlpha, float duration)
+    {
+        // CanvasGroupが設定されていない場合は処理を終了する
+        if (messageCanvasGroup == null)
+            yield break;
+
+        // フェード開始時点の透明度を取得する
+        float startAlpha = messageCanvasGroup.alpha;
+
+        // フェード時間が0以下の場合は、即座に目標の透明度に設定する
+        if (duration <= 0f)
+        {
+            messageCanvasGroup.alpha = targetAlpha;
+            yield break;
+        }
+
+        // フェード開始からの経過時間を初期化する
+        float elapsed = 0f;
+
+        // 指定した時間が経過するまでフェードを続ける
+        while (elapsed < duration)
+        {
+            // 前フレームからの経過時間を加算する
+            elapsed += Time.deltaTime;
+
+            // 経過時間からフェードの進行度を算出する（0～1）
+            float progress = Mathf.Clamp01(elapsed / duration);
+
+            // 開始時の透明度から目標の透明度まで徐々に変更する
+            messageCanvasGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, progress);
+
+            // 次のフレームまで処理を待つ
+            yield return null;
+        }
+
+        // 最後に透明度を目標値へ正確に設定する
+        messageCanvasGroup.alpha = targetAlpha;
+    }
+
+
+    /// <summary>
+    /// フェード処理を開始する
+    /// 進行中のフェードがあれば停止し、現在の透明度から再開する
+    /// </summary>
+    private void StartFade(float targetAlpha, float duration)
+    {
+        // すでにフェード処理が実行中なら停止する
+        if (fadeCoroutine != null)
+        {
+            StopCoroutine(fadeCoroutine);
+            fadeCoroutine = null;
+        }
+
+        // フェードの方向を記録する（true：フェードアウト中、false：フェードイン中）
+        isFadingOut = targetAlpha <= 0f;
+
+        // フェードインを開始した時点でメッセージを表示状態にする
+        if (targetAlpha > 0f)
+        {
+            isMessageVisible = true;
+        }
+
+        // 指定した透明度と時間でフェード処理を開始する
+        fadeCoroutine = StartCoroutine(FadeAndUpdateState(targetAlpha, duration));
+    }
+
+
+    /// <summary>
+    /// フェード処理の完了後、メッセージの表示状態を更新する
+    /// </summary>
+    /// <param name="targetAlpha">フェード終了時の透明度</param>
+    /// <param name="duration">フェードにかける時間</param>
+    private IEnumerator FadeAndUpdateState(float targetAlpha, float duration)
+    {
+        // 指定した透明度までフェードさせる
+        yield return FadeCanvasGroup(targetAlpha, duration);
+
+        // フェード処理が終了したため、コルーチンの参照を解除
+        fadeCoroutine = null;
+
+        // 完全に透明になった場合は、メッセージを非表示にする
+        if (targetAlpha <= 0f)
+        {
+            // メッセージが非表示になったことを記録
+            isMessageVisible = false;
+
+            // フェードアウトが終了したことを記録
+            isFadingOut = false;
+
+            // メッセージパネルを非表示にする
+            if (messagePanel != null)
+            {
+                messagePanel.SetActive(false);
+            }
+
+            // 次回表示時に備えて、テキストの表示文字数をリセット
+            if (messageText != null)
+            {
+                messageText.maxVisibleCharacters = 0;
+            }
+        }
+        else
+        {
+            // メッセージが表示状態になったことを記録
+            isMessageVisible = true;
+
+            // フェードアウトが終了したことを記録
+            isFadingOut = false;
+        }
+    }
+    #endregion
 
 
     #region タイプからメッセージを表示
@@ -142,6 +302,9 @@ public class GameMessageManager : MonoBehaviour
     /// <summary>
     /// キャラクター画像とセリフを設定し、表示を開始する
     /// </summary>
+    /// <summary>
+    /// キャラクター画像とセリフを設定し、表示を開始する
+    /// </summary>
     private void DisplayMessage(Sprite character, string message)
     {
         // 前の文字送り・自動非表示処理があれば停止
@@ -158,17 +321,22 @@ public class GameMessageManager : MonoBehaviour
             specialCharacterCoroutine = null;
         }
 
-        // メッセージパネルを表示
-        if (messagePanel != null)
+        // 表示パネルが非表示なら有効化
+        if (messagePanel != null && !messagePanel.activeSelf)
         {
             messagePanel.SetActive(true);
+        }
+
+        // 非表示、またはフェードアウト中ならフェードイン
+        if (!isMessageVisible || isFadingOut)
+        {
+            StartFade(1f, fadeInDuration);
         }
 
         // キャラクターの表情画像を設定
         if (characterImage != null)
         {
             characterImage.sprite = character;
-            // 画像が設定されている場合だけ表示
             characterImage.enabled = character != null;
         }
 
@@ -191,7 +359,7 @@ public class GameMessageManager : MonoBehaviour
         // TextMeshProの文字情報を更新
         messageText.ForceMeshUpdate();
 
-        // 各文字の元の頂点位置を保存する
+        // 各文字の元の頂点位置を保存
         InitializeSpecialCharacters();
 
         // 特殊文字のアニメーションを開始
@@ -641,11 +809,8 @@ public class GameMessageManager : MonoBehaviour
         // 全文表示後、指定時間だけ待つ
         yield return new WaitForSeconds(displayTime);
 
-        // 表示時間が終了したらメッセージを消す
-        if (messagePanel != null)
-        {
-            messagePanel.SetActive(false);
-        }
+        // フェードアウト開始
+        StartFade(0f, fadeOutDuration);
 
         // 不要になった特殊文字アニメーションを停止
         if (specialCharacterCoroutine != null)
@@ -681,17 +846,28 @@ public class GameMessageManager : MonoBehaviour
             specialCharacterCoroutine = null;
         }
 
-        // メッセージパネルを非表示にする
+        // 現在の透明度からフェードアウト
+        StartFade(0f, fadeOutDuration);
+    }
+
+    /// <summary>
+    /// フェードアウトしてからメッセージを非表示にする
+    /// </summary>
+    private IEnumerator HideMessageCoroutine()
+    {
+        yield return FadeCanvasGroup(0f, fadeOutDuration);
+
         if (messagePanel != null)
         {
             messagePanel.SetActive(false);
         }
 
-        // 次に表示するセリフが前のセリフの続きにならないようにする
         if (messageText != null)
         {
             messageText.maxVisibleCharacters = 0;
         }
+
+        messageCoroutine = null;
     }
     #endregion
 }

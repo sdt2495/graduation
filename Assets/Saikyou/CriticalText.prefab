@@ -157,10 +157,12 @@ MonoBehaviour:
   showDuration: 0.2
   displayDuration: 0.75
   returnDuration: 0.1
+  fadeOutDuration: 0.05
   enemyPoint: {fileID: 0}
   targetPoint: {fileID: 0}
   spawnOffsetX: -200
   criticalOffsetY: 30
   normalScale: 1
   maxScale: 2
-  popDuration: 0.15
+  popDuration: 0.05
+  stopDuration: 0.04

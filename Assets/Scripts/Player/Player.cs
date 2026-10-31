@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
 
     [Header("コンボ")]
     [SerializeField] private ComboUI commboUI;
+    [SerializeField] private ComboBar comboBar;
     private int commbo = 0;
 
     [Header("コマンドUI")]
@@ -35,7 +36,9 @@ public class Player : MonoBehaviour
     private void Start()
     {
         curretHP = maxHP;
+
         commboUI.UpdateCombo(commbo);
+        comboBar.UpdateComboBar(commbo);
     }
 
     private void Update()
@@ -122,6 +125,7 @@ public class Player : MonoBehaviour
 
                 commbo++;
                 commboUI.UpdateCombo(commbo);
+                comboBar.UpdateComboBar(commbo);
 
                 commandUI.UpdateActiveComand(enemy.GetCurrentIndex());
                 break;
@@ -162,6 +166,7 @@ public class Player : MonoBehaviour
 
         commbo++;
         commboUI.UpdateCombo(commbo);
+        comboBar.UpdateComboBar(commbo);
 
         commandUI.ApplyNext(enemy);
         commandUI.UpdateNextCommand();
@@ -209,6 +214,7 @@ public class Player : MonoBehaviour
 
         commbo = 0;
         commboUI.UpdateCombo(commbo);
+        comboBar.UpdateComboBar(commbo);
 
         StartCoroutine(FlashRed());
 

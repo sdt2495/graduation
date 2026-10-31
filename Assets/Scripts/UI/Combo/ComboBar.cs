@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,7 +9,10 @@ public class ComboBar : MonoBehaviour
 
     [Header("カラー")]
     [SerializeField] private Color defaultColor = Color.gray;
-    [SerializeField] private Color activeColor = Color.green;
+    [SerializeField] private Color firstColor = new Color(0.8f, 0.8f, 0.8f);
+    [SerializeField] private Color secoundColor = Color.cyan;
+    [SerializeField] private Color thirdColor = Color.yellow;
+    [SerializeField] private Color fourthColor = new Color(1f, 0.75f, 0.85f);
 
     /// <summary>
     /// コンボ数に応じてバーを更新
@@ -16,6 +20,7 @@ public class ComboBar : MonoBehaviour
     public void UpdateComboBar(int combo)
     {
         int activeCount = GetActiveBarCount(combo);
+        Color activeColor = GetActiveColor(combo);
 
         for (int i = 0; i < bars.Length; i++)
         {
@@ -28,6 +33,31 @@ public class ComboBar : MonoBehaviour
                 bars[i].color = defaultColor;
             }
         }
+    }
+
+    /// <summary>
+    /// コンボ数に応じてバーの色を変える
+    /// </summary>
+    /// <param name="combo"></param>
+    /// <returns></returns>
+    private Color GetActiveColor(int combo)
+    {
+        if(combo < 5)
+        {
+            return firstColor;
+        }
+
+        if(combo < 10)
+        {
+            return secoundColor;
+        }
+
+        if( combo < 20)
+        {
+            return thirdColor;
+        }
+
+        return fourthColor;
     }
 
     /// <summary>

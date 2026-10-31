@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
     [Header("コンボ")]
     [SerializeField] private ComboUI commboUI;
     [SerializeField] private ComboBar comboBar;
+    [SerializeField] private ComboBarBreak comboBarBreak;
     private int commbo = 0;
 
     [Header("コマンドUI")]
@@ -189,6 +190,15 @@ public class Player : MonoBehaviour
 
         // ミスをしたらダメージを受ける
         yield return StartCoroutine(commandUI.PlayMissAnimation(missIndex, nextIndex));
+
+        // コンボが0の時は破壊アニメーションを再生しない
+        if(commbo > 0)
+        {
+            // ミスしたらバー破壊
+            comboBarBreak.PlayBreak();
+        }
+        
+        // ダメージ処理
         Damage(1);
 
         if(enemy.IsCommandFinished())

@@ -20,6 +20,7 @@ public class AttackTextkari : MonoBehaviour
 
     [Tooltip("元の位置に戻る時間")]
     public float returnDuration = 0.3f;
+    public float fadeOutDuration = 0.5f;
 
     [Header("移動設定")]
     public Transform enemyPoint;
@@ -219,15 +220,20 @@ public class AttackTextkari : MonoBehaviour
         // 左上に移動する距離
         Vector2 exitEndPosition = exitStartPosition + new Vector2(-200f, 150f);
 
-        while (timer < returnDuration)
+        while (timer < returnDuration || timer < fadeOutDuration)
         {
             timer += Time.deltaTime;
-            float t = Mathf.Clamp01(timer / returnDuration);
+
+            // 移動用の進行度
+            float moveT = Mathf.Clamp01(timer / returnDuration);
+
+            // フェード用の進行度
+            float fadeT = Mathf.Clamp01(timer / fadeOutDuration);
 
             // 滑らかに加速
-            float eased = t * t;
+            float eased = moveT * moveT;
 
-            // 左に移動
+            // 左上に移動
             rect.anchoredPosition = Vector2.Lerp(
                 exitStartPosition,
                 exitEndPosition,
@@ -235,7 +241,7 @@ public class AttackTextkari : MonoBehaviour
             );
 
             // フェードアウト
-            color.a = 1f - t;
+            color.a = 1f - fadeT;
             text.color = color;
 
             yield return null;

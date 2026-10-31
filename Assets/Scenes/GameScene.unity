@@ -1937,6 +1937,7 @@ MonoBehaviour:
   renderer: {fileID: 758857480}
   maxHP: 100
   commboUI: {fileID: 833779302}
+  comboBar: {fileID: 833779303}
   commandUI: {fileID: 838218681}
   battleManager: {fileID: 484586750}
   moveAction: {fileID: -1680190386980627800, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
@@ -2118,6 +2119,7 @@ GameObject:
   m_Component:
   - component: {fileID: 833779301}
   - component: {fileID: 833779302}
+  - component: {fileID: 833779303}
   m_Layer: 0
   m_Name: PlayerCombo
   m_TagString: Untagged
@@ -2162,6 +2164,34 @@ MonoBehaviour:
   effectSpeed: 1.5
   scaleUpDuration: 0.1
   scaleDowntDuration: 0.15
+--- !u!114 &833779303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 833779300}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc6ac6eb06af424d8791f7f1c61505f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ComboBar
+  bars:
+  - {fileID: 207470758}
+  - {fileID: 1824876284}
+  - {fileID: 1239949452}
+  - {fileID: 493512151}
+  - {fileID: 272526715}
+  - {fileID: 95684508}
+  - {fileID: 2085949556}
+  - {fileID: 490869626}
+  - {fileID: 36894114}
+  - {fileID: 622559348}
+  defaultColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  firstColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+  secoundColor: {r: 0, g: 1, b: 1, a: 1}
+  thirdColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  fourthColor: {r: 1, g: 0.75, b: 0.85, a: 1}
 --- !u!1 &838218676
 GameObject:
   m_ObjectHideFlags: 0

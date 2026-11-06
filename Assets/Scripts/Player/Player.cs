@@ -189,7 +189,7 @@ public class Player : MonoBehaviour
         int nextIndex = enemy.GetCurrentIndex();
 
         // ミスをしたらダメージを受ける
-        yield return StartCoroutine(commandUI.PlayMissAnimation(missIndex, nextIndex));
+        Coroutine missAnimation = StartCoroutine(commandUI.PlayMissAnimation(missIndex, nextIndex));
 
         // コンボが0の時は破壊アニメーションを再生しない
         if(commbo > 0)
@@ -197,6 +197,9 @@ public class Player : MonoBehaviour
             // ミスしたらバー破壊
             comboBarBreak.PlayBreak();
         }
+
+        // 矢印のミス演出が終わるまで待つ
+        yield return missAnimation;
         
         // ダメージ処理
         Damage(1);

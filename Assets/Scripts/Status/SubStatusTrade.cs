@@ -18,6 +18,9 @@ public class SubStatusTrade : MonoBehaviour
         public Button sellButton;
     }
 
+    [Header("選択・確定UI")]
+    public TradeSelectionUI selectionUI;
+
     [Header("サブステータス6個")]
     public SubStatus[] statuses = new SubStatus[6];
 
@@ -54,14 +57,36 @@ public class SubStatusTrade : MonoBehaviour
 
             if (statuses[i].buyButton != null)
             {
-                statuses[i].buyButton.onClick.AddListener(
-                    () => Buy(index));
+                statuses[i].buyButton.onClick.AddListener(() =>
+                {
+                    if (selectionUI == null) return;
+
+                    SubStatus s = statuses[index];
+
+                    selectionUI.Select(
+                        s.buyButton,
+                        s.statusName,
+                        "購入",
+                        () => Buy(index)
+                    );
+                });
             }
 
             if (statuses[i].sellButton != null)
             {
-                statuses[i].sellButton.onClick.AddListener(
-                    () => Sell(index));
+                statuses[i].sellButton.onClick.AddListener(() =>
+                {
+                    if (selectionUI == null) return;
+
+                    SubStatus s = statuses[index];
+
+                    selectionUI.Select(
+                        s.sellButton,
+                        s.statusName,
+                        "売却",
+                        () => Sell(index)
+                    );
+                });
             }
         }
 

@@ -1,8 +1,6 @@
 
-using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class PageSwitcher : MonoBehaviour
@@ -11,79 +9,60 @@ public class PageSwitcher : MonoBehaviour
     public GameObject page1;
     public GameObject page2;
 
-    [Header("メインステータスのボタン（Page1）")]
+    [Header("メインステータスのボタン")]
     public Button[] mainStatusButtons;
 
-    [Header("サブステータスのボタン（Page2）")]
+    [Header("サブステータスのボタン")]
     public Button[] subStatusButtons;
-
-    [Header("ボタンの大きさ")]
-    public float selectedScale = 1.2f;
-    public float normalScale = 1f;
-    public float animationDuration = 0.2f;
-
-    private readonly HashSet<Button> registeredButtons =
-        new HashSet<Button>();
 
     private void Start()
     {
         // 最初はメインページ
         ShowPage1();
 
-        // Inspectorで登録したボタンにイベントを設定
-        RegisterButtons(mainStatusButtons, ShowPage1);
-        RegisterButtons(subStatusButtons, ShowPage2);
+        RegisterButtons(mainStatusButtons, true);
+        RegisterButtons(subStatusButtons, false);
     }
 
-    private void RegisterButtons(
-        Button[] buttons,
-        UnityEngine.Events.UnityAction action)
+    private void RegisterButtons(Button[] buttons, bool isMain)
     {
         if (buttons == null) return;
 
         foreach (Button button in buttons)
         {
-            if (button == null || !registeredButtons.Add(button))
-                continue;
+            if (button == null) continue;
 
-            EventTrigger trigger =
-                button.GetComponent<EventTrigger>();
+            StatusButtonHover hover =
+                button.GetComponent<StatusButtonHover>();
 
-            if (trigger == null)
-                trigger = button.gameObject.AddComponent<EventTrigger>();
+            if (hover == null)
+                hover = button.gameObject.AddComponent<StatusButtonHover>();
 
-            if (trigger.triggers == null)
-                trigger.triggers =
-                    new List<EventTrigger.Entry>();
-
-            EventTrigger.Entry entry =
-                new EventTrigger.Entry();
-
-            entry.eventID = EventTriggerType.PointerEnter;
-            entry.callback.AddListener((data) => action());
-
-            trigger.triggers.Add(entry);
+            hover.Initialize(this, isMain);
         }
     }
 
     public void ShowPage1()
     {
-        if (page1 != null)
-            page1.SetActive(true);
-
-        if (page2 != null)
-            page2.SetActive(false);
+        if (page1 != null) page1.SetActive(true);
+        if (page2 != null) page2.SetActive(false);
     }
 
     public void ShowPage2()
     {
-        if (page1 != null)
-            page1.SetActive(false);
+        if (page1 != null) page1.SetActive(false);
+        if (page2 != null) page2.SetActive(true);
+    }
 
-        if (page2 != null)
-            page2.SetActive(true);
+    public void SwitchPage(bool isMain)
+    {
+        if (isMain)
+            ShowPage1();
+        else
+            ShowPage2();
     }
 }
+
 
 
 

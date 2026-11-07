@@ -46,11 +46,12 @@ public class NovelManager : MonoBehaviour
     // ジャンプ
     private const int COL_JUMP = 24;             // 選択肢2ジャンプID
     // カットイン (登場)
-    private const int COL_CUTIN_IMAGE = 25;          // カットイン画像
-    private const int COL_CUTIN_IN_SLIDE = 26;       // カットインスライド方向
-    private const int COL_CUTIN_IN_FADE = 27;        // カットインフェード
-    private const int COL_CUTIN_IN_TIME = 28;        // カットイン時間
-
+    private const int COL_CUTIN_IMAGE = 25;      // カットイン画像
+    private const int COL_CUTIN_IN_SLIDE = 26;   // カットインスライド方向
+    private const int COL_CUTIN_IN_FADE = 27;    // カットインフェード
+    private const int COL_CUTIN_IN_TIME = 28;    // カットイン時間
+    // メッセージウィンドウ
+    private const int COL_MESSAGE_WINDOW = 29;   // メッセージウィンドウ画像
     #endregion
 
     [Header("csvReader")]
@@ -116,6 +117,9 @@ public class NovelManager : MonoBehaviour
     [Space(5)]
     [SerializeField] private Image leftTailImage;
     [SerializeField] private Image rightTailImage;
+    // ウィンドウ画像
+    private const string MESSAGE_WINDOW_PATH = "MessageWindow/";
+    private const string DEFAULT_MESSAGE_WINDOW = "Default";
 
     [Header("次へマーク")]
     [SerializeField] private GameObject nextMark;
@@ -212,8 +216,11 @@ public class NovelManager : MonoBehaviour
         // 選択肢の状態をリセット
         choiceSourceLine = -1;
 
+        // デフォルトのウィンドウ画像に戻す
+        SetMessageWindowImage("DEFAULT");
         // メッセージウィンドウを表示
         SetMessageWindow(true);
+
         // 次へマーク更新
         UpdateNextMark();
 
@@ -755,6 +762,12 @@ public class NovelManager : MonoBehaviour
 
         // 現在の行を取得
         string[] line = csvReader.GetLine(currentLine);
+
+        // メッセージウィンドウ画像を変更
+        if (!string.IsNullOrEmpty(line[COL_MESSAGE_WINDOW]))
+        {
+            SetMessageWindowImage(line[COL_MESSAGE_WINDOW]);
+        }
 
         // 演出前のメッセージUI表示状態を保存
         bool messageWasVisible = messageVisible;
@@ -1407,6 +1420,34 @@ public class NovelManager : MonoBehaviour
         SetImageAlpha(messageWindowImage);
         SetImageAlpha(leftTailImage);
         SetImageAlpha(rightTailImage);
+    }
+
+
+    /// <summary>
+    /// メッセージウィンドウの画像を変更する
+    /// </summary>
+    void SetMessageWindowImage(string imageName)
+    {
+        // Imageが設定されていない場合
+        if (messageWindowImage == null)
+            return;
+
+        // 画像名が空欄、またはDEFAULTならデフォルト画像にする
+        if (string.IsNullOrEmpty(imageName) || imageName == "DEFAULT")
+        {
+            imageName = DEFAULT_MESSAGE_WINDOW;
+        }
+        // Resourcesから画像を読み込む
+        Sprite sprite = Resources.Load<Sprite>(MESSAGE_WINDOW_PATH + imageName);
+
+        // 画像が見つからなかった場合
+        if (sprite == null)
+        {
+            Debug.LogWarning("メッセージウィンドウ画像が見つかりません: " + imageName);
+            return;
+        }
+        // ウィンドウ画像を変更
+        messageWindowImage.sprite = sprite;
     }
     #endregion
 

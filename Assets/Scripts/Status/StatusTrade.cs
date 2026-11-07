@@ -10,7 +10,8 @@ public class StatusTrade : MonoBehaviour
     [Header("レーダーチャート")]
     public StatusRadar statusRadar;
 
-    
+    [Header("選択・確定UI")]
+    public TradeSelectionUI selectionUI;
 
     [Header("ステータス数値表示")]
     public TMP_Text hpValueText;
@@ -102,15 +103,31 @@ public class StatusTrade : MonoBehaviour
             return;
         }
 
-        // クリック時の処理
         button.onClick.AddListener(() =>
         {
+            if (selectionUI == null)
+            {
+                Debug.LogError(
+                    "StatusTrade：TradeSelectionUIが未設定です！");
+                return;
+            }
+
             statusRadar.ClearPreview();
 
-            if (isBuy)
-                BuyStatus(statusName);
-            else
-                SellStatus(statusName);
+            string tradeType = isBuy ? "購入" : "売却";
+
+            selectionUI.Select(
+                button,
+                statusName,
+                tradeType,
+                () =>
+                {
+                    if (isBuy)
+                        BuyStatus(statusName);
+                    else
+                        SellStatus(statusName);
+                }
+            );
         });
 
         // マウスカーソルの出入りを取得

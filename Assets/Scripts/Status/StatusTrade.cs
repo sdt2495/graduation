@@ -105,29 +105,25 @@ public class StatusTrade : MonoBehaviour
 
         button.onClick.AddListener(() =>
         {
-            if (selectionUI == null)
-            {
-                Debug.LogError(
-                    "StatusTrade：TradeSelectionUIが未設定です！");
-                return;
-            }
-
-            statusRadar.ClearPreview();
-
-            string tradeType = isBuy ? "購入" : "売却";
+            if (selectionUI == null) return;
 
             selectionUI.Select(
                 button,
                 statusName,
-                tradeType,
+                isBuy ? "購入" : "売却",
                 () =>
                 {
+                    statusRadar.ClearPreview();
+
                     if (isBuy)
                         BuyStatus(statusName);
                     else
                         SellStatus(statusName);
                 }
             );
+
+            // 選択した商品の予測を表示
+            PreviewStatus(statusName, isBuy);
         });
 
         // マウスカーソルの出入りを取得
@@ -139,11 +135,19 @@ public class StatusTrade : MonoBehaviour
 
         AddPointerEvent(trigger, EventTriggerType.PointerEnter, () =>
         {
+            // 商品が選択されている間は、別商品のプレビューを出さない
+            if (selectionUI != null && selectionUI.HasSelection)
+                return;
+
             PreviewStatus(statusName, isBuy);
         });
 
         AddPointerEvent(trigger, EventTriggerType.PointerExit, () =>
         {
+            // 選択中はプレビューを消さない
+            if (selectionUI != null && selectionUI.HasSelection)
+                return;
+
             statusRadar.ClearPreview();
         });
 

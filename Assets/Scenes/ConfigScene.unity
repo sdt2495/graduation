@@ -143,11 +143,11 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 15202603}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: -8651266743182068686, guid: 581d602a4869798498186d7002d96796, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 17cbe96a4a0b27140b62e87cb137eed7, type: 3}
+  m_Resource: {fileID: 8300000, guid: d4efb5d1cda26f6428a004655b00e9ee, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -4118,6 +4118,13 @@ MonoBehaviour:
   decideDuration: 0.2
   stayDuration: 0.1
   returnDuration: 0.25
+  shakeInsteadOfDecide: 0
+  shakeDuration: 0.5
+  shakeAngle: 10
+  shakeSpeed: 30
+  exitMessageText: {fileID: 0}
+  exitMessage: "\u4F7F\u3048\u307E\u305B\u3093"
+  messageDuration: 2
   visualImage: {fileID: 7504781965599334141}
   normalColor: {r: 1, g: 1, b: 1, a: 1}
   selectedColor: {r: 1, g: 0, b: 0.18431377, a: 1}

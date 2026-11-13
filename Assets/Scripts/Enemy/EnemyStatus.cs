@@ -54,4 +54,13 @@ public class EnemyStatus
     {
         CurrentHP = Mathf.Min(MaxHP, CurrentHP + amount);
     }
+
+    public int CalculateDamage(int playerDefense)
+    {
+        playerDefense = Mathf.Max(0, playerDefense);
+
+        float damage = Attack * 100f / (100f + 2f * playerDefense);
+
+        return Mathf.FloorToInt(damage);
+    }
 }

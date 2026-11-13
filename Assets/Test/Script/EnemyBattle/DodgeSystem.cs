@@ -1,6 +1,8 @@
+
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class DodgeSystem : MonoBehaviour
 {
@@ -27,12 +29,27 @@ public class DodgeSystem : MonoBehaviour
     [Header("カメラ")]
     [SerializeField] private BattleCameraController battleCamera;
 
+    [Tooltip("ズームが完了するまでの待機時間")]
+    [SerializeField, Min(0f)]
+    private float cameraZoomWaitTime = 1.0f;
+
+    [Tooltip("カメラを元に戻した後の待機時間")]
+    [SerializeField, Min(0f)]
+    private float cameraReturnWaitTime = 1.0f;
+
     [Header("攻撃設定")]
     [SerializeField] private float beatInterval = 1f;
 
     [Header("選択色")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color selectedColor = Color.green;
+
+    [Header("結果通知")]
+    [SerializeField]
+    private UnityEvent onClear;
+
+    [SerializeField]
+    private UnityEvent onMiss;
 
     private Direction selectedDirection;
     private Direction firstAttackDirection;
@@ -88,11 +105,9 @@ public class DodgeSystem : MonoBehaviour
 
         if (battleCamera != null)
         {
-            battleCamera.FocusOnPlayer();
+            battleCamera.StartZoom();
 
-            yield return new WaitForSeconds(
-                battleCamera.TransitionDuration
-            );
+            yield return new WaitForSeconds(cameraZoomWaitTime);
         }
 
         Debug.Log("ズーム完了");
@@ -144,10 +159,12 @@ public class DodgeSystem : MonoBehaviour
         if (success)
         {
             Debug.Log("回避成功");
+            onClear?.Invoke();
         }
         else
         {
             Debug.Log("回避失敗");
+            onMiss?.Invoke();
         }
     }
 
@@ -162,7 +179,7 @@ public class DodgeSystem : MonoBehaviour
 
         if (battleCamera != null)
         {
-            battleCamera.RestoreCamera();
+            battleCamera.EndZoom();
         }
 
         Debug.Log("SPACEで再開");

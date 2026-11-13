@@ -213,14 +213,14 @@ public class DodgeMiniGame : MonoBehaviour
             miniGamePanel.SetActive(true);
         }
 
+        // 左方向への滑らかなズームを開始
         if (battleCameraController != null)
         {
-            battleCameraController.FocusOnPlayer();
+            battleCameraController.StartZoom();
         }
 
         miniGameCoroutine = StartCoroutine(PlayAttack());
     }
-
     /// <summary>
     /// 攻撃パターンを指定して開始する。
     /// </summary>
@@ -713,7 +713,7 @@ public class DodgeMiniGame : MonoBehaviour
 
         if (battleCameraController != null)
         {
-            battleCameraController.RestoreCamera();
+            battleCameraController.EndZoom();
         }
 
         miniGameCoroutine = null;
@@ -742,7 +742,7 @@ public class DodgeMiniGame : MonoBehaviour
 
         if (battleCameraController != null)
         {
-            battleCameraController.RestoreCamera();
+            battleCameraController.EndZoom();
         }
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class BattleEnemySpawner : MonoBehaviour
 {
+    [SerializeField] private EnemyData _enemyData;
     [SerializeField] private Enemy enemyPrefab;
     [SerializeField] private Transform battlePoint;
     [SerializeField] private Player player;
@@ -27,6 +28,8 @@ public class BattleEnemySpawner : MonoBehaviour
     public void SpawnEnemy()
     {
         battleEnemy = Instantiate(enemyPrefab, battlePoint.position, Quaternion.identity);
+
+        battleEnemy.Initialize(_enemyData);
 
         // ダメージポップアップの表示先を設定
         battleEnemy.SetDamageCanvas(canvas);

@@ -28,6 +28,9 @@ public class BattleManager : MonoBehaviour
 
     [SerializeField] private BattaleCommandManager battleCommandManager;
 
+    [Header("敵の攻撃演出")]
+    [SerializeField] private ExclamationMark exclamationMark;
+
     // 制限時間
     [SerializeField] private float battleTimeLimit = 10.0f;
     private float reaminingTime;
@@ -86,14 +89,13 @@ public class BattleManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator EnemyAttack()
     {
-        isEnemyAttackFinished = false;
-        timingMiniGameCaller.StartTimingMiniGame();
-        
-        // ミニゲームが終わるまで待つ
-        while(!isEnemyAttackFinished)
+        // Enemyの頭上アニメーションを開始
+        if (exclamationMark != null)
         {
-            yield return null;
+            exclamationMark.StartExclamation();
         }
+
+        yield return null;
     }
 
     /// <summary>

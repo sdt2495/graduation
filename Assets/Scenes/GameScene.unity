@@ -1162,6 +1162,7 @@ GameObject:
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
   - component: {fileID: 519420033}
+  - component: {fileID: 519420034}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1255,7 +1256,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 34
-  orthographic: 1
+  orthographic: 0
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:
@@ -1299,6 +1300,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3556e8a94aa5d314d8478b67c4dc5256, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraShake
+--- !u!114 &519420034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8f49bfa59729e848816a389a25ad28d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BattleCameraController
+  targetCamera: {fileID: 519420031}
+  player: {fileID: 758857481}
+  zoomMultiplier: 1.5
+  zoomDuration: 1
+  returnDuration: 1
+  zoomFocus: {fileID: 758857481}
+  verticalOffset: 0
+  horizontalMoveDistance: 2
+  playerMoveRate: 0.5
+  zoomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &528733447
 GameObject:
   m_ObjectHideFlags: 0
@@ -2920,6 +2966,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: BackGround
       objectReference: {fileID: 0}
+    - target: {fileID: 3649026769849971483, guid: a7e127a6cf56d384d826b02a332e4e63, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5662349016674554380, guid: a7e127a6cf56d384d826b02a332e4e63, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
     - target: {fileID: 5662349016674554380, guid: a7e127a6cf56d384d826b02a332e4e63, type: 3}
       propertyPath: m_RenderMode
       value: 1
@@ -3210,6 +3264,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: battleCamera
+      value: 
+      objectReference: {fileID: 519420034}
     - target: {fileID: 2961851739524117276, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -4641,6 +4699,10 @@ PrefabInstance:
     - target: {fileID: 1676552668441176143, guid: cdf7448f125904047a4d58e61b6f2e0a, type: 3}
       propertyPath: m_Name
       value: Sub Camera
+      objectReference: {fileID: 0}
+    - target: {fileID: 1676552668441176143, guid: cdf7448f125904047a4d58e61b6f2e0a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6164799054247608952, guid: cdf7448f125904047a4d58e61b6f2e0a, type: 3}
       propertyPath: m_LocalPosition.x

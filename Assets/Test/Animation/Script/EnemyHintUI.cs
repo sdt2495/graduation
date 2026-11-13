@@ -6,11 +6,12 @@ using UnityEngine;
 /// <summary>
 /// EnemyのヒントUIを管理する。
 ///
+/// ・初期状態では非表示
+/// ・BattleManagerから呼び出されたときだけ開始
 /// ・ヒントテキストを表示
 /// ・表示アニメーションを再生
 /// ・指定時間待機
 /// ・UIPanelShrinkを開始
-/// ・カメラズームはUIPanelShrinkに任せる
 /// </summary>
 public class EnemyHintUI : MonoBehaviour
 {
@@ -19,10 +20,7 @@ public class EnemyHintUI : MonoBehaviour
     [SerializeField] private Animator animator;
 
     [Header("演出開始設定")]
-    [Tooltip("ヒント表示からパネル縮小開始までの待機時間")]
     [SerializeField] private float cameraStartDelay = 0.3f;
-
-    [Tooltip("追加で待機してからパネル縮小を開始する時間")]
     [SerializeField] private float shrinkStartDelay = 0.2f;
 
     [Header("パネル縮小")]
@@ -35,11 +33,23 @@ public class EnemyHintUI : MonoBehaviour
     // 演出管理用コルーチン
     private Coroutine sequenceCoroutine;
 
+    // 二重起動防止
+    private bool isPlaying;
+
+    private void Awake()
+    {
+        // ゲーム開始時はヒントUIを非表示にする
+        gameObject.SetActive(false);
+    }
+
     /// <summary>
-    /// ヒントを表示する。
+    /// BattleManagerから呼び出してヒントを表示する。
     /// </summary>
     public void ShowHint(string message)
     {
+        if (isPlaying)
+            return;
+
         if (hintText == null || animator == null)
         {
             Debug.LogWarning(
@@ -49,12 +59,7 @@ public class EnemyHintUI : MonoBehaviour
             return;
         }
 
-        // 既存の演出を停止
-        if (sequenceCoroutine != null)
-        {
-            StopCoroutine(sequenceCoroutine);
-            sequenceCoroutine = null;
-        }
+        isPlaying = true;
 
         // UIを表示
         hintText.text = message;
@@ -73,20 +78,13 @@ public class EnemyHintUI : MonoBehaviour
     /// </summary>
     private IEnumerator StartSequence()
     {
-        // ヒント表示後の待機
         if (cameraStartDelay > 0f)
-        {
             yield return new WaitForSeconds(cameraStartDelay);
-        }
 
-        // 追加待機
         if (shrinkStartDelay > 0f)
-        {
             yield return new WaitForSeconds(shrinkStartDelay);
-        }
 
         // パネル縮小を開始
-        // カメラズームもUIPanelShrink側で同時に開始される
         if (panelShrink != null)
         {
             panelShrink.StartShrink();
@@ -107,13 +105,13 @@ public class EnemyHintUI : MonoBehaviour
     /// </summary>
     public void HidePanel()
     {
-        // 実行中の演出を停止
         if (sequenceCoroutine != null)
         {
             StopCoroutine(sequenceCoroutine);
             sequenceCoroutine = null;
         }
 
+        isPlaying = false;
         gameObject.SetActive(false);
     }
 }

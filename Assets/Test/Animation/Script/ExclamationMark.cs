@@ -5,7 +5,8 @@ using UnityEngine;
 /// <summary>
 /// Enemyの頭上にアニメーションを表示する。
 ///
-/// ・ゲーム開始時にアニメーションを1回再生
+/// ・BattleManagerから呼び出されたときだけ開始
+/// ・Enemyの頭上にアニメーションを表示
 /// ・アニメーション終了まで待機
 /// ・終了後にUIPanelShrinkの縮小演出を開始
 /// </summary>
@@ -21,7 +22,6 @@ public class ExclamationMark : MonoBehaviour
     [SerializeField] private Camera targetCamera;
 
     [Header("パネル縮小")]
-    [Tooltip("アニメーション終了後に縮小を開始する")]
     [SerializeField] private UIPanelShrink uiPanelShrink;
 
     [Header("表示位置")]
@@ -29,11 +29,21 @@ public class ExclamationMark : MonoBehaviour
     private Vector3 positionOffset = new Vector3(0f, 1.5f, 0f);
 
     [Header("次の演出までの待機時間")]
-    [Tooltip("頭上アニメーション終了後、パネル縮小を開始するまでの時間")]
     [SerializeField] private float nextSequenceDelay = 0.5f;
 
+    // 二重起動防止
+    private bool isPlaying;
+
+    /// <summary>
+    /// BattleManagerから呼び出す開始処理。
+    /// </summary>
     public void StartExclamation()
     {
+        if (isPlaying)
+            return;
+
+        isPlaying = true;
+
         ShowAnimation();
     }
 
@@ -53,6 +63,7 @@ public class ExclamationMark : MonoBehaviour
                 "Enemy、Prefab、Canvasの設定を確認してください。"
             );
 
+            isPlaying = false;
             return;
         }
 
@@ -64,6 +75,7 @@ public class ExclamationMark : MonoBehaviour
             worldCamera == null)
         {
             Debug.LogWarning("カメラが見つかりません。");
+            isPlaying = false;
             return;
         }
 
@@ -77,7 +89,10 @@ public class ExclamationMark : MonoBehaviour
             : worldPosition;
 
         if (screenPosition.z < 0f)
+        {
+            isPlaying = false;
             return;
+        }
 
         Camera canvasCamera =
             targetCanvas.renderMode == RenderMode.ScreenSpaceOverlay
@@ -90,6 +105,7 @@ public class ExclamationMark : MonoBehaviour
             canvasCamera,
             out Vector2 localPosition))
         {
+            isPlaying = false;
             return;
         }
 
@@ -110,6 +126,7 @@ public class ExclamationMark : MonoBehaviour
             );
 
             Destroy(effect);
+            isPlaying = false;
             return;
         }
 
@@ -127,6 +144,7 @@ public class ExclamationMark : MonoBehaviour
             );
 
             Destroy(effect);
+            isPlaying = false;
             return;
         }
 
@@ -147,6 +165,7 @@ public class ExclamationMark : MonoBehaviour
             );
 
             Destroy(effect);
+            isPlaying = false;
             return;
         }
 
@@ -160,8 +179,8 @@ public class ExclamationMark : MonoBehaviour
     /// アニメーション終了後にパネル縮小を開始する。
     /// </summary>
     private IEnumerator WaitForAnimationEnd(
-    GameObject effect,
-    float animationLength)
+        GameObject effect,
+        float animationLength)
     {
         // 頭上アニメーション終了まで待機
         yield return new WaitForSeconds(animationLength);
@@ -172,7 +191,7 @@ public class ExclamationMark : MonoBehaviour
             Destroy(effect);
         }
 
-        // 次の演出まで少し待機
+        // 次の演出まで待機
         if (nextSequenceDelay > 0f)
         {
             yield return new WaitForSeconds(nextSequenceDelay);
@@ -191,5 +210,7 @@ public class ExclamationMark : MonoBehaviour
                 "UIPanelShrinkが設定されていません。"
             );
         }
+
+        isPlaying = false;
     }
 }

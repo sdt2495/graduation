@@ -1,7 +1,6 @@
 
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class PageSwitcher : MonoBehaviour
 {
@@ -15,6 +14,9 @@ public class PageSwitcher : MonoBehaviour
     [Header("サブステータスのボタン")]
     public Button[] subStatusButtons;
 
+    [Header("サブステータス管理")]
+    public SubStatusTrade subStatusTrade;
+
     private void Start()
     {
         // 最初はメインページ
@@ -22,6 +24,9 @@ public class PageSwitcher : MonoBehaviour
 
         RegisterButtons(mainStatusButtons, true);
         RegisterButtons(subStatusButtons, false);
+
+        // 起動時にも数値を更新
+        RefreshSubStatusLabels();
     }
 
     private void RegisterButtons(Button[] buttons, bool isMain)
@@ -36,7 +41,9 @@ public class PageSwitcher : MonoBehaviour
                 button.GetComponent<StatusButtonHover>();
 
             if (hover == null)
+            {
                 hover = button.gameObject.AddComponent<StatusButtonHover>();
+            }
 
             hover.Initialize(this, isMain);
         }
@@ -52,16 +59,37 @@ public class PageSwitcher : MonoBehaviour
     {
         if (page1 != null) page1.SetActive(false);
         if (page2 != null) page2.SetActive(true);
+
+        // サブページを開いたら数値を更新
+        RefreshSubStatusLabels();
     }
 
     public void SwitchPage(bool isMain)
     {
         if (isMain)
+        {
             ShowPage1();
+        }
         else
+        {
             ShowPage2();
+        }
+    }
+
+    private void RefreshSubStatusLabels()
+    {
+        if (subStatusTrade == null)
+        {
+            subStatusTrade = FindFirstObjectByType<SubStatusTrade>();
+        }
+
+        if (subStatusTrade != null)
+        {
+            subStatusTrade.RefreshSubStatusButtonLabels();
+        }
     }
 }
+
 
 
 

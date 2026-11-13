@@ -75,6 +75,7 @@ public class StatusTrade : MonoBehaviour
 
         UpdateUI();
         ShowMessage("ボタンにカーソルを乗せると結果を予測できます！");
+        RefreshStatusButtonLabels();
     }
 
 
@@ -267,6 +268,11 @@ public class StatusTrade : MonoBehaviour
 
         UpdateUI();
         ShowMessage(name + "を購入！ -" + buyPrice + " G");
+        // ステータスの値を変更
+        // 所持金を更新
+        // レーダーチャートを更新
+
+        RefreshStatusButtonLabels();
     }
 
     private void SellStatus(string name)
@@ -293,6 +299,11 @@ public class StatusTrade : MonoBehaviour
 
         UpdateUI();
         ShowMessage(name + "を売却！ +" + sellPrice + " G");
+        // ステータスの値を変更
+        // 所持金を更新
+        // レーダーチャートを更新
+
+        RefreshStatusButtonLabels();
     }
 
     private float GetStatus(string name)
@@ -365,6 +376,97 @@ public class StatusTrade : MonoBehaviour
         Debug.Log(message);
     }
 
+    // ステータスの現在値を取得
+    private float GetCurrentStatusValue(string statusName)
+    {
+        if (statusRadar == null) return 0;
+
+        switch (statusName.ToUpper())
+        {
+            case "HP":
+                return statusRadar.HP;
+
+            case "ATK":
+                return statusRadar.ATK;
+
+            case "DEF":
+                return statusRadar.DEF;
+
+            case "CRI":
+            case "CRL":
+                return statusRadar.CRI;
+
+            case "SAN":
+            case "OTHER":
+                return statusRadar.Other;
+
+            case "TEC":
+                return statusRadar.TEC;
+
+            default:
+                return 0;
+        }
+    }
+
+    // 購入・売却ボタンの表示を更新
+
+    public void RefreshStatusButtonLabels()
+    {
+        Button[] buttons = FindObjectsByType<Button>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None
+        );
+
+        foreach (Button button in buttons)
+        {
+            string buttonName = button.name;
+
+            bool isBuy = buttonName.EndsWith(" Buy");
+            bool isSell = buttonName.EndsWith(" Sell");
+
+            if (!isBuy && !isSell)
+                continue;
+
+            string statusName = buttonName
+                .Replace(" Buy", "")
+                .Replace(" Sell", "");
+
+            // メインステータスのボタンだけを更新する
+            // サブステータスのボタンは上書きしない
+            string key = statusName.ToUpperInvariant();
+
+            if (key != "HP" &&
+                key != "ATK" &&
+                key != "DEF" &&
+                key != "CRL" &&
+                key != "CRI" &&
+                key != "SAN" &&
+                key != "TEC")
+            {
+                continue;
+            }
+
+            TMP_Text label =
+                button.GetComponentInChildren<TMP_Text>(true);
+
+            if (label == null)
+                continue;
+
+            float value = GetCurrentStatusValue(key);
+
+            // ボタン名がCRLの場合も、表示はCRIにする
+            string displayName = key == "CRL" ? "CRI" :
+                                 key == "SAN" ? "SAN" :
+                                 key;
+
+            string priceText = isBuy
+                ? "-" + buyPrice + "G"
+                : "+" + sellPrice + "G";
+
+            label.text =
+                $"{displayName} {value:0.##}  {priceText}";
+        }
+    }
 
 }
 

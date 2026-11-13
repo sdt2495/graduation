@@ -1,7 +1,7 @@
 
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class SubStatusTrade : MonoBehaviour
 {
@@ -33,56 +33,72 @@ public class SubStatusTrade : MonoBehaviour
     public TMP_Text messageText;
 
     private int money =>
-    MoneyManager.Instance != null
-        ? MoneyManager.Instance.Money
-        : 0;
+        MoneyManager.Instance != null
+            ? MoneyManager.Instance.Money
+            : 0;
+
+    private readonly string[] defaultNames =
+    {
+        "CRD", "EVA", "LUK",
+        "CMB", "REV", "VAM"
+    };
 
     private void Start()
     {
-        string[] names =
-        {
-            "CRD", "EVA", "LUK",
-            "CMB", "REV", "VAM"
-        };
-
         for (int i = 0; i < statuses.Length; i++)
         {
             if (statuses[i] == null)
                 statuses[i] = new SubStatus();
 
-            if (string.IsNullOrEmpty(statuses[i].statusName))
-                statuses[i].statusName = names[i];
+            SubStatus s = statuses[i];
+
+            if (string.IsNullOrEmpty(s.statusName))
+            {
+                s.statusName = i < defaultNames.Length
+                    ? defaultNames[i]
+                    : "SubStatus" + i;
+            }
 
             int index = i;
 
-            if (statuses[i].buyButton != null)
+            if (s.buyButton != null)
             {
-                statuses[i].buyButton.onClick.AddListener(() =>
+                s.buyButton.onClick.AddListener(() =>
                 {
-                    if (selectionUI == null) return;
+                    if (selectionUI == null)
+                    {
+                        Debug.LogWarning(
+                            "TradeSelectionUI が設定されていません。");
+                        return;
+                    }
 
-                    SubStatus s = statuses[index];
+                    SubStatus current = statuses[index];
 
                     selectionUI.Select(
-                        s.buyButton,
-                        s.statusName,
+                        current.buyButton,
+                        current.statusName,
                         "購入",
                         () => Buy(index)
                     );
                 });
             }
 
-            if (statuses[i].sellButton != null)
+            if (s.sellButton != null)
             {
-                statuses[i].sellButton.onClick.AddListener(() =>
+                s.sellButton.onClick.AddListener(() =>
                 {
-                    if (selectionUI == null) return;
+                    if (selectionUI == null)
+                    {
+                        Debug.LogWarning(
+                            "TradeSelectionUI が設定されていません。");
+                        return;
+                    }
 
-                    SubStatus s = statuses[index];
+                    SubStatus current = statuses[index];
 
                     selectionUI.Select(
-                        s.sellButton,
-                        s.statusName,
+                        current.sellButton,
+                        current.statusName,
                         "売却",
                         () => Sell(index)
                     );
@@ -90,11 +106,15 @@ public class SubStatusTrade : MonoBehaviour
             }
         }
 
+        // 起動時から現在値と価格を表示
         UpdateUI();
     }
 
+    // 購入処理
     private void Buy(int index)
     {
+        if (index < 0 || index >= statuses.Length) return;
+
         SubStatus s = statuses[index];
 
         if (s.value >= 100f)
@@ -109,14 +129,19 @@ public class SubStatusTrade : MonoBehaviour
             return;
         }
 
+        if (MoneyManager.Instance == null)
+        {
+            ShowMessage("MoneyManager が見つかりません！");
+            return;
+        }
+
         if (money < buyPrice)
         {
             ShowMessage("お金が足りません！");
             return;
         }
 
-        if (MoneyManager.Instance == null ||
-    !MoneyManager.Instance.Spend(buyPrice))
+        if (!MoneyManager.Instance.Spend(buyPrice))
         {
             ShowMessage("お金が足りません！");
             return;
@@ -128,8 +153,11 @@ public class SubStatusTrade : MonoBehaviour
         ShowMessage(s.statusName + " を購入しました！");
     }
 
+    // 売却処理
     private void Sell(int index)
     {
+        if (index < 0 || index >= statuses.Length) return;
+
         SubStatus s = statuses[index];
 
         if (s.value <= 0f)
@@ -151,34 +179,85 @@ public class SubStatusTrade : MonoBehaviour
         }
 
         s.value = Mathf.Max(0f, s.value - tradeAmount);
+
         MoneyManager.Instance.Earn(sellPrice);
 
         UpdateUI();
         ShowMessage(s.statusName + " を売却しました！");
     }
 
+    // ステータスとボタン表示をまとめて更新
     private void UpdateUI()
     {
+        if (statuses == null) return;
+
         foreach (SubStatus s in statuses)
         {
             if (s == null) continue;
 
+            // 別表示の数値テキスト（設定されている場合）
             if (s.valueText != null)
             {
                 s.valueText.text =
-                    s.statusName + "  " + s.value.ToString("F0");
+                    s.statusName + "  " + s.value.ToString("0.##");
             }
+
+            // 購入ボタン：名前 + 現在値 + 購入価格
+            UpdateButtonLabel(
+                s.buyButton,
+                s.statusName,
+                s.value,
+                "-" + buyPrice + "G"
+            );
+
+            // 売却ボタン：名前 + 現在値 + 売却価格
+            UpdateButtonLabel(
+                s.sellButton,
+                s.statusName,
+                s.value,
+                "+" + sellPrice + "G"
+            );
         }
 
         if (MoneyManager.Instance != null)
+        {
             MoneyManager.Instance.UpdateMoneyUI();
+        }
+    }
+
+    // ボタンにステータス名・値・価格を表示
+    private void UpdateButtonLabel(
+        Button button,
+        string statusName,
+        float value,
+        string priceText)
+    {
+        if (button == null) return;
+
+        TMP_Text label =
+            button.GetComponentInChildren<TMP_Text>(true);
+
+        if (label == null) return;
+
+        label.text =
+            $"{statusName} {value:0.##}  {priceText}";
+    }
+
+    // 他のスクリプトから呼び出す更新処理
+    public void RefreshSubStatusButtonLabels()
+    {
+        UpdateUI();
     }
 
     private void ShowMessage(string message)
     {
         if (messageText != null)
+        {
             messageText.text = message;
+        }
 
         Debug.Log(message);
     }
 }
+
+

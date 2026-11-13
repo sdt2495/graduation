@@ -2194,7 +2194,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 393.7, y: -236.2}
+  m_AnchoredPosition: {x: 196, y: 225}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &230450687
@@ -2736,8 +2736,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -46, y: 29}
-  m_SizeDelta: {x: 544.8047, y: 244.8897}
+  m_AnchoredPosition: {x: -43.0457, y: 29}
+  m_SizeDelta: {x: 550.7134, y: 244.8897}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &281298470
 MonoBehaviour:
@@ -3371,10 +3371,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: "\u30AD\u30E3\u30F3\u30BB\u30EB"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
+  m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4800,6 +4800,7 @@ GameObject:
   - component: {fileID: 424716413}
   - component: {fileID: 424716412}
   - component: {fileID: 424716411}
+  - component: {fileID: 424716414}
   m_Layer: 5
   m_Name: Scroll View
   m_TagString: Untagged
@@ -4896,6 +4897,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 424716409}
   m_CullTransparentMesh: 1
+--- !u!225 &424716414
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 424716409}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &432675799
 GameObject:
   m_ObjectHideFlags: 0
@@ -8021,6 +8034,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TradeSelectionUI
   confirmButton: {fileID: 1387488827}
   confirmButtonText: {fileID: 1100116555}
+  backgroundUI: {fileID: 424716414}
   confirmationPanel: {fileID: 2123570757}
   confirmationTitleText: {fileID: 1783380344}
   itemTitleText: {fileID: 281298470}
@@ -8030,7 +8044,7 @@ MonoBehaviour:
   modalConfirmButton: {fileID: 1408340358}
   cancelButton: {fileID: 1302297669}
   closeButton: {fileID: 230450687}
-  selectedColor: {r: 0.55, g: 0.85, b: 0.9, a: 1}
+  selectedColor: {r: 0.26477394, g: 0.7370464, b: 0.8254717, a: 1}
 --- !u!1 &715203586
 GameObject:
   m_ObjectHideFlags: 0
@@ -13321,10 +13335,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: "\u8CFC\u5165"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
+  m_sharedMaterial: {fileID: -7768446879658130342, guid: 54361c95224c0fd43a525e41bc1956af, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -14764,7 +14778,7 @@ GameObject:
   - component: {fileID: 1302297670}
   - component: {fileID: 1302297669}
   m_Layer: 5
-  m_Name: Button
+  m_Name: Cancel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15965,7 +15979,7 @@ GameObject:
   - component: {fileID: 1408340359}
   - component: {fileID: 1408340358}
   m_Layer: 5
-  m_Name: Button
+  m_Name: BuyButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15988,7 +16002,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 193, y: 225}
+  m_AnchoredPosition: {x: 390, y: -231}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1408340358

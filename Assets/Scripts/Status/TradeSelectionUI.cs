@@ -11,6 +11,9 @@ public class TradeSelectionUI : MonoBehaviour
     public Button confirmButton;
     public TMP_Text confirmButtonText;
 
+    [Header("後ろのUI")]
+    public CanvasGroup backgroundUI;
+
     [Header("確認ウィンドウ")]
     public GameObject confirmationPanel;
     public TMP_Text confirmationTitleText;
@@ -130,20 +133,16 @@ public class TradeSelectionUI : MonoBehaviour
             return;
 
         if (confirmationTitleText != null)
-        {
             confirmationTitleText.text =
                 selectedType == "購入"
                 ? "ステータスを購入"
                 : "ステータスを売却";
-        }
 
         if (itemTitleText != null)
-        {
             itemTitleText.text =
                 string.IsNullOrEmpty(selectedDisplayTitle)
                 ? selectedName
                 : selectedDisplayTitle;
-        }
 
         if (descriptionText != null)
             descriptionText.text = selectedDescription;
@@ -154,15 +153,20 @@ public class TradeSelectionUI : MonoBehaviour
         if (priceText != null)
         {
             string label =
-                selectedType == "購入"
-                ? "必要 Gold"
-                : "獲得 Gold";
+                selectedType == "購入" ? "必要 Gold" : "獲得 Gold";
 
             priceText.text =
-                label + "　　　　　　　　 " +
-                selectedPrice.ToString("N0") + " G";
+                label + "　" + selectedPrice.ToString("N0") + " G";
         }
 
+        // 後ろの取引UIを操作できなくする
+        if (backgroundUI != null)
+        {
+            backgroundUI.interactable = false;
+            backgroundUI.blocksRaycasts = false;
+        }
+
+        // 確認画面を表示
         if (confirmationPanel != null)
             confirmationPanel.SetActive(true);
     }
@@ -171,6 +175,13 @@ public class TradeSelectionUI : MonoBehaviour
     {
         if (confirmationPanel != null)
             confirmationPanel.SetActive(false);
+
+        // 後ろの取引UIを再び操作できるようにする
+        if (backgroundUI != null)
+        {
+            backgroundUI.interactable = true;
+            backgroundUI.blocksRaycasts = true;
+        }
     }
 
     public void ConfirmTrade()

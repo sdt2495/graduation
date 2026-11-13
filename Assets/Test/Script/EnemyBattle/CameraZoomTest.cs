@@ -1,21 +1,30 @@
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
 /// スペースキーでカメラのズームと復帰を切り替え、
 /// 動作確認を行うテスト用クラス。
+///
+/// ・スペースキーで左方向へズーム
+/// ・もう一度押すと元の状態に戻る
 /// </summary>
 public class CameraZoomTest : MonoBehaviour
 {
     [Header("カメラ制御")]
 
     [Tooltip("BattleCameraControllerを設定します。")]
-    [SerializeField] private BattleCameraController battleCameraController;
+    [SerializeField]
+    private BattleCameraController battleCameraController;
 
     [Header("テスト設定")]
 
     [Tooltip("有効にするとスペースキーで操作できます。")]
-    [SerializeField] private bool useSpaceKey = true;
+    [SerializeField]
+    private bool useSpaceKey = true;
+
+    // 現在ズーム中かどうか
+    private bool isZoomed;
 
     private void Update()
     {
@@ -32,7 +41,7 @@ public class CameraZoomTest : MonoBehaviour
         }
 
         // スペースキーが押された瞬間に切り替える
-        if (Keyboard.current.spaceKey.wasPressedThisFrame ) 
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             ToggleZoom();
         }
@@ -53,13 +62,15 @@ public class CameraZoomTest : MonoBehaviour
             return;
         }
 
-        if (battleCameraController.IsZoomed)
+        if (isZoomed)
         {
-            battleCameraController.RestoreCamera();
+            battleCameraController.EndZoom();
+            isZoomed = false;
         }
         else
         {
-            battleCameraController.FocusOnPlayer();
+            battleCameraController.StartZoom();
+            isZoomed = true;
         }
     }
 }

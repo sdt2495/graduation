@@ -25,11 +25,11 @@ public class ShopManagerkari : MonoBehaviour
 
     private string[] effectNames =
     {
-        "AttackUP",
-        "SpeedUP",
-        "MaxHP UP",
-        "TAKESHI",
-        "MASARUTV"
+        "ATK+6",
+        "HP+7",
+        "DEF+90",
+        "CRI+7",
+        "ATK+999999"
     };
 
     private int[] prices = { 100, 100, 150, 150, 500000 };
@@ -39,6 +39,9 @@ public class ShopManagerkari : MonoBehaviour
     private bool[] purchased = new bool[3];
 
     private int selectedIndex = -1;
+
+    [Header("ステータス連携")]
+    public StatusRadar statusRadar;
 
     void Start()
     {
@@ -146,9 +149,60 @@ public class ShopManagerkari : MonoBehaviour
 
         coins -= price;
 
+        // 購入した商品のステータスを反映
+        if (statusRadar != null)
+        {
+            float hp = statusRadar.HP;
+            float atk = statusRadar.ATK;
+            float def = statusRadar.DEF;
+            float cri = statusRadar.CRI;
+            float tec = statusRadar.TEC;
+            float other = statusRadar.Other;
+
+
+            switch (effect)
+            {
+                case 0: // ATK+6
+                    atk += 6;
+                    break;
+
+                case 1: // HP+7
+                    hp += 7;
+                    break;
+
+                case 2: // DEF+90
+                    def += 90;
+                    break;
+
+                case 3: // CRI+7
+                    cri += 7;
+                    break;
+
+                case 4: // ATK+999999
+                    atk += 999999;
+                    break;
+            }
+
+            // ステータスを更新
+            statusRadar.SetStatus(
+                Mathf.Clamp(hp, 0, 100),
+                Mathf.Clamp(atk, 0, 100),
+                Mathf.Clamp(def, 0, 100),
+                Mathf.Clamp(cri, 0, 100),
+                Mathf.Clamp(tec, 0, 100),
+                Mathf.Clamp(other, 0, 100)
+            );
+
+            Debug.Log("ショップ購入によるステータス更新完了！");
+        }
+        else
+        {
+            Debug.LogError("ShopManagerkari: StatusRadarが設定されていません！");
+        }
+
         hasPurchased = true;
 
-        // RE-ROLLを使用不可にする
+        // りろーるを使用不可にする
         rerollButton.interactable = false;
 
         purchased[selectedIndex] = true;

@@ -66,6 +66,9 @@ public class TradeSelectionUI : MonoBehaviour
     private float selectedAmountPerTrade = 10f;
     private float selectedMaxValue = 100f;
 
+    // 他のスクリプトから現在値を取得する
+    private Func<float> selectedValueProvider;
+
     private readonly Dictionary<Button, Color> originalColors =
         new Dictionary<Button, Color>();
 
@@ -142,6 +145,39 @@ public class TradeSelectionUI : MonoBehaviour
         );
     }
 
+    // 実際のステータス値と連動する選択処理
+    public void SelectLive(
+        Button button,
+        string itemName,
+        string tradeType,
+        Action action,
+        Func<float> getCurrentValue,
+        float amountPerTrade,
+        int price,
+        string description = "",
+        string displayTitle = "",
+        float maxValue = 100f)
+    {
+        if (getCurrentValue == null)
+            return;
+
+        Select(
+            button,
+            itemName,
+            tradeType,
+            action,
+            description,
+            "",
+            price,
+            displayTitle,
+            getCurrentValue(),
+            amountPerTrade,
+            maxValue
+        );
+
+        selectedValueProvider = getCurrentValue;
+    }
+
     // 現在値・売買量も渡す場合はこちらを使用
     public void Select(
         Button button,
@@ -214,6 +250,12 @@ public class TradeSelectionUI : MonoBehaviour
     {
         if (!HasSelection || selectedAction == null)
             return;
+
+        // 確認画面を開く直前に、最新の値を取得する
+        if (selectedValueProvider != null)
+        {
+            selectedCurrentValue = selectedValueProvider();
+        }
 
         bool isPurchase = selectedType == "購入";
 

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5640618988908233305}
   m_Layer: 0
   m_Name: Enemy
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -114,6 +114,8 @@ MonoBehaviour:
   criticalMultiplier: 1.2
   spriteRenderer: {fileID: 4082603920160826734}
   flashDuration: 0.1
+  normalColor: {r: 1, g: 1, b: 1, a: 1}
+  flashColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &3599964758595178842
 GameObject:
   m_ObjectHideFlags: 0

@@ -74,12 +74,17 @@ public class SubStatusTrade : MonoBehaviour
 
                     SubStatus current = statuses[index];
 
-                    selectionUI.Select(
-                        current.buyButton,
-                        current.statusName,
-                        "w“ü",
-                        () => Buy(index)
-                    );
+                    selectionUI.SelectLive(
+    current.buyButton,
+    current.statusName,
+    "w“ü",
+    () => Buy(index),
+    () => statuses[index].value,
+    tradeAmount,
+    buyPrice,
+    "",
+    current.statusName
+);
                 });
             }
 
@@ -96,12 +101,17 @@ public class SubStatusTrade : MonoBehaviour
 
                     SubStatus current = statuses[index];
 
-                    selectionUI.Select(
-                        current.sellButton,
-                        current.statusName,
-                        "”„‹p",
-                        () => Sell(index)
-                    );
+                    selectionUI.SelectLive(
+     current.sellButton,
+     current.statusName,
+     "”„‹p",
+     () => Sell(index),
+     () => statuses[index].value,
+     tradeAmount,
+     sellPrice,
+     "",
+     current.statusName
+ );
                 });
             }
         }

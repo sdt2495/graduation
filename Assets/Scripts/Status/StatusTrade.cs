@@ -106,12 +106,19 @@ public class StatusTrade : MonoBehaviour
 
         button.onClick.AddListener(() =>
         {
-            if (selectionUI == null) return;
+            if (selectionUI == null)
+            {
+                Debug.LogWarning(
+                    "TradeSelectionUI が設定されていません！");
+                return;
+            }
 
-            selectionUI.Select(
+            selectionUI.SelectLive(
                 button,
                 statusName,
                 isBuy ? "購入" : "売却",
+
+                // 確定時に実行する処理
                 () =>
                 {
                     statusRadar.ClearPreview();
@@ -120,10 +127,28 @@ public class StatusTrade : MonoBehaviour
                         BuyStatus(statusName);
                     else
                         SellStatus(statusName);
-                }
+                },
+
+                // 現在値を StatusRadar から取得
+                () => GetStatus(statusName),
+
+                // 1回あたりの変化量
+                tradeAmount,
+
+                // 購入価格または売却価格
+                isBuy ? buyPrice : sellPrice,
+
+                // 説明
+                statusName + " のステータスを" +
+                    (isBuy ? "購入" : "売却") + "します。",
+
+                // 表示名
+                statusName,
+
+                // 最大値
+                100f
             );
 
-            // 選択した商品の予測を表示
             PreviewStatus(statusName, isBuy);
         });
 

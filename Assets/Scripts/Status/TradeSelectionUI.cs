@@ -1,4 +1,5 @@
 
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,25 +8,43 @@ using TMPro;
 
 public class TradeSelectionUI : MonoBehaviour
 {
-    [Header("一覧の下にあるボタン")]
+    [Header("一覧の下にある確定ボタン")]
     public Button confirmButton;
     public TMP_Text confirmButtonText;
 
-    [Header("後ろのUI")]
+    [Header("背景の取引UI")]
     public CanvasGroup backgroundUI;
 
-    [Header("確認ウィンドウ")]
-    public GameObject confirmationPanel;
-    public TMP_Text confirmationTitleText;
-    public TMP_Text itemTitleText;
-    public TMP_Text descriptionText;
-    public TMP_Text valueChangeText;
-    public TMP_Text priceText;
+    [Header("購入確認パネル PurchaseConfirmationPanel")]
+    public GameObject purchaseConfirmationPanel;
+    public TMP_Text purchaseTitleText;
+    public TMP_Text purchaseItemTitleText;
+    public TMP_Text purchaseDescriptionText;
+    public TMP_Text purchaseValueChangeText;
+    public TMP_Text purchasePriceLabelText;
+    public TMP_Text purchasePriceText;
+    public Button purchaseConfirmButton;
+    public Button purchaseCancelButton;
+    public Button purchaseCloseButton;
 
-    [Header("確認ウィンドウのボタン")]
-    public Button modalConfirmButton;
-    public Button cancelButton;
-    public Button closeButton;
+    [Header("売却確認パネル SellConfirmationPanel")]
+    public GameObject sellConfirmationPanel;
+    public TMP_Text sellTitleText;
+    public TMP_Text sellItemTitleText;
+    public TMP_Text sellDescriptionText;
+    public Button sellDecreaseAmountButton;
+    public TMP_Text sellAmountText;
+    public Button sellIncreaseAmountButton;
+    public TMP_Text sellValueChangeText;
+    public TMP_Text sellGoldLabelText;
+    public TMP_Text sellGoldText;
+    public Button sellConfirmButton;
+    public Button sellCancelButton;
+    public Button sellCloseButton;
+
+    [Header("売却数量設定")]
+    [Min(1)] public int initialSellAmount = 2;
+    [Min(1)] public int maxSellAmount = 99;
 
     [Header("選択色")]
     public Color selectedColor =
@@ -33,39 +52,71 @@ public class TradeSelectionUI : MonoBehaviour
 
     private Button selectedButton;
     private Action selectedAction;
-    private string selectedName;
-    private string selectedType;
-    private string selectedDescription;
-    private string selectedValueChange;
-    private string selectedDisplayTitle;
+
+    private string selectedName = "";
+    private string selectedType = "";
+    private string selectedDescription = "";
+    private string selectedDisplayTitle = "";
+
     private int selectedPrice;
+    private int sellAmount;
+
+    // 取引前後の値を計算するための情報
+    private float selectedCurrentValue;
+    private float selectedAmountPerTrade = 10f;
+    private float selectedMaxValue = 100f;
 
     private readonly Dictionary<Button, Color> originalColors =
         new Dictionary<Button, Color>();
 
     public bool HasSelection => selectedButton != null;
 
-    private void Start()
+    private void Awake()
     {
-        if (confirmationPanel != null)
-            confirmationPanel.SetActive(false);
+        sellAmount = Mathf.Clamp(
+            initialSellAmount, 1, Mathf.Max(1, maxSellAmount));
+
+        if (purchaseConfirmationPanel != null)
+            purchaseConfirmationPanel.SetActive(false);
+
+        if (sellConfirmationPanel != null)
+            sellConfirmationPanel.SetActive(false);
 
         if (confirmButton != null)
-        {
-            confirmButton.onClick.AddListener(OpenConfirmation);
             confirmButton.interactable = false;
-        }
-
-        if (modalConfirmButton != null)
-            modalConfirmButton.onClick.AddListener(ConfirmTrade);
-
-        if (cancelButton != null)
-            cancelButton.onClick.AddListener(CloseConfirmation);
-
-        if (closeButton != null)
-            closeButton.onClick.AddListener(CloseConfirmation);
     }
 
+    private void Start()
+    {
+        if (confirmButton != null)
+            confirmButton.onClick.AddListener(OpenConfirmation);
+
+        if (purchaseConfirmButton != null)
+            purchaseConfirmButton.onClick.AddListener(ConfirmTrade);
+
+        if (sellConfirmButton != null)
+            sellConfirmButton.onClick.AddListener(ConfirmTrade);
+
+        if (purchaseCancelButton != null)
+            purchaseCancelButton.onClick.AddListener(CloseConfirmation);
+
+        if (purchaseCloseButton != null)
+            purchaseCloseButton.onClick.AddListener(CloseConfirmation);
+
+        if (sellCancelButton != null)
+            sellCancelButton.onClick.AddListener(CloseConfirmation);
+
+        if (sellCloseButton != null)
+            sellCloseButton.onClick.AddListener(CloseConfirmation);
+
+        if (sellDecreaseAmountButton != null)
+            sellDecreaseAmountButton.onClick.AddListener(DecreaseSellAmount);
+
+        if (sellIncreaseAmountButton != null)
+            sellIncreaseAmountButton.onClick.AddListener(IncreaseSellAmount);
+    }
+
+    // 既存の Select 呼び出しと互換性を保つ
     public void Select(
         Button button,
         string itemName,
@@ -76,9 +127,38 @@ public class TradeSelectionUI : MonoBehaviour
         int price = 0,
         string displayTitle = "")
     {
-        if (button == null || action == null) return;
+        Select(
+            button,
+            itemName,
+            tradeType,
+            action,
+            description,
+            valueChange,
+            price,
+            displayTitle,
+            50f,
+            10f,
+            100f
+        );
+    }
 
-        // 前の商品の色を戻す
+    // 現在値・売買量も渡す場合はこちらを使用
+    public void Select(
+        Button button,
+        string itemName,
+        string tradeType,
+        Action action,
+        string description,
+        string valueChange,
+        int price,
+        string displayTitle,
+        float currentValue,
+        float amountPerTrade,
+        float maxValue = 100f)
+    {
+        if (button == null || action == null)
+            return;
+
         if (selectedButton != null)
             RestoreColor(selectedButton);
 
@@ -87,9 +167,12 @@ public class TradeSelectionUI : MonoBehaviour
         selectedType = tradeType;
         selectedAction = action;
         selectedDescription = description;
-        selectedValueChange = valueChange;
         selectedPrice = price;
         selectedDisplayTitle = displayTitle;
+
+        selectedCurrentValue = currentValue;
+        selectedAmountPerTrade = Mathf.Max(0f, amountPerTrade);
+        selectedMaxValue = Mathf.Max(0f, maxValue);
 
         Graphic graphic = button.targetGraphic;
 
@@ -118,13 +201,13 @@ public class TradeSelectionUI : MonoBehaviour
 
     private void UpdateConfirmButtonText()
     {
-        if (confirmButtonText == null) return;
+        if (confirmButtonText == null)
+            return;
 
         string actionName =
             selectedType == "購入" ? "購入する" : "売却する";
 
-        confirmButtonText.text =
-            selectedName + "を" + actionName;
+        confirmButtonText.text = selectedName + "を" + actionName;
     }
 
     public void OpenConfirmation()
@@ -132,51 +215,151 @@ public class TradeSelectionUI : MonoBehaviour
         if (!HasSelection || selectedAction == null)
             return;
 
-        if (confirmationTitleText != null)
-            confirmationTitleText.text =
-                selectedType == "購入"
-                ? "ステータスを購入"
-                : "ステータスを売却";
+        bool isPurchase = selectedType == "購入";
 
-        if (itemTitleText != null)
-            itemTitleText.text =
-                string.IsNullOrEmpty(selectedDisplayTitle)
-                ? selectedName
-                : selectedDisplayTitle;
+        // 必ず片方だけ表示する
+        if (purchaseConfirmationPanel != null)
+            purchaseConfirmationPanel.SetActive(isPurchase);
 
-        if (descriptionText != null)
-            descriptionText.text = selectedDescription;
+        if (sellConfirmationPanel != null)
+            sellConfirmationPanel.SetActive(!isPurchase);
 
-        if (valueChangeText != null)
-            valueChangeText.text = selectedValueChange;
-
-        if (priceText != null)
+        if (isPurchase)
         {
-            string label =
-                selectedType == "購入" ? "必要 Gold" : "獲得 Gold";
+            if (purchaseTitleText != null)
+                purchaseTitleText.text = "ステータスを購入";
 
-            priceText.text =
-                label + "　" + selectedPrice.ToString("N0") + " G";
+            if (purchaseItemTitleText != null)
+                purchaseItemTitleText.text =
+                    string.IsNullOrEmpty(selectedDisplayTitle)
+                    ? selectedName
+                    : selectedDisplayTitle;
+
+            if (purchaseDescriptionText != null)
+                purchaseDescriptionText.text = selectedDescription;
+
+            if (purchaseValueChangeText != null)
+            {
+                float after = Mathf.Min(
+                    selectedMaxValue,
+                    selectedCurrentValue + selectedAmountPerTrade);
+
+                purchaseValueChangeText.text =
+                    $"{selectedCurrentValue:0.##} → {after:0.##}";
+            }
+
+            if (purchasePriceLabelText != null)
+                purchasePriceLabelText.text = "必要 Gold";
+
+            if (purchasePriceText != null)
+                purchasePriceText.text =
+                    selectedPrice.ToString("N0") + " G";
+        }
+        else
+        {
+            // 売却画面を開くたびに初期数量へ戻す
+            sellAmount = Mathf.Clamp(
+                initialSellAmount, 1, Mathf.Max(1, maxSellAmount));
+
+            UpdateSellPanel();
         }
 
-        // 後ろの取引UIを操作できなくする
+        // 背景の取引UIを操作できなくする
         if (backgroundUI != null)
         {
             backgroundUI.interactable = false;
             backgroundUI.blocksRaycasts = false;
         }
+    }
 
-        // 確認画面を表示
-        if (confirmationPanel != null)
-            confirmationPanel.SetActive(true);
+    private void UpdateSellPanel()
+    {
+        if (sellTitleText != null)
+            sellTitleText.text = "SELL / " + selectedName;
+
+        if (sellItemTitleText != null)
+            sellItemTitleText.text =
+                string.IsNullOrEmpty(selectedDisplayTitle)
+                ? selectedName
+                : selectedDisplayTitle;
+
+        if (sellDescriptionText != null)
+            sellDescriptionText.text = selectedDescription;
+
+        if (sellAmountText != null)
+            sellAmountText.text = "×" + sellAmount;
+
+        float decrease = selectedAmountPerTrade * sellAmount;
+
+        float after = Mathf.Max(
+            0f, selectedCurrentValue - decrease);
+
+        if (sellValueChangeText != null)
+        {
+            sellValueChangeText.text =
+                $"{selectedCurrentValue:0.##} → {after:0.##}";
+        }
+
+        // 選択された数量に応じて売却額を計算
+        long totalGold = (long)selectedPrice * sellAmount;
+
+        if (sellGoldLabelText != null)
+            sellGoldLabelText.text = "獲得 Gold";
+
+        if (sellGoldText != null)
+            sellGoldText.text = "+ " + totalGold.ToString("N0") + " G";
+
+        if (sellDecreaseAmountButton != null)
+        {
+            sellDecreaseAmountButton.interactable = sellAmount > 1;
+        }
+
+        if (sellIncreaseAmountButton != null)
+        {
+            sellIncreaseAmountButton.interactable =
+                sellAmount < Mathf.Max(1, maxSellAmount)
+                && decrease < selectedCurrentValue;
+        }
+    }
+
+    private void DecreaseSellAmount()
+    {
+        if (selectedType != "売却")
+            return;
+
+        if (sellAmount > 1)
+        {
+            sellAmount--;
+            UpdateSellPanel();
+        }
+    }
+
+    private void IncreaseSellAmount()
+    {
+        if (selectedType != "売却")
+            return;
+
+        if (sellAmount >= Mathf.Max(1, maxSellAmount))
+            return;
+
+        float nextDecrease =
+            selectedAmountPerTrade * (sellAmount + 1);
+
+        if (nextDecrease >= selectedCurrentValue)
+            return;
+
+        sellAmount++;
+        UpdateSellPanel();
     }
 
     public void CloseConfirmation()
     {
-        if (confirmationPanel != null)
-            confirmationPanel.SetActive(false);
+        if (purchaseConfirmationPanel != null)
+            purchaseConfirmationPanel.SetActive(false);
 
-        // 後ろの取引UIを再び操作できるようにする
+        if (sellConfirmationPanel != null)
+            sellConfirmationPanel.SetActive(false);
+
         if (backgroundUI != null)
         {
             backgroundUI.interactable = true;
@@ -186,13 +369,27 @@ public class TradeSelectionUI : MonoBehaviour
 
     public void ConfirmTrade()
     {
-        if (selectedAction == null) return;
+        if (selectedAction == null)
+            return;
+
+        // 購入処理は今までどおり1回分
+        // 売却処理は選択した数量分を実行
+        Action action = selectedAction;
 
         CloseConfirmation();
 
-        // 実際の購入・売却処理はここで初めて実行
-        selectedAction.Invoke();
+        if (selectedType == "売却")
+        {
+            for (int i = 0; i < sellAmount; i++)
+                action.Invoke();
+        }
+        else
+        {
+            action.Invoke();
+        }
     }
 }
+
+
 
 

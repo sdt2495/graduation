@@ -32,7 +32,7 @@ public class ExclamationMark : MonoBehaviour
     [Tooltip("頭上アニメーション終了後、パネル縮小を開始するまでの時間")]
     [SerializeField] private float nextSequenceDelay = 0.5f;
 
-    private void Start()
+    public void StartExclamation()
     {
         ShowAnimation();
     }

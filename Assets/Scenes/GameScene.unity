@@ -3260,16 +3260,72 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 284250039396613139, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 403353467466786146, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 999095321071694052, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: upImage
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: downImage
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: leftImage
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: rightImage
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: upCrosshair
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: battleCamera
       value: 
       objectReference: {fileID: 519420034}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: downCrosshair
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: leftCrosshair
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786058090092281328, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: rightCrosshair
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 2961851739524117276, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3378987699985330713, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3928913182251324386, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: battleCameraController
+      value: 
+      objectReference: {fileID: 519420034}
+    - target: {fileID: 5288230683732161635, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -4744,7 +4800,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3724310954395162563, guid: cdf7448f125904047a4d58e61b6f2e0a, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

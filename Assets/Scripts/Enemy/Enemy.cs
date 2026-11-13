@@ -27,8 +27,10 @@ public class Enemy : MonoBehaviour
     // ミスしたコマンドのindex
     private int missIndex = -1;
 
-    [Header("HP")]
-    [SerializeField] private int maxHP = 10;
+    [Header("ステータスデータ")]
+    [SerializeField] private EnemyData enemyData;
+
+    private EnemyStatus status;
 
     [Header("ダメージ表示")]
 
@@ -43,8 +45,6 @@ public class Enemy : MonoBehaviour
     public float criticalChance = 20f;
     public float criticalMultiplier = 1.2f;
 
-    private int currentHP;
-
     [Header("ダメージフラッシュ")]
     [SerializeField] private SpriteRenderer spriteRenderer;
     [SerializeField] private float flashDuration = 0.1f;
@@ -53,14 +53,15 @@ public class Enemy : MonoBehaviour
 
     private Coroutine coroutine;
 
-    private void Awake()
+    public void Initialize(EnemyData data)
     {
-        currentHP = maxHP;
+        status = new EnemyStatus(data);
     }
-
     // 外部参照用
-    public int CurrentHP {  get { return currentHP; } }
-    public int MaxHP {  get { return maxHP; } }
+    public int CurrentHP => status.CurrentHP;
+    public int MaxHP => status.MaxHP;
+    public int Attack => status.Attack;
+    public int Defense => status.Defense;
 
     /// <summary>
     /// 敵がダメージを受ける処理
@@ -75,13 +76,8 @@ public class Enemy : MonoBehaviour
         {
             damage = Mathf.RoundToInt(damage * criticalMultiplier);
         }
-
-        currentHP -= damage;
-
-        if(currentHP < 0)
-        {
-            currentHP = 0;
-        }
+        
+        status.TakeDamage(damage);
 
         // 白くフラッシュ
         if(coroutine != null)
@@ -131,7 +127,7 @@ public class Enemy : MonoBehaviour
     /// <returns></returns>
     public bool IsDead()
     {
-        return currentHP <= 0;
+        return status.IsDead();
     }
 
     /// <summary>

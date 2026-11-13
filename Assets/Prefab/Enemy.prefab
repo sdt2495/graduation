@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 4.48, y: -2.46, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 3296895073148326770}
@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa37e2711d4617d4db41d01647e6a924, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Enemy
-  maxHP: 100
+  enemyData: {fileID: 0}
   damageTextPrefab: {fileID: 5433104768944249112, guid: 9e398037447d0e648b6717eb41c642ca, type: 3}
   damagePoint: {fileID: 5804551183218657069}
   targetCanvas: {fileID: 0}

@@ -17,6 +17,12 @@ public class GameFlowManager : MonoBehaviour
     private bool isPlayingConversation = false;    // ‰ï˜b’†‚©‚Ç‚¤‚©
 
 
+    #region “Ç‚İæ‚èê—p•Ï” (Get)
+
+    public bool IsPlayingConversation => isPlayingConversation;
+    #endregion
+
+
     #region ‰Šú‰»
 
     private void Awake()

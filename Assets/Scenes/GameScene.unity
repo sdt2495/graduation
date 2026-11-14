@@ -3154,7 +3154,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: spreadDistance
-      value: 240
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: 2847188323217654411, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: targetCamera
@@ -3165,8 +3165,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3928913182251324386, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
-      propertyPath: scanStartDelay
-      value: 0.5
+      propertyPath: pivotX
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 3928913182251324386, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: battleCameraController

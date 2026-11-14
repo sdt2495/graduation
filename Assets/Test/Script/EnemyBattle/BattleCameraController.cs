@@ -54,7 +54,7 @@ public class BattleCameraController : MonoBehaviour
         AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     // 元のカメラ情報
-    private float originalFOV;
+    private float originalOrthographicSize;
     private Vector3 originalCameraPosition;
     private Quaternion originalCameraRotation;
 
@@ -120,11 +120,11 @@ public class BattleCameraController : MonoBehaviour
             return;
         }
 
-        // Perspectiveカメラを確認
-        if (targetCamera.orthographic)
+        // Orthographicカメラを確認
+        if (!targetCamera.orthographic)
         {
             Debug.LogError(
-                "BattleCameraController：Perspectiveカメラを設定してください。",
+                "BattleCameraController：Orthographicカメラを設定してください。",
                 this
             );
 
@@ -133,7 +133,8 @@ public class BattleCameraController : MonoBehaviour
         }
 
         // 元のカメラ情報を保存
-        originalFOV = targetCamera.fieldOfView;
+        originalOrthographicSize =
+            targetCamera.orthographicSize;
 
         originalCameraPosition =
             targetCamera.transform.position;
@@ -176,9 +177,9 @@ public class BattleCameraController : MonoBehaviour
         Vector3 focusPosition =
             zoomFocus.position + cameraUp * verticalOffset;
 
-        // ズーム後のFOV
-        float targetFOV =
-            originalFOV /
+        // ズーム後のOrthographic Size
+        float targetSize =
+            originalOrthographicSize /
             Mathf.Max(zoomMultiplier, MIN_ZOOM_MULTIPLIER);
 
         // 注目位置までの奥行きを計算
@@ -212,7 +213,7 @@ public class BattleCameraController : MonoBehaviour
         // ズームと移動を同時に開始
         cameraCoroutine = StartCoroutine(
             ZoomCamera(
-                targetFOV,
+                targetSize,
                 targetCameraPosition,
                 targetPlayerPosition,
                 zoomDuration
@@ -229,7 +230,7 @@ public class BattleCameraController : MonoBehaviour
 
         cameraCoroutine = StartCoroutine(
             ZoomCamera(
-                originalFOV,
+                originalOrthographicSize,
                 originalCameraPosition,
                 originalPlayerPosition,
                 returnDuration
@@ -253,13 +254,14 @@ public class BattleCameraController : MonoBehaviour
     /// カメラとPlayerを同じ補間率で移動させる。
     /// </summary>
     private IEnumerator ZoomCamera(
-        float targetFOV,
+        float targetSize,
         Vector3 destinationCameraPosition,
         Vector3 destinationPlayerPosition,
         float duration)
     {
         // 開始時のカメラ情報
-        float startFOV = targetCamera.fieldOfView;
+        float startSize =
+            targetCamera.orthographicSize;
 
         Vector3 startCameraPosition =
             targetCamera.transform.position;
@@ -272,7 +274,7 @@ public class BattleCameraController : MonoBehaviour
         // 時間が0以下なら即座に変更
         if (duration <= 0f)
         {
-            targetCamera.fieldOfView = targetFOV;
+            targetCamera.orthographicSize = targetSize;
 
             targetCamera.transform.position =
                 destinationCameraPosition;
@@ -296,10 +298,10 @@ public class BattleCameraController : MonoBehaviour
             float curveValue =
                 zoomCurve.Evaluate(progress);
 
-            // FOVを変更
-            targetCamera.fieldOfView = Mathf.Lerp(
-                startFOV,
-                targetFOV,
+            // Orthographic Sizeを変更
+            targetCamera.orthographicSize = Mathf.Lerp(
+                startSize,
+                targetSize,
                 curveValue
             );
 
@@ -323,7 +325,7 @@ public class BattleCameraController : MonoBehaviour
         }
 
         // 最終位置を確実に設定
-        targetCamera.fieldOfView = targetFOV;
+        targetCamera.orthographicSize = targetSize;
 
         targetCamera.transform.position =
             destinationCameraPosition;

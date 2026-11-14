@@ -4,15 +4,21 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+/// <summary>
+/// スキャンの進行度と結果表示を管理する。
+///
+/// ・外部からスキャン開始
+/// ・外部から進行度を受け取る
+/// ・Sliderとパーセント表示を同期
+/// ・100%到達後に結果を表示
+/// ・指定時間後にUIを非表示
+/// </summary>
 public class SliderPercentUI : MonoBehaviour
 {
     [Header("UI")]
     [SerializeField] private Slider slider;
     [SerializeField] private TMP_Text percentText;
     [SerializeField] private TMP_Text statusText;
-
-    [Header("Scan")]
-    [SerializeField] private float scanDuration = 2f;
 
     [Header("Finish")]
     [SerializeField] private float hideDelay = 1f;
@@ -28,66 +34,95 @@ public class SliderPercentUI : MonoBehaviour
         {
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
-    }
 
-    private void Start()
-    {
-        slider.minValue = 0;
-        slider.maxValue = 100;
-        slider.value = 0;
+        // Sliderの初期設定
+        if (slider != null)
+        {
+            slider.minValue = 0f;
+            slider.maxValue = 100f;
+            slider.value = 0f;
+        }
 
         canvasGroup.alpha = 0f;
 
         UpdateUI();
     }
 
-    // 外部から呼び出してスキャンを開始
+    /// <summary>
+    /// 外部からスキャン表示を開始する。
+    /// </summary>
     public void StartScan()
     {
         if (isScanning)
             return;
 
+        isScanning = true;
+
         gameObject.SetActive(true);
 
         canvasGroup.alpha = 1f;
 
-        StartCoroutine(ScanRoutine());
+        if (slider != null)
+        {
+            slider.value = 0f;
+        }
+
+        UpdateUI();
+
+        Debug.Log("Sliderスキャン開始");
     }
 
-    private IEnumerator ScanRoutine()
+    /// <summary>
+    /// 外部から受け取った進行度を反映する。
+    /// progressは0～1。
+    /// </summary>
+    public void UpdateScanProgress(float progress)
     {
-        isScanning = true;
+        if (!isScanning || slider == null)
+            return;
 
-        slider.value = 0;
+        progress = Mathf.Clamp01(progress);
 
-        float timer = 0f;
+        // 0～1を0～100%に変換
+        slider.value = progress * 100f;
 
-        while (timer < scanDuration)
-        {
-            timer += Time.deltaTime;
+        UpdateUI();
+    }
 
-            float t = scanDuration <= 0f
-                ? 1f
-                : Mathf.Clamp01(timer / scanDuration);
-
-            slider.value = Mathf.Lerp(0f, 100f, t);
-
-            UpdateUI();
-
-            yield return null;
-        }
+    /// <summary>
+    /// スキャン完了時に呼び出す。
+    /// </summary>
+    public void CompleteScan()
+    {
+        if (!isScanning)
+            return;
 
         slider.value = 100f;
 
-        statusText.text = "DATA ACQUIRED";
+        UpdateUI();
 
-        yield return new WaitForSeconds(hideDelay);
+        Debug.Log("DATA ACQUIRED");
 
-        gameObject.SetActive(false);
-
-        isScanning = false;
+        StartCoroutine(FinishRoutine());
     }
 
+    /// <summary>
+    /// 完了後の非表示処理。
+    /// </summary>
+    private IEnumerator FinishRoutine()
+    {
+        yield return new WaitForSeconds(hideDelay);
+
+        canvasGroup.alpha = 0f;
+
+        isScanning = false;
+
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// UI表示を更新する。
+    /// </summary>
     private void UpdateUI()
     {
         if (slider == null)
@@ -95,13 +130,19 @@ public class SliderPercentUI : MonoBehaviour
 
         float percent = slider.value;
 
-        percentText.text = $"{percent:0}%";
+        if (percentText != null)
+        {
+            percentText.text = $"{percent:0}%";
+        }
 
-        if (percent <= 0)
+        if (statusText == null)
+            return;
+
+        if (percent <= 0f)
         {
             statusText.text = "";
         }
-        else if (percent < 100)
+        else if (percent < 100f)
         {
             statusText.text = "SCANNING TARGET...";
         }

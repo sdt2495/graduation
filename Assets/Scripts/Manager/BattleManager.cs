@@ -31,6 +31,9 @@ public class BattleManager : MonoBehaviour
     [Header("“G‚ÌUŒ‚‰‰o")]
     [SerializeField] private ExclamationMark exclamationMark;
 
+    [Header("Enemyƒqƒ“ƒgUI")]
+    [SerializeField] private EnemyHintUI enemyHintUI;
+
     // §ŒÀŠÔ
     [SerializeField] private float battleTimeLimit = 10.0f;
     private float reaminingTime;
@@ -93,6 +96,12 @@ public class BattleManager : MonoBehaviour
         if (exclamationMark != null)
         {
             exclamationMark.StartExclamation();
+        }
+
+        // Enemy‚Ìƒqƒ“ƒgUI‚ğ•\¦
+        if (enemyHintUI != null)
+        {
+            enemyHintUI.ShowHint("“G‚ÌUŒ‚I");
         }
 
         yield return null;

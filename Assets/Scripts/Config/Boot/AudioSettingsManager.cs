@@ -66,18 +66,19 @@ public class AudioSettingsManager : MonoBehaviour
 
     private void Awake()
     {
-        // インスタンス
+        // インスタンスがまだ登録されていない場合
         if (Instance == null)
         {
+            // このオブジェクトをインスタンスとして登録
             Instance = this;
 
-            DontDestroyOnLoad(this.gameObject);
-
+            // 保存されている音量設定を読み込む
             LoadVolume();
         }
         else
         {
-            Destroy(this.gameObject);
+            // 既にインスタンスが存在する場合は重複を防ぐ
+            Destroy(this);
         }
     }
 

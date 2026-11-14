@@ -37,6 +37,8 @@ public class BattaleCommandManager : MonoBehaviour
     [SerializeField] private InputActionReference navigateAction;
     [SerializeField] private InputActionReference submitAction;
 
+    [SerializeField] private GameManager gameManager;
+
     private void Start()
     {
         // 最初に選択するボタンを設定
@@ -143,42 +145,55 @@ public class BattaleCommandManager : MonoBehaviour
     /// </summary>
     public void ShowBattleCommandSelection()
     {
+        // 戦闘開始ボタンの画面を表示
+        battleCommandUI.SetActive(true);
+
+        // タイマーは非表示
+        timerUI.SetActive(false);
+
         Enemy battleEnemy = spawner.GetBattleEnemy();
 
-        battleCommandUI.SetActive(true);
+        // Enemyのコマンド位置を初期化
         battleEnemy.ResetCommand();
+
+        // NEXTコマンドを生成
         commandUI.SetInitialNextCommands();
+
+        // 現在のコマンドとNEXTコマンドをUIに反映
         commandUI.UpdateCommanedText(battleEnemy);
 
+        // 矢印UIを表示
+        commandUI.SetCommandUIVisible(true);
+
+        // ボタン選択を初期化
         selectCommandIndex = 0;
 
-        RectTransform buttonRect = commandButton[selectCommandIndex].GetComponent<RectTransform>();
+        RectTransform buttonRect =
+            commandButton[selectCommandIndex].GetComponent<RectTransform>();
 
-        targetFramePosition = new Vector3(buttonRect.anchoredPosition.x, buttonRect.anchoredPosition.y, selectFrame.localPosition.z);
+        targetFramePosition = new Vector3(
+            buttonRect.anchoredPosition.x,
+            buttonRect.anchoredPosition.y,
+            selectFrame.localPosition.z
+        );
     }
-     
+
     /// <summary>
     /// 戦闘ボタンの処理
     /// </summary>
     public void OnFightButton()
     {
-        // コマンド選択UIを非表示にする
+        // 戦闘開始ボタンの画面を非表示
         battleCommandUI.SetActive(false);
 
-        // タイマー系UIを表示する
+        // タイマーを表示
         timerUI.SetActive(true);
 
-        // 戦闘開始
-        battleManager.StartBattle();
-
-        Enemy battleEnemy = spawner.GetBattleEnemy();
-        battleEnemy.ResetCommand();
-
-        commandUI.SetInitialNextCommands();
-
-        commandUI.UpdateCommanedText(battleEnemy);
-
+        // プレイヤーの入力を有効化
         player.SetCommandInput(true);
+
+        // 戦闘開始
+        gameManager.StartBattlePhase();
     }
 
     private void UpdateSelectionScale()
@@ -193,5 +208,20 @@ public class BattaleCommandManager : MonoBehaviour
 
         // 選択フレームも同じ倍率で拡大
         selectFrame.localScale = originalFrameScale * selectScale;
+    }
+
+    /// <summary>
+    /// 戦闘終了後の処理
+    /// </summary>
+    public void OnBattleEnded()
+    {
+        // コマンドUIを非表示
+        commandUI.SetCommandUIVisible(false);
+
+        // タイマーUIを非表示
+        timerUI.SetActive(false);
+
+        // 次の戦闘開始ボタンを表示
+        battleCommandUI.SetActive(true);
     }
 }

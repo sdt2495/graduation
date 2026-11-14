@@ -141,7 +141,7 @@ public class BattleManager : MonoBehaviour
         EndBattle();
 
         // コマンド選択画面へ戻る
-        battleCommandManager.ShowBattleCommandSelection();
+        battleCommandManager.OnBattleEnded();
     }
 
     public void EndBattle()

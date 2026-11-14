@@ -56,18 +56,18 @@ public class TextSettingsManager : MonoBehaviour
     #endregion
 
 
-    // 常駐オブジェクト
     private void Awake()
     {
+        // インスタンスがまだ登録されていない場合
         if (Instance == null)
         {
+            // このオブジェクトをインスタンスとして登録
             Instance = this;
-
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
-            Destroy(gameObject);
+            // 既にインスタンスが存在する場合は重複を防ぐ
+            Destroy(this);
         }
     }
 

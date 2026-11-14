@@ -51,6 +51,15 @@ public class CommandUI : MonoBehaviour
     private int currentActiveIndex = 0;
 
     /// <summary>
+    /// 現在のコマンドとNEXTコマンドの表示を切り替える
+    /// </summary>
+    public void SetCommandUIVisible(bool isVisible)
+    {
+        commandParent.gameObject.SetActive(isVisible);
+        nextCommandParent.gameObject.SetActive(isVisible);
+    }
+
+    /// <summary>
     /// 現在のコマンドとNextコマンドのUIを更新する
     /// </summary>
     /// <param name="battleEnemy"></param>
@@ -69,8 +78,6 @@ public class CommandUI : MonoBehaviour
     public void SetInitialNextCommands()
     {
         SetNextCommand();
-
-        CreateCommandElements(nextCommand, nextCommandParent, nextcommandElements);
     }
 
     /// <summary>

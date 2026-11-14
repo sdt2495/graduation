@@ -31,6 +31,9 @@ public class BattleManager : MonoBehaviour
     [Header("“G‚ÌUŒ‚‰‰o")]
     [SerializeField] private ExclamationMark exclamationMark;
 
+    [Header("Enemyƒqƒ“ƒgUI")]
+    [SerializeField] private EnemyHintUI enemyHintUI;
+
     // §ŒÀŠÔ
     [SerializeField] private float battleTimeLimit = 10.0f;
     private float reaminingTime;
@@ -95,6 +98,12 @@ public class BattleManager : MonoBehaviour
             exclamationMark.StartExclamation();
         }
 
+        // Enemy‚Ìƒqƒ“ƒgUI‚ğ•\¦
+        if (enemyHintUI != null)
+        {
+            enemyHintUI.ShowHint("“G‚ÌUŒ‚I");
+        }
+
         yield return null;
     }
 
@@ -141,7 +150,7 @@ public class BattleManager : MonoBehaviour
         EndBattle();
 
         // ƒRƒ}ƒ“ƒh‘I‘ğ‰æ–Ê‚Ö–ß‚é
-        battleCommandManager.ShowBattleCommandSelection();
+        battleCommandManager.OnBattleEnded();
     }
 
     public void EndBattle()

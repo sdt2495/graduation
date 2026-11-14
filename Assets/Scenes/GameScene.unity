@@ -866,7 +866,7 @@ Transform:
   m_GameObject: {fileID: 470591275}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.8, y: 0.55, z: 0}
+  m_LocalPosition: {x: 5, y: 0.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -927,6 +927,7 @@ MonoBehaviour:
   timerBarFill: {fileID: 1485621678}
   battleCommandManager: {fileID: 976136307}
   exclamationMark: {fileID: 1297870251}
+  enemyHintUI: {fileID: 1082352435}
   battleTimeLimit: 7.5
 --- !u!1 &490869624
 GameObject:
@@ -1143,7 +1144,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8320594dd395b7542933edcf8871c24b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleEnemySpawner
-  _enemyData: {fileID: 11400000, guid: 5da98f8597a74e54c9e3348692c9d28a, type: 2}
   enemyPrefab: {fileID: 5640618988908233305, guid: e376c2de5ebbb294d993720a95fe8140, type: 3}
   battlePoint: {fileID: 470591276}
   player: {fileID: 758857482}
@@ -2516,6 +2516,54 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &934584211
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 934584213}
+  - component: {fileID: 934584212}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &934584212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 934584211}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d12ed15e1b4496a4d995d6fd41673d19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  enemySpawner: {fileID: 515253255}
+  enemyData: {fileID: 11400000, guid: 5da98f8597a74e54c9e3348692c9d28a, type: 2}
+  commandManager: {fileID: 976136307}
+  battleManager: {fileID: 484586750}
+--- !u!4 &934584213
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 934584211}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.95432, y: -0.63461, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &949635420
 GameObject:
   m_ObjectHideFlags: 0
@@ -2784,6 +2832,7 @@ MonoBehaviour:
   selectScale: 1.2
   navigateAction: {fileID: -8784545083839296357, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   submitAction: {fileID: 392368643174621059, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  gameManager: {fileID: 934584212}
 --- !u!1 &1041358313
 GameObject:
   m_ObjectHideFlags: 0
@@ -2863,6 +2912,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1082352435 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7372040765422063501, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+  m_PrefabInstance: {fileID: 1297870250}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e56fefdac3a7b74f8a511f48e7bfbf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHintUI
 --- !u!1 &1124025390
 GameObject:
   m_ObjectHideFlags: 0
@@ -3140,6 +3200,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: spreadDistance
+      value: 200
+      objectReference: {fileID: 0}
     - target: {fileID: 2847188323217654411, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: targetCamera
       value: 
@@ -3149,8 +3213,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3928913182251324386, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
-      propertyPath: scanStartDelay
-      value: 0.5
+      propertyPath: pivotX
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 3928913182251324386, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: battleCameraController
@@ -4905,3 +4969,4 @@ SceneRoots:
   - {fileID: 1297870250}
   - {fileID: 9744051}
   - {fileID: 125346109}
+  - {fileID: 934584213}

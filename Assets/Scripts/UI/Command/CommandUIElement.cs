@@ -106,7 +106,10 @@ public class CommandUIElement : MonoBehaviour
         frameState = FrameState.Hidden;
         activeDiamondImage.gameObject.SetActive(false);
 
+        diamondImage.color = Color.white;
+        activeDiamondImage.color = Color.white;
         arrowImage.color = normalArrowColor;
+
         arrowImage.transform.localScale = arrowOriginalScale;
         transform.rotation = Quaternion.identity;
         transform.localScale = Vector3.one;

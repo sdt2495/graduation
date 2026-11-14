@@ -20,7 +20,6 @@ public class ShopManagerkari : MonoBehaviour
     public Button rerollButton;
 
     private bool hasRerolled = false;
-
     private bool hasPurchased = false;
 
     private string[] effectNames =
@@ -35,13 +34,20 @@ public class ShopManagerkari : MonoBehaviour
     private int[] prices = { 100, 100, 150, 150, 500000 };
 
     private int[] currentEffects = new int[3];
-
     private bool[] purchased = new bool[3];
 
     private int selectedIndex = -1;
 
     [Header("ステータス連携")]
     public StatusRadar statusRadar;
+
+    [Header("ステータス数値表示")]
+    public TMP_Text hpValueText;
+    public TMP_Text atkValueText;
+    public TMP_Text defValueText;
+    public TMP_Text criValueText;
+    public TMP_Text sanValueText;
+    public TMP_Text tecValueText;
 
     void Start()
     {
@@ -58,7 +64,6 @@ public class ShopManagerkari : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P))
         {
             bool open = !shopPanel.activeSelf;
-
             shopPanel.SetActive(open);
 
             if (open)
@@ -70,7 +75,6 @@ public class ShopManagerkari : MonoBehaviour
 
     void GenerateShop()
     {
-
         hasRerolled = false;
         rerollButton.interactable = true;
 
@@ -80,10 +84,8 @@ public class ShopManagerkari : MonoBehaviour
 
         purchaseButton.interactable = false;
 
-        // 効果の番号を用意
         int[] availableEffects = { 0, 1, 2, 3, 4 };
 
-        // Fisher-Yatesシャッフル
         for (int i = 0; i < availableEffects.Length; i++)
         {
             int random = Random.Range(i, availableEffects.Length);
@@ -93,11 +95,9 @@ public class ShopManagerkari : MonoBehaviour
             availableEffects[random] = temp;
         }
 
-        // シャッフルした先頭3つを使用
         for (int i = 0; i < 3; i++)
         {
             purchased[i] = false;
-
             currentEffects[i] = availableEffects[i];
 
             effectTexts[i].text =
@@ -114,6 +114,7 @@ public class ShopManagerkari : MonoBehaviour
             );
         }
     }
+
     void SelectItem(int index)
     {
         if (purchased[index])
@@ -149,7 +150,6 @@ public class ShopManagerkari : MonoBehaviour
 
         coins -= price;
 
-        // 購入した商品のステータスを反映
         if (statusRadar != null)
         {
             float hp = statusRadar.HP;
@@ -159,31 +159,29 @@ public class ShopManagerkari : MonoBehaviour
             float tec = statusRadar.TEC;
             float other = statusRadar.Other;
 
-
             switch (effect)
             {
-                case 0: // ATK+6
+                case 0:
                     atk += 6;
                     break;
 
-                case 1: // HP+7
+                case 1:
                     hp += 7;
                     break;
 
-                case 2: // DEF+90
+                case 2:
                     def += 90;
                     break;
 
-                case 3: // CRI+7
+                case 3:
                     cri += 7;
                     break;
 
-                case 4: // ATK+999999
+                case 4:
                     atk += 999999;
                     break;
             }
 
-            // ステータスを更新
             statusRadar.SetStatus(
                 Mathf.Clamp(hp, 0, 100),
                 Mathf.Clamp(atk, 0, 100),
@@ -192,6 +190,9 @@ public class ShopManagerkari : MonoBehaviour
                 Mathf.Clamp(tec, 0, 100),
                 Mathf.Clamp(other, 0, 100)
             );
+
+            // 数値テキストを更新
+            UpdateStatusText();
 
             Debug.Log("ショップ購入によるステータス更新完了！");
         }
@@ -202,14 +203,11 @@ public class ShopManagerkari : MonoBehaviour
 
         hasPurchased = true;
 
-        // りろーるを使用不可にする
         rerollButton.interactable = false;
 
         purchased[selectedIndex] = true;
-
         effectTexts[selectedIndex].text = "購入済み";
 
-        // すべての商品を選択不可にする
         for (int i = 0; i < 3; i++)
         {
             selectButtons[i].interactable = false;
@@ -218,12 +216,35 @@ public class ShopManagerkari : MonoBehaviour
         selectedText.text = "購入完了！";
 
         selectedIndex = -1;
-
         purchaseButton.interactable = false;
 
         UpdateCoinText();
 
         Debug.Log("購入成功！");
+    }
+
+    // ステータス数値表示を更新
+    private void UpdateStatusText()
+    {
+        if (statusRadar == null) return;
+
+        if (hpValueText != null)
+            hpValueText.text = "HP  " + statusRadar.HP.ToString("F0");
+
+        if (atkValueText != null)
+            atkValueText.text = "ATK  " + statusRadar.ATK.ToString("F0");
+
+        if (defValueText != null)
+            defValueText.text = "DEF  " + statusRadar.DEF.ToString("F0");
+
+        if (criValueText != null)
+            criValueText.text = "CRI  " + statusRadar.CRI.ToString("F0");
+
+        if (sanValueText != null)
+            sanValueText.text = "SAN  " + statusRadar.Other.ToString("F0");
+
+        if (tecValueText != null)
+            tecValueText.text = "TEC  " + statusRadar.TEC.ToString("F0");
     }
 
     void UpdateCoinText()

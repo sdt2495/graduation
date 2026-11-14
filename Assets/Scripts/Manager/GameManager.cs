@@ -15,11 +15,31 @@ public class GameManager : MonoBehaviour
 {
     [SerializeField] private BattleEnemySpawner enemySpawner;
 
+    [Header("ステージ設定")]
+    [SerializeField] private EnemyData enemyData;
+
+    [SerializeField] private BattaleCommandManager commandManager;
+    [SerializeField] private BattleManager battleManager;
+
     private GamePhase currentPhase;
 
     public void Start()
     {
         ChangePhase(GamePhase.Dialogue);
+    }
+
+    /// <summary>
+    /// デバック用に追加
+    /// Enterキーで次のPHASEへ移行
+    /// </summary>
+    private void Update()
+    {
+        // デバッグ用：F1キーで準備画面へ移行
+        if (currentPhase == GamePhase.Dialogue &&
+            Input.GetKeyDown(KeyCode.F1))
+        {
+            ChangePhase(GamePhase.BattlePreparation);
+        }
     }
 
     private void ChangePhase(GamePhase nextphase)
@@ -62,11 +82,19 @@ public class GameManager : MonoBehaviour
     private void StartBattlePreparation()
     {
         Debug.Log("戦闘準備開始");
+
+        // 敵を生成
+        enemySpawner.SpawnEnemy(enemyData);
+
+        // コマンド選択画面を表示
+        commandManager.ShowBattleCommandSelection();
     }
 
     private void StartBattle()
     {
         Debug.Log("戦闘開始");
+
+        battleManager.StartBattle();
     }
 
     private void StartUpgrade()
@@ -82,5 +110,14 @@ public class GameManager : MonoBehaviour
     private void StartGameOver()
     {
         Debug.Log("ゲームオーバー");
+    }
+
+    public void StartBattlePhase()
+    {
+        // 戦闘準備中の場合だけ戦闘を開始する
+        if (currentPhase != GamePhase.BattlePreparation)
+            return;
+
+        ChangePhase(GamePhase.Battle);
     }
 }

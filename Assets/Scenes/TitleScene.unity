@@ -1097,7 +1097,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1084510454}
   - component: {fileID: 1084510453}
-  - component: {fileID: 1084510455}
   m_Layer: 0
   m_Name: SoundManager
   m_TagString: Untagged
@@ -1217,18 +1216,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1084510455
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1084510452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9819358a59acd554ba4b1e69336d5593, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TitleBGM
 --- !u!1 &1097469600
 GameObject:
   m_ObjectHideFlags: 0
@@ -2313,7 +2300,15 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
@@ -2321,8 +2316,16 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1461610721}
     - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: OnClickStartGameButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: TitleManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 272401660707588800, guid: 219e6b7ae1ac5f647928929d114cab45, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_StringArgument

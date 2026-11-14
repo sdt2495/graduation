@@ -867,7 +867,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7705650627151560665}
   - component: {fileID: 3954442111603915198}
-  - component: {fileID: 4019094513279786172}
+  - component: {fileID: 7664263673910030669}
   m_Layer: 5
   m_Name: StatusRadar
   m_TagString: Untagged
@@ -909,7 +909,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9146909670821182833}
   m_CullTransparentMesh: 1
---- !u!114 &4019094513279786172
+--- !u!114 &7664263673910030669
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -918,28 +918,36 @@ MonoBehaviour:
   m_GameObject: {fileID: 9146909670821182833}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c08041b85d6a2f469017513d0a6b1f1, type: 3}
+  m_Script: {fileID: 11500000, guid: 998a427dfba90b04ebd782be71aa65bc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StatusRadar
+  m_EditorClassIdentifier: Assembly-CSharp::HexagonRadarGraphic
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  HP: 40
-  ATK: 40
-  DEF: 40
-  CRI: 40
-  TEC: 40
-  Other: 40
-  meterColor: {r: 1, g: 0.0298337, b: 0, a: 0.5}
+  values:
+  - 50
+  - 50
+  - 50
+  - 50
+  - 50
+  - 50
+  showPreview: 0
+  previewValues:
+  - 50
+  - 50
+  - 50
+  - 50
+  - 50
+  - 50
+  meterColor: {r: 1, g: 0.3, b: 0.1, a: 0.4}
   meterLineColor: {r: 1, g: 0.2, b: 0.05, a: 1}
   meterLineWidth: 3
-  previewColor: {r: 1, g: 0.85, b: 0.1, a: 0.3}
-  previewLineWidth: 3
   previewFillColor: {r: 1, g: 0.85, b: 0.1, a: 0.12}
+  previewLineColor: {r: 1, g: 0.85, b: 0.1, a: 0.8}
+  previewLineWidth: 2
   frameColor: {r: 0, g: 0, b: 0, a: 1}
-  lineWidth: 5
-  guideColor: {r: 0, g: 0, b: 0, a: 0.3}
-  guideWidth: 3
+  frameLineWidth: 4
+  guideColor: {r: 0, g: 0, b: 0, a: 0.2}
+  guideLineWidth: 1.5
   guideCount: 5
-  animationSpeed: 4

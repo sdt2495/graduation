@@ -58,6 +58,10 @@ public class UIPanelShrink : MonoBehaviour
     [Header("スキャン開始までの待機時間")]
     [SerializeField] private float scanStartDelay = 0.5f;
 
+    [Header("方向画像制御")]
+    [SerializeField]
+    private DirectionImageController directionImageController;
+
     // 縮小経過時間
     private float timer;
 
@@ -209,6 +213,18 @@ public class UIPanelShrink : MonoBehaviour
                 if (sliderPercentUI != null)
                 {
                     sliderPercentUI.CompleteScan();
+                }
+
+                // 4方向の画像演出を開始
+                if (directionImageController != null)
+                {
+                    directionImageController.StartDirectionImages();
+                }
+                else
+                {
+                    Debug.LogWarning(
+                        "DirectionImageControllerが設定されていません。"
+                    );
                 }
 
                 Debug.Log("スキャン線到達：スキャン完了");

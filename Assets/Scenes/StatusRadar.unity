@@ -1409,17 +1409,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 7705650627151560665, guid: 471d62f17860f7243aaf37038811bbd2, type: 3}
   m_PrefabInstance: {fileID: 6766046139072751368}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &153017747 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4019094513279786172, guid: 471d62f17860f7243aaf37038811bbd2, type: 3}
-  m_PrefabInstance: {fileID: 6766046139072751368}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4c08041b85d6a2f469017513d0a6b1f1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::StatusRadar
 --- !u!1 &153053516
 GameObject:
   m_ObjectHideFlags: 0
@@ -10376,7 +10365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ce263d90a991ef46be4b72c38fc2351, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StatusTrade
-  statusRadar: {fileID: 153017747}
+  statusRadar: {fileID: 1244273882}
   selectionUI: {fileID: 714707619}
   hpValueText: {fileID: 756130915}
   atkValueText: {fileID: 130151038}
@@ -14751,6 +14740,45 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1231949145}
   m_CullTransparentMesh: 1
+--- !u!1 &1244273880 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9146909670821182833, guid: 471d62f17860f7243aaf37038811bbd2, type: 3}
+  m_PrefabInstance: {fileID: 6766046139072751368}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1244273882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1244273880}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c08041b85d6a2f469017513d0a6b1f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StatusRadar
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  HP: 37
+  ATK: 37
+  DEF: 37
+  CRI: 37
+  TEC: 37
+  Other: 37
+  meterColor: {r: 1, g: 0.3, b: 0.1, a: 0.4}
+  meterLineColor: {r: 1, g: 0.2, b: 0.05, a: 1}
+  meterLineWidth: 3
+  previewColor: {r: 1, g: 0.85, b: 0.1, a: 0.3}
+  previewLineWidth: 3
+  previewFillColor: {r: 1, g: 0.85, b: 0.1, a: 0.12}
+  frameColor: {r: 0, g: 0, b: 0, a: 1}
+  lineWidth: 4
+  guideColor: {r: 0, g: 0, b: 0, a: 0.2}
+  guideWidth: 1.5
+  guideCount: 5
+  animationSpeed: 4
 --- !u!1 &1255734738
 GameObject:
   m_ObjectHideFlags: 0
@@ -24074,10 +24102,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: StatusRadar
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 7664263673910030669, guid: 471d62f17860f7243aaf37038811bbd2, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 9146909670821182833, guid: 471d62f17860f7243aaf37038811bbd2, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1244273882}
   m_SourcePrefab: {fileID: 100100000, guid: 471d62f17860f7243aaf37038811bbd2, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

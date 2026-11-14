@@ -215,8 +215,8 @@ MonoBehaviour:
   downImage: {fileID: 8422029787325370696}
   leftImage: {fileID: 2415296508658652592}
   rightImage: {fileID: 1970753881401018722}
-  initialOffset: 100
-  spreadDistance: 300
+  initialOffset: 175
+  spreadDistance: 240
   moveDuration: 0.4
 --- !u!1 &876971877839166594
 GameObject:
@@ -424,7 +424,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -100, y: -75}
+  m_AnchoredPosition: {x: -100, y: -90}
   m_SizeDelta: {x: 1000, y: 650}
   m_Pivot: {x: 0.2, y: 0.4}
 --- !u!222 &1942461755967487366
@@ -478,9 +478,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIPanelShrink
   target: {fileID: 442464026085126291}
-  startWidth: 1400
-  endWidth: 750
-  height: 750
+  startWidth: 1700
+  endWidth: 900
+  height: 900
   duration: 0.6
   pivotX: 0.35
   battleCameraController: {fileID: 0}
@@ -490,14 +490,14 @@ MonoBehaviour:
   - {fileID: 9173824704115644704}
   - {fileID: 5277188177461816093}
   - {fileID: 3037027260114582593}
-  startX: 1600
-  endX: 850
-  fixedY: 850
+  startX: 1700
+  endX: 900
+  fixedY: 900
   scanLine: {fileID: 6948856610608819522}
-  scanStartY: 350
-  scanEndY: -350
+  scanStartY: 450
+  scanEndY: -450
   scanDuration: 1.5
-  scanStartDelay: 1
+  scanStartDelay: 0.5
   directionImageController: {fileID: 2645128280319284434}
 --- !u!225 &7444629849050008128
 CanvasGroup:
@@ -1665,7 +1665,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 750, y: 15}
+  m_SizeDelta: {x: 890, y: 15}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2753338368629863323
 CanvasRenderer:

@@ -866,7 +866,7 @@ Transform:
   m_GameObject: {fileID: 470591275}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.8, y: 0.55, z: 0}
+  m_LocalPosition: {x: 5, y: 0.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -927,6 +927,7 @@ MonoBehaviour:
   timerBarFill: {fileID: 1485621678}
   battleCommandManager: {fileID: 976136307}
   exclamationMark: {fileID: 1297870251}
+  enemyHintUI: {fileID: 1082352435}
   battleTimeLimit: 7.5
 --- !u!1 &490869624
 GameObject:
@@ -2863,6 +2864,17 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1082352435 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7372040765422063501, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+  m_PrefabInstance: {fileID: 1297870250}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e56fefdac3a7b74f8a511f48e7bfbf8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHintUI
 --- !u!1 &1124025390
 GameObject:
   m_ObjectHideFlags: 0
@@ -3139,6 +3151,10 @@ PrefabInstance:
     - target: {fileID: 403353467466786146, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: spreadDistance
+      value: 240
       objectReference: {fileID: 0}
     - target: {fileID: 2847188323217654411, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: targetCamera

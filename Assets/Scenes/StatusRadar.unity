@@ -23913,6 +23913,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Panel
       objectReference: {fileID: 0}
+    - target: {fileID: 5589753524538596093, guid: 872344a65e921a64b81cc359c7d3b0df, type: 3}
+      propertyPath: vertexDotRadius
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 6253557743664769875, guid: 872344a65e921a64b81cc359c7d3b0df, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

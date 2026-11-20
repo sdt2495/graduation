@@ -1,5 +1,4 @@
 
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,6 +7,9 @@ using TMPro;
 
 public class TradeSelectionUI : MonoBehaviour
 {
+    [Header("ページ切り替え")]
+    public PageSwitcher pageSwitcher;
+
     [Header("一覧の下にある確定ボタン")]
     public Button confirmButton;
     public TMP_Text confirmButtonText;
@@ -61,18 +63,18 @@ public class TradeSelectionUI : MonoBehaviour
     private int selectedPrice;
     private int sellAmount;
 
-    // 取引前後の値を計算するための情報
     private float selectedCurrentValue;
     private float selectedAmountPerTrade = 10f;
     private float selectedMaxValue = 100f;
 
-    // 他のスクリプトから現在値を取得する
     private Func<float> selectedValueProvider;
 
     private readonly Dictionary<Button, Color> originalColors =
         new Dictionary<Button, Color>();
 
     public bool HasSelection => selectedButton != null;
+
+    public static bool HasAnySelection { get; private set; }
 
     private void Awake()
     {
@@ -119,7 +121,7 @@ public class TradeSelectionUI : MonoBehaviour
             sellIncreaseAmountButton.onClick.AddListener(IncreaseSellAmount);
     }
 
-    // 既存の Select 呼び出しと互換性を保つ
+    // 既存の Select 呼び出しとの互換性を維持
     public void Select(
         Button button,
         string itemName,
@@ -145,7 +147,7 @@ public class TradeSelectionUI : MonoBehaviour
         );
     }
 
-    // 実際のステータス値と連動する選択処理
+    // 最新のステータス値を取得する選択処理
     public void SelectLive(
         Button button,
         string itemName,
@@ -178,7 +180,7 @@ public class TradeSelectionUI : MonoBehaviour
         selectedValueProvider = getCurrentValue;
     }
 
-    // 現在値・売買量も渡す場合はこちらを使用
+    // 実際の選択処理
     public void Select(
         Button button,
         string itemName,
@@ -195,6 +197,7 @@ public class TradeSelectionUI : MonoBehaviour
         if (button == null || action == null)
             return;
 
+        // 前に選択していたボタンの色を戻す
         if (selectedButton != null)
             RestoreColor(selectedButton);
 
@@ -210,6 +213,16 @@ public class TradeSelectionUI : MonoBehaviour
         selectedAmountPerTrade = Mathf.Max(0f, amountPerTrade);
         selectedMaxValue = Mathf.Max(0f, maxValue);
 
+        selectedValueProvider = null;
+        HasAnySelection = true;
+
+        // 選択されたボタンのページへ即座に切り替える
+        if (pageSwitcher != null)
+        {
+            pageSwitcher.SwitchToPageContaining(button);
+        }
+
+        // 選択色を設定
         Graphic graphic = button.targetGraphic;
 
         if (graphic != null)
@@ -251,15 +264,11 @@ public class TradeSelectionUI : MonoBehaviour
         if (!HasSelection || selectedAction == null)
             return;
 
-        // 確認画面を開く直前に、最新の値を取得する
         if (selectedValueProvider != null)
-        {
             selectedCurrentValue = selectedValueProvider();
-        }
 
         bool isPurchase = selectedType == "購入";
 
-        // 必ず片方だけ表示する
         if (purchaseConfirmationPanel != null)
             purchaseConfirmationPanel.SetActive(isPurchase);
 
@@ -287,7 +296,7 @@ public class TradeSelectionUI : MonoBehaviour
                     selectedCurrentValue + selectedAmountPerTrade);
 
                 purchaseValueChangeText.text =
-                    $"{selectedCurrentValue:0.##} → {after:0.##}";
+                    $"{selectedCurrentValue:0.}  →  {after:0.}";
             }
 
             if (purchasePriceLabelText != null)
@@ -299,14 +308,13 @@ public class TradeSelectionUI : MonoBehaviour
         }
         else
         {
-            // 売却画面を開くたびに初期数量へ戻す
             sellAmount = Mathf.Clamp(
                 initialSellAmount, 1, Mathf.Max(1, maxSellAmount));
 
             UpdateSellPanel();
         }
 
-        // 背景の取引UIを操作できなくする
+        // 背景の操作を禁止
         if (backgroundUI != null)
         {
             backgroundUI.interactable = false;
@@ -339,10 +347,9 @@ public class TradeSelectionUI : MonoBehaviour
         if (sellValueChangeText != null)
         {
             sellValueChangeText.text =
-                $"{selectedCurrentValue:0.##} → {after:0.##}";
+                $"{selectedCurrentValue:0.} → {after:0.}";
         }
 
-        // 選択された数量に応じて売却額を計算
         long totalGold = (long)selectedPrice * sellAmount;
 
         if (sellGoldLabelText != null)
@@ -352,9 +359,7 @@ public class TradeSelectionUI : MonoBehaviour
             sellGoldText.text = "+ " + totalGold.ToString("N0") + " G";
 
         if (sellDecreaseAmountButton != null)
-        {
             sellDecreaseAmountButton.interactable = sellAmount > 1;
-        }
 
         if (sellIncreaseAmountButton != null)
         {
@@ -407,6 +412,8 @@ public class TradeSelectionUI : MonoBehaviour
             backgroundUI.interactable = true;
             backgroundUI.blocksRaycasts = true;
         }
+
+        // キャンセルでは選択状態を解除しない
     }
 
     public void ConfirmTrade()
@@ -414,23 +421,55 @@ public class TradeSelectionUI : MonoBehaviour
         if (selectedAction == null)
             return;
 
-        // 購入処理は今までどおり1回分
-        // 売却処理は選択した数量分を実行
         Action action = selectedAction;
+        bool isSell = selectedType == "売却";
+        int amount = sellAmount;
 
+        // 確認画面を閉じる
         CloseConfirmation();
 
-        if (selectedType == "売却")
+        // 取引を実行
+        if (isSell)
         {
-            for (int i = 0; i < sellAmount; i++)
+            for (int i = 0; i < amount; i++)
                 action.Invoke();
         }
         else
         {
             action.Invoke();
         }
+
+        // ★取引確定後に選択を解除
+        ClearSelection();
+    }
+
+    // 選択状態を解除
+    public void ClearSelection()
+    {
+        if (selectedButton != null)
+            RestoreColor(selectedButton);
+
+        selectedButton = null;
+        selectedAction = null;
+        selectedValueProvider = null;
+
+        selectedName = "";
+        selectedType = "";
+        selectedDescription = "";
+        selectedDisplayTitle = "";
+
+        selectedPrice = 0;
+
+        HasAnySelection = false;
+
+        if (confirmButton != null)
+            confirmButton.interactable = false;
+
+        if (confirmButtonText != null)
+            confirmButtonText.text = "選択してください";
     }
 }
+
 
 
 

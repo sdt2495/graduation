@@ -222,8 +222,8 @@ public class BattaleCommandManager : MonoBehaviour
     /// </summary>
     public void OnBattleEnded()
     {
-        // コマンドUIを非表示
-        commandUI.SetCommandUIVisible(false);
+        // コマンドUIを表示
+        commandUI.SetCommandUIVisible(true);
 
         // タイマーUIを非表示
         timerUI.SetActive(false);

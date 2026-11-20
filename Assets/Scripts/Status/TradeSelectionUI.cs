@@ -1,4 +1,3 @@
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,7 +16,7 @@ public class TradeSelectionUI : MonoBehaviour
     [Header("背景の取引UI")]
     public CanvasGroup backgroundUI;
 
-    [Header("購入確認パネル PurchaseConfirmationPanel")]
+    [Header("購入確認パネル")]
     public GameObject purchaseConfirmationPanel;
     public TMP_Text purchaseTitleText;
     public TMP_Text purchaseItemTitleText;
@@ -29,7 +28,7 @@ public class TradeSelectionUI : MonoBehaviour
     public Button purchaseCancelButton;
     public Button purchaseCloseButton;
 
-    [Header("売却確認パネル SellConfirmationPanel")]
+    [Header("売却確認パネル")]
     public GameObject sellConfirmationPanel;
     public TMP_Text sellTitleText;
     public TMP_Text sellItemTitleText;
@@ -68,6 +67,9 @@ public class TradeSelectionUI : MonoBehaviour
     private float selectedMaxValue = 100f;
 
     private Func<float> selectedValueProvider;
+
+    // レーダーチャートの予測値を更新する処理
+    private Action<float> selectedPreviewUpdater;
 
     private readonly Dictionary<Button, Color> originalColors =
         new Dictionary<Button, Color>();
@@ -121,7 +123,7 @@ public class TradeSelectionUI : MonoBehaviour
             sellIncreaseAmountButton.onClick.AddListener(IncreaseSellAmount);
     }
 
-    // 既存の Select 呼び出しとの互換性を維持
+    // 既存のSelect呼び出しとの互換性を維持
     public void Select(
         Button button,
         string itemName,
@@ -147,7 +149,7 @@ public class TradeSelectionUI : MonoBehaviour
         );
     }
 
-    // 最新のステータス値を取得する選択処理
+    // 最新のステータス値と予測更新処理を登録
     public void SelectLive(
         Button button,
         string itemName,
@@ -158,7 +160,8 @@ public class TradeSelectionUI : MonoBehaviour
         int price,
         string description = "",
         string displayTitle = "",
-        float maxValue = 100f)
+        float maxValue = 100f,
+        Action<float> previewUpdater = null)
     {
         if (getCurrentValue == null)
             return;
@@ -178,6 +181,10 @@ public class TradeSelectionUI : MonoBehaviour
         );
 
         selectedValueProvider = getCurrentValue;
+        selectedPreviewUpdater = previewUpdater;
+
+        // 選択時点でも現在の数量に合わせて予測値を更新
+        UpdatePreview();
     }
 
     // 実際の選択処理
@@ -197,7 +204,6 @@ public class TradeSelectionUI : MonoBehaviour
         if (button == null || action == null)
             return;
 
-        // 前に選択していたボタンの色を戻す
         if (selectedButton != null)
             RestoreColor(selectedButton);
 
@@ -214,15 +220,13 @@ public class TradeSelectionUI : MonoBehaviour
         selectedMaxValue = Mathf.Max(0f, maxValue);
 
         selectedValueProvider = null;
+        selectedPreviewUpdater = null;
+
         HasAnySelection = true;
 
-        // 選択されたボタンのページへ即座に切り替える
         if (pageSwitcher != null)
-        {
             pageSwitcher.SwitchToPageContaining(button);
-        }
 
-        // 選択色を設定
         Graphic graphic = button.targetGraphic;
 
         if (graphic != null)
@@ -296,7 +300,7 @@ public class TradeSelectionUI : MonoBehaviour
                     selectedCurrentValue + selectedAmountPerTrade);
 
                 purchaseValueChangeText.text =
-                    $"{selectedCurrentValue:0.}  →  {after:0.}";
+                    $"{selectedCurrentValue:0.##} → {after:0.##}";
             }
 
             if (purchasePriceLabelText != null)
@@ -305,6 +309,16 @@ public class TradeSelectionUI : MonoBehaviour
             if (purchasePriceText != null)
                 purchasePriceText.text =
                     selectedPrice.ToString("N0") + " G";
+
+            // 購入時の予測値
+            if (selectedPreviewUpdater != null)
+            {
+                float after = Mathf.Min(
+                    selectedMaxValue,
+                    selectedCurrentValue + selectedAmountPerTrade);
+
+                selectedPreviewUpdater(after);
+            }
         }
         else
         {
@@ -314,7 +328,6 @@ public class TradeSelectionUI : MonoBehaviour
             UpdateSellPanel();
         }
 
-        // 背景の操作を禁止
         if (backgroundUI != null)
         {
             backgroundUI.interactable = false;
@@ -347,7 +360,7 @@ public class TradeSelectionUI : MonoBehaviour
         if (sellValueChangeText != null)
         {
             sellValueChangeText.text =
-                $"{selectedCurrentValue:0.} → {after:0.}";
+                $"{selectedCurrentValue:0.##} → {after:0.##}";
         }
 
         long totalGold = (long)selectedPrice * sellAmount;
@@ -356,17 +369,52 @@ public class TradeSelectionUI : MonoBehaviour
             sellGoldLabelText.text = "獲得 Gold";
 
         if (sellGoldText != null)
-            sellGoldText.text = "+ " + totalGold.ToString("N0") + " G";
+            sellGoldText.text =
+                "+ " + totalGold.ToString("N0") + " G";
 
         if (sellDecreaseAmountButton != null)
             sellDecreaseAmountButton.interactable = sellAmount > 1;
 
         if (sellIncreaseAmountButton != null)
         {
+            float nextDecrease =
+                selectedAmountPerTrade * (sellAmount + 1);
+
             sellIncreaseAmountButton.interactable =
                 sellAmount < Mathf.Max(1, maxSellAmount)
-                && decrease < selectedCurrentValue;
+                && nextDecrease < selectedCurrentValue;
         }
+
+        // ★ 数量に応じた売却後の値をレーダーチャートへ反映
+        UpdatePreview();
+    }
+
+    private void UpdatePreview()
+    {
+        if (selectedPreviewUpdater == null)
+            return;
+
+        float after;
+
+        if (selectedType == "売却")
+        {
+            after = Mathf.Max(
+                0f,
+                selectedCurrentValue -
+                selectedAmountPerTrade * sellAmount);
+        }
+        else if (selectedType == "購入")
+        {
+            after = Mathf.Min(
+                selectedMaxValue,
+                selectedCurrentValue + selectedAmountPerTrade);
+        }
+        else
+        {
+            return;
+        }
+
+        selectedPreviewUpdater(after);
     }
 
     private void DecreaseSellAmount()
@@ -413,7 +461,11 @@ public class TradeSelectionUI : MonoBehaviour
             backgroundUI.blocksRaycasts = true;
         }
 
-        // キャンセルでは選択状態を解除しない
+        // キャンセル時は予測表示を解除
+        if (selectedPreviewUpdater != null)
+        {
+            selectedPreviewUpdater(float.NaN);
+        }
     }
 
     public void ConfirmTrade()
@@ -425,10 +477,8 @@ public class TradeSelectionUI : MonoBehaviour
         bool isSell = selectedType == "売却";
         int amount = sellAmount;
 
-        // 確認画面を閉じる
         CloseConfirmation();
 
-        // 取引を実行
         if (isSell)
         {
             for (int i = 0; i < amount; i++)
@@ -439,19 +489,22 @@ public class TradeSelectionUI : MonoBehaviour
             action.Invoke();
         }
 
-        // ★取引確定後に選択を解除
         ClearSelection();
     }
 
-    // 選択状態を解除
     public void ClearSelection()
     {
         if (selectedButton != null)
             RestoreColor(selectedButton);
 
+        // 予測表示を解除
+        if (selectedPreviewUpdater != null)
+            selectedPreviewUpdater(float.NaN);
+
         selectedButton = null;
         selectedAction = null;
         selectedValueProvider = null;
+        selectedPreviewUpdater = null;
 
         selectedName = "";
         selectedType = "";

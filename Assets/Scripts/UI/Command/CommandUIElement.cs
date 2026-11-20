@@ -59,13 +59,24 @@ public class CommandUIElement : MonoBehaviour
 
     private FrameState frameState = FrameState.Hidden;
 
+    private bool isInitialized;
+
     private void Awake()
     {
+        Initialize();
+    }
+
+    private void Initialize()
+    {
+        if (isInitialized) return;
+
         diamondOriginalScale = diamondImage.transform.localScale;
         arrowOriginalScale = arrowImage.transform.localScale;
         activeDiamondOriginalScale = activeDiamondImage.transform.localScale;
 
         activeDiamondImage.gameObject.SetActive(false);
+
+        isInitialized = true;
     }
 
     /// <summary>
@@ -74,6 +85,8 @@ public class CommandUIElement : MonoBehaviour
     /// <param name="command"></param>
     public void SetCommand(CommandType command)
     {
+        Initialize();
+
         switch (command)
         {
             case CommandType.Up:

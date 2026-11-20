@@ -39,6 +39,8 @@ public class BattaleCommandManager : MonoBehaviour
 
     [SerializeField] private GameManager gameManager;
 
+    [SerializeField] private BattleCommandSlide commandSlide;
+
     private void Start()
     {
         // 最初に選択するボタンを設定
@@ -176,6 +178,8 @@ public class BattaleCommandManager : MonoBehaviour
             buttonRect.anchoredPosition.y,
             selectFrame.localPosition.z
         );
+        // 選択コマンドのスライドアニメーション
+        commandSlide.ShowCommand();
     }
 
     /// <summary>
@@ -183,17 +187,20 @@ public class BattaleCommandManager : MonoBehaviour
     /// </summary>
     public void OnFightButton()
     {
-        // 戦闘開始ボタンの画面を非表示
-        battleCommandUI.SetActive(false);
+        Debug.Log("OnFightButton 呼び出し");
 
-        // タイマーを表示
+        battleCommandUI.SetActive(false);
         timerUI.SetActive(true);
 
-        // プレイヤーの入力を有効化
-        player.SetCommandInput(true);
-
-        // 戦闘開始
         gameManager.StartBattlePhase();
+
+        if (!battleManager.IsBattle())
+        {
+            battleManager.StartBattle();
+        }
+
+        commandUI.SetCommandUIVisible(true);
+        player.SetCommandInput(true);
     }
 
     private void UpdateSelectionScale()
@@ -223,5 +230,21 @@ public class BattaleCommandManager : MonoBehaviour
 
         // 次の戦闘開始ボタンを表示
         battleCommandUI.SetActive(true);
+
+        // 選択コマンドのスライドアニメーション
+        commandSlide.ShowCommand();
+    }
+
+    public void PrepareNextCommands()
+    {
+        Enemy battleEnemy = spawner.GetBattleEnemy();
+
+        if (battleEnemy == null) return;
+
+        // 新しいコマンド列を生成
+        battleEnemy.SetRandomCommands();
+
+        // 新しいコマンド列をUIに反映
+        commandUI.UpdateCommanedText(battleEnemy);
     }
 }

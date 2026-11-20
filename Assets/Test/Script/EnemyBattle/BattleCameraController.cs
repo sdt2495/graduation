@@ -49,6 +49,14 @@ public class BattleCameraController : MonoBehaviour
 
     [Header("補間設定")]
     [Tooltip("カメラとPlayerの移動・ズームに使用する補間カーブ")]
+
+    [Header("BattleManager連携")]
+    [SerializeField] private BattleManager battleManager;
+
+    [Header("Canvas消滅演出")]
+[SerializeField]
+private UIPanelShrink panelShrink;
+
     [SerializeField]
     private AnimationCurve zoomCurve =
         AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -223,12 +231,30 @@ public class BattleCameraController : MonoBehaviour
 
     /// <summary>
     /// カメラとPlayerを元の位置へ戻す。
+    /// 復帰完了後にBattleManagerへ攻撃終了を通知する。
     /// </summary>
     public void EndZoom()
     {
         StopCameraCoroutine();
 
+        // カメラの復帰と同時にCanvas消滅開始
+        if (panelShrink != null)
+        {
+            panelShrink.StartCanvasHide();
+        }
+
         cameraCoroutine = StartCoroutine(
+            ZoomCameraAndNotify()
+        );
+    }
+
+    /// <summary>
+    /// カメラとPlayerの復帰が完了してからBattleManagerへ通知する。
+    /// </summary>
+    private IEnumerator ZoomCameraAndNotify()
+    {
+        // カメラとPlayerを元の位置へ戻す
+        yield return StartCoroutine(
             ZoomCamera(
                 originalOrthographicSize,
                 originalCameraPosition,
@@ -236,6 +262,15 @@ public class BattleCameraController : MonoBehaviour
                 returnDuration
             )
         );
+
+        // カメラ復帰完了
+        cameraCoroutine = null;
+
+        // BattleManagerへ攻撃終了を通知
+        if (battleManager != null)
+        {
+            battleManager.OnEnemyAttackFinished();
+        }
     }
 
     /// <summary>

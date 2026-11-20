@@ -34,6 +34,9 @@ public class BattleManager : MonoBehaviour
     [Header("EnemyヒントUI")]
     [SerializeField] private EnemyHintUI enemyHintUI;
 
+    [Header("敵の攻撃(4方向の危険表示)")]
+    [SerializeField] private DirectionImageController directionImageController;
+
     // 制限時間
     [SerializeField] private float battleTimeLimit = 10.0f;
     private float reaminingTime;
@@ -92,6 +95,9 @@ public class BattleManager : MonoBehaviour
     /// <returns></returns>
     private IEnumerator EnemyAttack()
     {
+        // 攻撃終了フラグをリセット
+        isEnemyAttackFinished = false;
+
         // Enemyの頭上アニメーションを開始
         if (exclamationMark != null)
         {
@@ -104,7 +110,20 @@ public class BattleManager : MonoBehaviour
             enemyHintUI.ShowHint("敵の攻撃！");
         }
 
-        yield return null;
+        // 4方向の攻撃演出を開始し、終了通知(OnEnemyAttackFinished)が来るまで待つ
+        if (directionImageController != null)
+        {
+            directionImageController.StartEnemyAttack();
+
+            while (!isEnemyAttackFinished)
+            {
+                yield return null;
+            }
+        }
+        else
+        {
+            yield return null;
+        }
     }
 
     /// <summary>

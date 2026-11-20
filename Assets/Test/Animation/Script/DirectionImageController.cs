@@ -1,67 +1,224 @@
-
+ï»¿
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 /// <summary>
-/// Player‚ÌüˆÍ‚É4•ûŒü‚Ì‰æ‘œ‚ğ•\¦‚·‚éB
+/// ä¸Šä¸‹å·¦å³ã®æ–¹å‘ã‚’è¡¨ã™enumã€‚
+/// </summary>
+public enum ArrowDirection
+{
+    Up = 0,
+    Down = 1,
+    Left = 2,
+    Right = 3
+}
+
+/// <summary>
+/// æ‹ã®é€²è¡ŒçŠ¶æ…‹ã€‚
+/// </summary>
+public enum BeatPhase
+{
+    Idle,
+    Beat1,
+    Beat2,
+    Beat3,
+    Attack
+}
+
+/// <summary>
+/// Playerã®å‘¨å›²ã«4æ–¹å‘ã®ç”»åƒã‚’è¡¨ç¤ºã—ã€æ‹ã«åˆã‚ã›ã¦
+/// å±é™ºè¡¨ç¤ºãƒ»é¸æŠãƒ»ç€å¼¾ã®æ¼”å‡ºã‚’è¡Œã†ã€‚
 ///
-/// EPlayer‚ğTag‚©‚ç©“®æ“¾
-/// EPlayer‚ÍCanvas‚ÌŠO‚É”z’u‰Â”\
-/// EPlayer‚Ìƒ[ƒ‹ƒhÀ•W‚ğCanvasÀ•W‚É•ÏŠ·
-/// Eã‰º¶‰E‚Ì‰æ‘œ‚ğPlayer‚ÌŠO‘¤‚É”z’u
-/// E4•ûŒü‚Ì‰æ‘œ‚ğ“¯‚ÉŠO‘¤‚ÖˆÚ“®
-/// EˆÚ“®I—¹Œã‚Í•\¦‚µ‚½‚Ü‚Üc‚·
+/// ãƒ»Playerã‚’Tagã‹ã‚‰å–å¾—
+/// ãƒ»4æ–¹å‘ã®ç”»åƒã‚’Playerã®å‘¨å›²ã«é…ç½®
+/// ãƒ»å±é™ºæ–¹å‘ã¯èµ¤è‰²ã®è¤‡è£½ç”»åƒã§è¡¨ç¤º
+/// ãƒ»é¸æŠæ–¹å‘ã¯é’è‰²ã®æ ç·šã§è¡¨ç¤º
+/// ãƒ»èµ¤è‰²ãƒ»é’è‰²ã®å…‰ã‚‹ã‚¨ãƒ•ã‚§ã‚¯ãƒˆPrefabã«å¯¾å¿œ
+/// ãƒ»é¸æŠæ ç·šã¯ç‚¹æ»…
+/// ãƒ»é¸æŠæ™‚ã«æ‹¡å¤§æ¼”å‡º
+/// ãƒ»ç€å¼¾æ™‚ã«æ‹¡å¤§ã—ã¦å°ã•ããªã‚‹æ¼”å‡º
+/// ãƒ»è¢«å¼¾æ™‚ã¯Playeræœ¬ä½“ã ã‘ã‚’èµ¤ãç‚¹æ»…
 /// </summary>
 public class DirectionImageController : MonoBehaviour
 {
-    [Header("Playerİ’è")]
+    [Header("Playerè¨­å®š")]
     [SerializeField] private string playerTag = "Player";
 
-    [Header("Canvasİ’è")]
+    [Header("Canvasè¨­å®š")]
     [SerializeField] private Canvas targetCanvas;
 
-    [Header("4•ûŒü‚Ì‰æ‘œ")]
+    [Header("4æ–¹å‘ã®ç”»åƒ")]
     [SerializeField] private RectTransform upImage;
     [SerializeField] private RectTransform downImage;
     [SerializeField] private RectTransform leftImage;
     [SerializeField] private RectTransform rightImage;
 
-    [Header("Player‚©‚ç‚Ì‰Šú‹——£")]
+    [Header("Playerã‹ã‚‰ã®åˆæœŸè·é›¢")]
     [SerializeField] private float initialOffset = 100f;
 
-    [Header("‰æ‘œ‚ÌL‚ª‚èİ’è")]
+    [Header("ç”»åƒã®åºƒãŒã‚Šè¨­å®š")]
     [SerializeField] private float spreadDistance = 50f;
     [SerializeField] private float moveDuration = 0.4f;
 
-    // Player
-    private Transform player;
+    [Header("é¸æŠæ™‚ã®æ˜ã‚‹ã•")]
+    [Tooltip("å…ƒç”»åƒã®è‰²ã‚’ç™½ã«è¿‘ã¥ã‘ã‚‹å‰²åˆã€‚0ã§å¤‰åŒ–ãªã—")]
+    [Range(0f, 1f)]
+    [SerializeField] private float selectedBrighten = 0.2f;
 
-    // Canvas‚ÌRectTransform
+    [Header("å±é™ºè¡¨ç¤ºï¼ˆèµ¤ç³»ã‚°ãƒªãƒƒãƒï¼‰")]
+    [SerializeField] private Sprite glitchSprite;
+
+    [SerializeField]
+    private Color[] dangerColors =
+    {
+        new Color(0.95f, 0.10f, 0.30f, 1f),
+        new Color(1.00f, 0.20f, 0.55f, 1f),
+        new Color(0.75f, 0.05f, 0.20f, 1f),
+        new Color(1.00f, 0.45f, 0.60f, 1f)
+    };
+
+    [SerializeField] private float noiseInterval = 0.04f;
+    [SerializeField] private float jitterAmount = 2.5f;
+
+    [Header("å…‰ã‚‹ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ")]
+    [Tooltip("å±é™ºæ–¹å‘ã«è¡¨ç¤ºã™ã‚‹èµ¤è‰²ã‚¨ãƒ•ã‚§ã‚¯ãƒˆPrefab")]
+    [SerializeField] private GameObject dangerEffectPrefab;
+
+    [Tooltip("é¸æŠæ–¹å‘ã«è¡¨ç¤ºã™ã‚‹é’è‰²ã‚¨ãƒ•ã‚§ã‚¯ãƒˆPrefab")]
+    [SerializeField] private GameObject selectedEffectPrefab;
+
+    [Header("é¸æŠæ ç·šï¼ˆé’è‰²ï¼‰")]
+    [SerializeField]
+    private Color frameColorA = new Color(0.05f, 0.45f, 1f, 1f);
+
+    [SerializeField]
+    private Color frameColorB = new Color(0.2f, 0.8f, 1f, 1f);
+
+    [SerializeField] private float frameThickness = 5f;
+    [SerializeField] private float frameBlinkSpeed = 6f;
+
+    [Header("é¸æŠã—ãŸç¬é–“ã®æ¼”å‡º")]
+    [SerializeField] private float selectPunchScale = 1.35f;
+    [SerializeField] private float selectPunchDuration = 0.18f;
+
+    [Header("ç€å¼¾æ¼”å‡º")]
+    [SerializeField] private float impactPunchScale = 1.5f;
+    [SerializeField] private float impactFinalScale = 0.8f;
+    [SerializeField] private float impactPunchDuration = 0.25f;
+
+    [Header("Playerè¢«å¼¾æ™‚ã®èµ¤è‰²ç‚¹æ»…")]
+    [Tooltip("ç©ºã®å ´åˆã¯Playerã‹ã‚‰è‡ªå‹•å–å¾—")]
+    [SerializeField] private SpriteRenderer playerSpriteRenderer;
+
+    [SerializeField] private Color playerHitColor = Color.red;
+
+    [SerializeField] private float playerHitFlashDuration = 0.6f;
+
+    [SerializeField] private float playerHitFlashSpeed = 12f;
+
+    [Header("å…¥åŠ›")]
+    [SerializeField] private float coyoteTime = 0.1f;
+    [SerializeField] private bool useKeyboardInput = false;
+
+    [Header("çµæœé€šçŸ¥")]
+    public UnityEvent onHit = new UnityEvent();
+    public UnityEvent onAvoid = new UnityEvent();
+
+    [SerializeField] private bool noSelectionIsHit = true;
+
+    [Header("BattleManageré€£æº")]
+    [SerializeField] private BattleManager battleManager;
+
+    [Header("æ•µã®æ”»æ’ƒã‚·ãƒ¼ã‚±ãƒ³ã‚¹")]
+    [SerializeField] private int dangerDirectionCount = 2;
+    [SerializeField] private float beatInterval = 0.5f;
+    [SerializeField] private float startWaitTimeout = 15f;
+
+    [Header("æ”»æ’ƒçµ‚äº†å¾Œã®éè¡¨ç¤º")]
+    [SerializeField] private float hideDelayAfterAttack = 0.3f;
+
+    public UnityEvent onImagesHidden = new UnityEvent();
+
+    public event Action OnHit;
+    public event Action OnAvoid;
+
+    private bool waitingAttackFinish;
+    private bool pendingHit;
+
+    public BeatPhase Phase { get; private set; } = BeatPhase.Idle;
+
+    // ------------------------------------------------------------
+    // 1æ–¹å‘ã¶ã‚“ã®ç”»åƒæƒ…å ±
+    // ------------------------------------------------------------
+    private class Slot
+    {
+        public RectTransform rect;
+        public Image image;
+
+        // å±é™ºæ–¹å‘è¡¨ç¤ºç”¨ã®è¤‡è£½ç”»åƒ
+        public Image overlayImage;
+
+        // å…‰ã‚‹ã‚¨ãƒ•ã‚§ã‚¯ãƒˆ
+        public GameObject dangerEffectObject;
+        public GameObject selectedEffectObject;
+
+        public Outline outline;
+
+        public Sprite defaultSprite;
+        public Color defaultColor;
+        public Vector3 defaultScale;
+
+        public Vector2 startPos;
+        public Vector2 endPos;
+        public Vector2 basePos;
+        public Vector2 jitter;
+
+        public bool isDanger;
+        public bool isSelected;
+        public Color dangerColor;
+
+        public float scale = 1f;
+        public float restScale = 1f;
+
+        public bool punching;
+        public float punchTimer;
+        public float punchDuration;
+        public float punchPeak;
+        public float punchEnd;
+    }
+
+    private readonly Slot[] slots = new Slot[4];
+
+    private readonly HashSet<ArrowDirection> dangerDirections =
+        new HashSet<ArrowDirection>();
+
+    private ArrowDirection? selectedDirection;
+
+    private Transform player;
     private RectTransform canvasRect;
 
-    // ˆÚ“®ŠJnˆÊ’u
-    private Vector2 upStartPosition;
-    private Vector2 downStartPosition;
-    private Vector2 leftStartPosition;
-    private Vector2 rightStartPosition;
-
-    // ˆÚ“®I—¹ˆÊ’u
-    private Vector2 upEndPosition;
-    private Vector2 downEndPosition;
-    private Vector2 leftEndPosition;
-    private Vector2 rightEndPosition;
-
-    // ˆÚ“®ŠÔ
     private float timer;
-
-    // ˆÚ“®’†‚©‚Ç‚¤‚©
     private bool isMoving;
-
-    // ŠJnÏ‚İ‚©‚Ç‚¤‚©
     private bool hasStarted;
 
+    private float noiseTimer;
+    private float coyoteRemaining;
+
+    private Coroutine attackRoutine;
+
+    // Playerç‚¹æ»…ç”¨
+    private Coroutine playerHitFlashCoroutine;
+    private Color playerDefaultColor = Color.white;
+
+    // ------------------------------------------------------------
+    // åˆæœŸåŒ–
+    // ------------------------------------------------------------
     private void Awake()
     {
-        // Canvasæ“¾
         if (targetCanvas == null)
         {
             targetCanvas = GetComponentInParent<Canvas>();
@@ -77,81 +234,814 @@ public class DirectionImageController : MonoBehaviour
             canvasRect = targetCanvas.GetComponent<RectTransform>();
         }
 
-        // Playeræ“¾
         FindPlayer();
 
-        // ‰Šúó‘Ô‚Å‚Í‰æ‘œ‚ğ”ñ•\¦
+        // Playerã®SpriteRendererã‚’å–å¾—
+        FindPlayerSpriteRenderer();
+
+        CreateSlot(ArrowDirection.Up, upImage);
+        CreateSlot(ArrowDirection.Down, downImage);
+        CreateSlot(ArrowDirection.Left, leftImage);
+        CreateSlot(ArrowDirection.Right, rightImage);
+
         SetImagesActive(false);
     }
 
     private void Update()
     {
-        if (!isMoving)
+        float dt = Time.deltaTime;
+
+        UpdateSpreadMove(dt);
+        UpdateCoyoteTime(dt);
+
+        if (useKeyboardInput)
+        {
+            HandleKeyboardInput();
+        }
+
+        noiseTimer -= dt;
+
+        bool reroll = noiseTimer <= 0f;
+
+        if (reroll)
+        {
+            noiseTimer = Mathf.Max(0.005f, noiseInterval);
+        }
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            Slot slot = slots[i];
+
+            if (slot == null) continue;
+
+            UpdateScale(slot, dt);
+            UpdateVisual(slot, reroll);
+
+            if (isMoving || slot.isDanger || slot.isSelected)
+            {
+                slot.rect.anchoredPosition =
+                    slot.basePos + slot.jitter;
+            }
+        }
+
+        CheckAttackFinished();
+    }
+
+    // ------------------------------------------------------------
+    // Playerã®SpriteRendererå–å¾—
+    // ------------------------------------------------------------
+    private void FindPlayerSpriteRenderer()
+    {
+        if (player == null)
+        {
+            FindPlayer();
+        }
+
+        if (player == null)
             return;
 
-        // Œo‰ßŠÔ
-        timer += Time.deltaTime;
-
-        // ˆÚ“®is“x
-        float t = moveDuration <= 0f
-            ? 1f
-            : Mathf.Clamp01(timer / moveDuration);
-
-        // ŠŠ‚ç‚©‚ÉˆÚ“®
-        float smoothT = Mathf.SmoothStep(0f, 1f, t);
-
-        // ã
-        if (upImage != null)
+        // Inspectorã§è¨­å®šã•ã‚Œã¦ã„ãªã‘ã‚Œã°Playerã‹ã‚‰å–å¾—
+        if (playerSpriteRenderer == null)
         {
-            upImage.anchoredPosition = Vector2.Lerp(
-                upStartPosition,
-                upEndPosition,
-                smoothT
-            );
+            playerSpriteRenderer =
+                player.GetComponent<SpriteRenderer>();
+
+            // Playeræœ¬ä½“ã«ãªã„å ´åˆã¯å­ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‹ã‚‰å–å¾—
+            if (playerSpriteRenderer == null)
+            {
+                playerSpriteRenderer =
+                    player.GetComponentInChildren<SpriteRenderer>();
+            }
         }
 
-        // ‰º
-        if (downImage != null)
+        if (playerSpriteRenderer != null)
         {
-            downImage.anchoredPosition = Vector2.Lerp(
-                downStartPosition,
-                downEndPosition,
-                smoothT
-            );
+            playerDefaultColor = playerSpriteRenderer.color;
         }
-
-        // ¶
-        if (leftImage != null)
+        else
         {
-            leftImage.anchoredPosition = Vector2.Lerp(
-                leftStartPosition,
-                leftEndPosition,
-                smoothT
+            Debug.LogWarning(
+                "Playerã®SpriteRendererãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚"
             );
-        }
-
-        // ‰E
-        if (rightImage != null)
-        {
-            rightImage.anchoredPosition = Vector2.Lerp(
-                rightStartPosition,
-                rightEndPosition,
-                smoothT
-            );
-        }
-
-        // ˆÚ“®I—¹
-        if (t >= 1f)
-        {
-            isMoving = false;
-
-            Debug.Log("4•ûŒü‚Ì‰æ‘œ‚ÌˆÚ“®‚ªŠ®—¹‚µ‚Ü‚µ‚½B");
         }
     }
 
+    // ------------------------------------------------------------
+    // Playerè¢«å¼¾æ™‚ã®èµ¤è‰²ç‚¹æ»…
+    // ------------------------------------------------------------
     /// <summary>
-    /// Player‚ğTag‚©‚çæ“¾‚·‚éB
+    /// PlayerãŒæ”»æ’ƒã‚’å—ã‘ãŸã¨ãã«èµ¤è‰²ç‚¹æ»…ã‚’é–‹å§‹ã™ã‚‹ã€‚
     /// </summary>
+    private void StartPlayerHitFlash()
+    {
+        if (playerSpriteRenderer == null)
+        {
+            FindPlayerSpriteRenderer();
+        }
+
+        if (playerSpriteRenderer == null)
+            return;
+
+        // ã™ã§ã«ç‚¹æ»…ä¸­ãªã‚‰ä¸€åº¦åœæ­¢ã™ã‚‹
+        if (playerHitFlashCoroutine != null)
+        {
+            StopCoroutine(playerHitFlashCoroutine);
+
+            playerSpriteRenderer.color = playerDefaultColor;
+
+            playerHitFlashCoroutine = null;
+        }
+
+        playerHitFlashCoroutine =
+            StartCoroutine(PlayerHitFlashEffect());
+    }
+
+    /// <summary>
+    /// Playeræœ¬ä½“ã ã‘ã‚’èµ¤ãç‚¹æ»…ã•ã›ã‚‹ã€‚
+    /// </summary>
+    private IEnumerator PlayerHitFlashEffect()
+    {
+        if (playerSpriteRenderer == null)
+        {
+            playerHitFlashCoroutine = null;
+            yield break;
+        }
+
+        float elapsed = 0f;
+
+        while (elapsed < playerHitFlashDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            float flash = Mathf.PingPong(
+                elapsed * playerHitFlashSpeed,
+                1f
+            );
+
+            playerSpriteRenderer.color = Color.Lerp(
+                playerDefaultColor,
+                playerHitColor,
+                flash
+            );
+
+            yield return null;
+        }
+
+        // æœ€å¾Œã«å…ƒã®è‰²ã¸æˆ»ã™
+        if (playerSpriteRenderer != null)
+        {
+            playerSpriteRenderer.color = playerDefaultColor;
+        }
+
+        playerHitFlashCoroutine = null;
+    }
+
+    // ------------------------------------------------------------
+    // ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”Ÿæˆ
+    // ------------------------------------------------------------
+    private GameObject CreateEffect(
+        GameObject prefab,
+        RectTransform parent,
+        string objectName)
+    {
+        if (prefab == null || parent == null)
+            return null;
+
+        GameObject effect = Instantiate(
+            prefab,
+            parent,
+            false
+        );
+
+        effect.name = objectName;
+
+        RectTransform effectRect =
+            effect.GetComponent<RectTransform>();
+
+        if (effectRect != null)
+        {
+            effectRect.anchorMin = Vector2.zero;
+            effectRect.anchorMax = Vector2.one;
+
+            effectRect.offsetMin = Vector2.zero;
+            effectRect.offsetMax = Vector2.zero;
+
+            effectRect.localPosition = Vector3.zero;
+            effectRect.localRotation = Quaternion.identity;
+            effectRect.localScale = Vector3.one;
+        }
+
+        effect.SetActive(false);
+
+        return effect;
+    }
+
+    private void SetEffectActive(GameObject effect, bool active)
+    {
+        if (effect == null)
+            return;
+
+        if (effect.activeSelf != active)
+        {
+            effect.SetActive(active);
+        }
+    }
+
+    // ------------------------------------------------------------
+    // æ”»æ’ƒçµ‚äº†ç¢ºèª
+    // ------------------------------------------------------------
+    private void CheckAttackFinished()
+    {
+        if (!waitingAttackFinish)
+            return;
+
+        foreach (ArrowDirection dir in dangerDirections)
+        {
+            Slot slot = slots[(int)dir];
+
+            if (slot != null && slot.punching)
+                return;
+        }
+
+        waitingAttackFinish = false;
+
+        if (pendingHit)
+        {
+            // Playeræœ¬ä½“ã ã‘ã‚’èµ¤ãç‚¹æ»…
+            StartPlayerHitFlash();
+
+            onHit?.Invoke();
+            OnHit?.Invoke();
+        }
+        else
+        {
+            onAvoid?.Invoke();
+            OnAvoid?.Invoke();
+        }
+
+        if (battleManager != null)
+        {
+            battleManager.OnEnemyAttackFinished();
+        }
+    }
+
+    // ------------------------------------------------------------
+    // æ”»æ’ƒã‚·ãƒ¼ã‚±ãƒ³ã‚¹
+    // ------------------------------------------------------------
+    public void StartEnemyAttack()
+    {
+        if (attackRoutine != null)
+            return;
+
+        MonoBehaviour host = battleManager != null
+            ? (MonoBehaviour)battleManager
+            : this;
+
+        if (!host.isActiveAndEnabled)
+        {
+            Debug.LogWarning(
+                "DirectionImageController: æ”»æ’ƒã‚·ãƒ¼ã‚±ãƒ³ã‚¹ã‚’é–‹å§‹ã§ãã¾ã›ã‚“ã€‚"
+            );
+
+            return;
+        }
+
+        attackRoutine = host.StartCoroutine(EnemyAttackSequence());
+    }
+
+    private IEnumerator EnemyAttackSequence()
+    {
+        float waited = 0f;
+
+        while (!hasStarted || isMoving)
+        {
+            waited += Time.deltaTime;
+
+            if (waited >= startWaitTimeout)
+            {
+                Debug.LogWarning(
+                    "4æ–¹å‘ã®ç”»åƒãŒé–‹å§‹ã•ã‚Œã¾ã›ã‚“ã§ã—ãŸã€‚æ”»æ’ƒã‚’ä¸­æ­¢ã—ã¾ã™ã€‚"
+                );
+
+                attackRoutine = null;
+
+                if (battleManager != null)
+                {
+                    battleManager.OnEnemyAttackFinished();
+                }
+
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        ArrowDirection[] dangers =
+            PickRandomDirections(dangerDirectionCount);
+
+        int firstCount = Mathf.CeilToInt(dangers.Length / 2f);
+
+        ArrowDirection[] beat1 =
+            new ArrowDirection[firstCount];
+
+        ArrowDirection[] beat2 =
+            new ArrowDirection[dangers.Length - firstCount];
+
+        Array.Copy(dangers, 0, beat1, 0, beat1.Length);
+        Array.Copy(dangers, firstCount, beat2, 0, beat2.Length);
+
+        BeginBeat1(beat1);
+
+        yield return new WaitForSeconds(beatInterval);
+
+        BeginBeat2(beat2);
+
+        yield return new WaitForSeconds(beatInterval);
+
+        BeginBeat3();
+
+        while ((Phase != BeatPhase.Attack || waitingAttackFinish)
+               && Phase != BeatPhase.Idle)
+        {
+            yield return null;
+        }
+
+        if (hideDelayAfterAttack > 0f)
+        {
+            yield return new WaitForSeconds(hideDelayAfterAttack);
+        }
+
+        HideImages();
+
+        attackRoutine = null;
+    }
+
+    public void HideImages()
+    {
+        ResetBeat();
+
+        isMoving = false;
+        hasStarted = false;
+
+        SetImagesActive(false);
+
+        onImagesHidden?.Invoke();
+    }
+
+    private ArrowDirection[] PickRandomDirections(int count)
+    {
+        ArrowDirection[] all =
+        {
+            ArrowDirection.Up,
+            ArrowDirection.Down,
+            ArrowDirection.Left,
+            ArrowDirection.Right
+        };
+
+        for (int i = all.Length - 1; i > 0; i--)
+        {
+            int j = UnityEngine.Random.Range(0, i + 1);
+
+            ArrowDirection tmp = all[i];
+            all[i] = all[j];
+            all[j] = tmp;
+        }
+
+        count = Mathf.Clamp(count, 1, all.Length);
+
+        ArrowDirection[] result = new ArrowDirection[count];
+
+        Array.Copy(all, result, count);
+
+        return result;
+    }
+
+    // ------------------------------------------------------------
+    // æ‹ã®é€²è¡Œ
+    // ------------------------------------------------------------
+    public void BeginBeat1(params ArrowDirection[] dangers)
+    {
+        ClearBeatState();
+
+        Phase = BeatPhase.Beat1;
+
+        AddDangers(dangers);
+    }
+
+    public void BeginBeat2(params ArrowDirection[] dangers)
+    {
+        Phase = BeatPhase.Beat2;
+
+        AddDangers(dangers);
+    }
+
+    public void BeginBeat3()
+    {
+        Phase = BeatPhase.Beat3;
+
+        coyoteRemaining = Mathf.Max(0f, coyoteTime);
+
+        if (coyoteRemaining <= 0f)
+        {
+            TriggerAttack();
+        }
+    }
+
+    public void SelectDirection(ArrowDirection direction)
+    {
+        if (!IsInputOpen)
+            return;
+
+        if (selectedDirection.HasValue &&
+            selectedDirection.Value == direction)
+        {
+            return;
+        }
+
+        if (selectedDirection.HasValue)
+        {
+            SetSelected(selectedDirection.Value, false);
+        }
+
+        selectedDirection = direction;
+
+        SetSelected(direction, true);
+
+        Slot slot = slots[(int)direction];
+
+        if (slot != null)
+        {
+            StartPunch(
+                slot,
+                selectPunchScale,
+                1f,
+                selectPunchDuration
+            );
+        }
+    }
+
+    public void ResetBeat()
+    {
+        ClearBeatState();
+
+        Phase = BeatPhase.Idle;
+    }
+
+    public bool IsInputOpen
+    {
+        get
+        {
+            switch (Phase)
+            {
+                case BeatPhase.Beat1:
+                case BeatPhase.Beat2:
+                    return true;
+
+                case BeatPhase.Beat3:
+                    return coyoteRemaining > 0f;
+
+                default:
+                    return false;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------
+    // å±é™ºæ–¹å‘ã®è¨­å®š
+    // ------------------------------------------------------------
+    private void AddDangers(ArrowDirection[] dangers)
+    {
+        if (dangers == null) return;
+
+        foreach (ArrowDirection dir in dangers)
+        {
+            if (!dangerDirections.Add(dir))
+                continue;
+
+            Slot slot = slots[(int)dir];
+
+            if (slot == null) continue;
+
+            slot.isDanger = true;
+            slot.dangerColor = PickDangerColor();
+
+            slot.overlayImage.sprite =
+                glitchSprite != null
+                ? glitchSprite
+                : slot.defaultSprite;
+
+            slot.overlayImage.color = slot.dangerColor;
+            slot.overlayImage.enabled = true;
+
+            // èµ¤è‰²ã®å±é™ºã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’è¡¨ç¤º
+            SetEffectActive(
+                slot.dangerEffectObject,
+                true
+            );
+        }
+    }
+
+    private void UpdateCoyoteTime(float dt)
+    {
+        if (Phase != BeatPhase.Beat3)
+            return;
+
+        coyoteRemaining -= dt;
+
+        if (coyoteRemaining <= 0f)
+        {
+            coyoteRemaining = 0f;
+
+            TriggerAttack();
+        }
+    }
+
+    private void TriggerAttack()
+    {
+        Phase = BeatPhase.Attack;
+
+        foreach (ArrowDirection dir in dangerDirections)
+        {
+            Slot slot = slots[(int)dir];
+
+            if (slot == null) continue;
+
+            StartPunch(
+                slot,
+                impactPunchScale,
+                impactFinalScale,
+                impactPunchDuration
+            );
+        }
+
+        bool selectedDanger =
+            selectedDirection.HasValue &&
+            dangerDirections.Contains(selectedDirection.Value);
+
+        pendingHit = selectedDirection.HasValue
+            ? selectedDanger
+            : noSelectionIsHit;
+
+        waitingAttackFinish = true;
+
+        if (dangerDirections.Count == 0)
+        {
+            waitingAttackFinish = false;
+
+            if (pendingHit)
+            {
+                StartPlayerHitFlash();
+
+                onHit?.Invoke();
+                OnHit?.Invoke();
+            }
+            else
+            {
+                onAvoid?.Invoke();
+                OnAvoid?.Invoke();
+            }
+
+            if (battleManager != null)
+            {
+                battleManager.OnEnemyAttackFinished();
+            }
+        }
+    }
+
+    // ------------------------------------------------------------
+    // æ‹çŠ¶æ…‹ã®åˆæœŸåŒ–
+    // ------------------------------------------------------------
+    private void ClearBeatState()
+    {
+        dangerDirections.Clear();
+
+        selectedDirection = null;
+
+        coyoteRemaining = 0f;
+
+        waitingAttackFinish = false;
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            Slot slot = slots[i];
+
+            if (slot == null) continue;
+
+            slot.isDanger = false;
+            slot.isSelected = false;
+            slot.jitter = Vector2.zero;
+
+            slot.punching = false;
+            slot.scale = 1f;
+            slot.restScale = 1f;
+
+            slot.image.sprite = slot.defaultSprite;
+            slot.image.color = slot.defaultColor;
+
+            // èµ¤è‰²è¡¨ç¤ºç”¨ã®è¤‡è£½ç”»åƒã‚’éè¡¨ç¤º
+            slot.overlayImage.enabled = false;
+            slot.overlayImage.sprite = slot.defaultSprite;
+            slot.overlayImage.color = Color.white;
+
+            // èµ¤è‰²ãƒ»é’è‰²ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’éè¡¨ç¤º
+            SetEffectActive(
+                slot.dangerEffectObject,
+                false
+            );
+
+            SetEffectActive(
+                slot.selectedEffectObject,
+                false
+            );
+
+            // é’è‰²æ ç·šã‚’éè¡¨ç¤º
+            slot.outline.enabled = false;
+
+            slot.rect.localScale = slot.defaultScale;
+
+            if (hasStarted)
+            {
+                slot.rect.anchoredPosition = slot.basePos;
+            }
+        }
+    }
+
+    // ------------------------------------------------------------
+    // é¸æŠçŠ¶æ…‹
+    // ------------------------------------------------------------
+    private void SetSelected(ArrowDirection dir, bool selected)
+    {
+        Slot slot = slots[(int)dir];
+
+        if (slot == null)
+            return;
+
+        slot.isSelected = selected;
+
+        // æ—¢å­˜ã®é’è‰²æ ç·š
+        slot.outline.enabled = selected;
+
+        // é’è‰²ã‚¨ãƒ•ã‚§ã‚¯ãƒˆã®è¡¨ç¤ºãƒ»éè¡¨ç¤º
+        SetEffectActive(
+            slot.selectedEffectObject,
+            selected
+        );
+
+        if (!selected)
+        {
+            slot.jitter = Vector2.zero;
+        }
+    }
+
+    // ------------------------------------------------------------
+    // è¦‹ãŸç›®ã®æ›´æ–°
+    // ------------------------------------------------------------
+    private void UpdateVisual(Slot slot, bool reroll)
+    {
+        slot.image.color = slot.defaultColor;
+
+        if (slot.isDanger)
+        {
+            if (reroll)
+            {
+                slot.dangerColor = PickDangerColor();
+
+                slot.jitter = new Vector2(
+                    UnityEngine.Random.Range(-jitterAmount, jitterAmount),
+                    UnityEngine.Random.Range(-jitterAmount, jitterAmount)
+                );
+            }
+
+            slot.overlayImage.color = slot.dangerColor;
+            slot.overlayImage.enabled = true;
+        }
+        else
+        {
+            slot.overlayImage.enabled = false;
+        }
+
+        if (slot.isSelected)
+        {
+            float k = Mathf.PingPong(
+                Time.time * frameBlinkSpeed,
+                1f
+            );
+
+            slot.outline.effectColor =
+                Color.Lerp(frameColorA, frameColorB, k);
+        }
+    }
+
+    private Color PickDangerColor()
+    {
+        if (dangerColors == null || dangerColors.Length == 0)
+            return Color.red;
+
+        return dangerColors[
+            UnityEngine.Random.Range(0, dangerColors.Length)
+        ];
+    }
+
+    // ------------------------------------------------------------
+    // æ‹¡å¤§ãƒ»ç¸®å°æ¼”å‡º
+    // ------------------------------------------------------------
+    private void StartPunch(
+        Slot slot,
+        float peak,
+        float endScale,
+        float duration)
+    {
+        slot.punching = true;
+        slot.punchTimer = 0f;
+        slot.punchPeak = peak;
+        slot.punchEnd = endScale;
+        slot.punchDuration = Mathf.Max(0.01f, duration);
+    }
+
+    private void UpdateScale(Slot slot, float dt)
+    {
+        if (slot.punching)
+        {
+            slot.punchTimer += dt;
+
+            float t = Mathf.Clamp01(
+                slot.punchTimer / slot.punchDuration
+            );
+
+            const float peakTime = 0.3f;
+
+            if (t < peakTime)
+            {
+                float k = t / peakTime;
+
+                k = 1f - (1f - k) * (1f - k);
+
+                slot.scale = Mathf.Lerp(
+                    slot.restScale,
+                    slot.punchPeak,
+                    k
+                );
+            }
+            else
+            {
+                float k = (t - peakTime) / (1f - peakTime);
+
+                slot.scale = Mathf.Lerp(
+                    slot.punchPeak,
+                    slot.punchEnd,
+                    Mathf.SmoothStep(0f, 1f, k)
+                );
+            }
+
+            if (t >= 1f)
+            {
+                slot.punching = false;
+
+                slot.restScale = slot.punchEnd;
+
+                slot.scale = slot.punchEnd;
+            }
+        }
+
+        if (slot.punching || slot.scale != 1f)
+        {
+            slot.rect.localScale =
+                slot.defaultScale * slot.scale;
+        }
+    }
+
+    // ------------------------------------------------------------
+    // å…¥åŠ›
+    // ------------------------------------------------------------
+    private void HandleKeyboardInput()
+    {
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(KeyCode.UpArrow) ||
+            Input.GetKeyDown(KeyCode.W))
+        {
+            SelectDirection(ArrowDirection.Up);
+        }
+        else if (Input.GetKeyDown(KeyCode.DownArrow) ||
+                 Input.GetKeyDown(KeyCode.S))
+        {
+            SelectDirection(ArrowDirection.Down);
+        }
+        else if (Input.GetKeyDown(KeyCode.LeftArrow) ||
+                 Input.GetKeyDown(KeyCode.A))
+        {
+            SelectDirection(ArrowDirection.Left);
+        }
+        else if (Input.GetKeyDown(KeyCode.RightArrow) ||
+                 Input.GetKeyDown(KeyCode.D))
+        {
+            SelectDirection(ArrowDirection.Right);
+        }
+#endif
+    }
+
+    // ------------------------------------------------------------
+    // Playerå–å¾—
+    // ------------------------------------------------------------
     private void FindPlayer()
     {
         GameObject playerObject =
@@ -164,15 +1054,16 @@ public class DirectionImageController : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "Tag‚ªPlayer‚ÌƒIƒuƒWƒFƒNƒg‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB"
+                "TagãŒPlayerã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚"
             );
         }
     }
 
-    /// <summary>
-    /// Player‚Ìƒ[ƒ‹ƒhÀ•W‚ğCanvasÀ•W‚É•ÏŠ·‚·‚éB
-    /// </summary>
-    private bool GetPlayerCanvasPosition(out Vector2 canvasPosition)
+    // ------------------------------------------------------------
+    // Playeråº§æ¨™ã‚’Canvasåº§æ¨™ã¸å¤‰æ›
+    // ------------------------------------------------------------
+    private bool GetPlayerCanvasPosition(
+        out Vector2 canvasPosition)
     {
         canvasPosition = Vector2.zero;
 
@@ -184,7 +1075,14 @@ public class DirectionImageController : MonoBehaviour
         if (player == null || canvasRect == null)
             return false;
 
-        // Canvas‚ÌRender Mode‚É‰‚¶‚ÄƒJƒƒ‰‚ğæ“¾
+        Camera worldCamera = Camera.main;
+
+        if (worldCamera == null)
+        {
+            Debug.LogWarning("Camera.main ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚");
+            return false;
+        }
+
         Camera uiCamera = null;
 
         if (targetCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
@@ -193,17 +1091,16 @@ public class DirectionImageController : MonoBehaviour
 
             if (uiCamera == null)
             {
-                uiCamera = Camera.main;
+                uiCamera = worldCamera;
             }
         }
 
-        // Player‚Ìƒ[ƒ‹ƒhÀ•W‚ğƒXƒNƒŠ[ƒ“À•W‚É•ÏŠ·
-        Vector3 screenPosition = RectTransformUtility.WorldToScreenPoint(
-            Camera.main,
-            player.position
-        );
+        Vector3 screenPosition =
+            RectTransformUtility.WorldToScreenPoint(
+                worldCamera,
+                player.position
+            );
 
-        // ƒXƒNƒŠ[ƒ“À•W‚ğCanvas‚Ìƒ[ƒJƒ‹À•W‚É•ÏŠ·
         return RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvasRect,
             screenPosition,
@@ -212,119 +1109,228 @@ public class DirectionImageController : MonoBehaviour
         );
     }
 
-    /// <summary>
-    /// 4•ûŒü‚Ì‰æ‘œ‰‰o‚ğŠJn‚·‚éB
-    /// UIPanelShrink‚©‚çŒÄ‚Ño‚·B
-    /// </summary>
+    // ------------------------------------------------------------
+    // 4æ–¹å‘ç”»åƒã®é–‹å§‹
+    // ------------------------------------------------------------
     public void StartDirectionImages()
     {
-        // “ñd‹N“®–h~
         if (hasStarted)
             return;
 
-        // Player‚ÌCanvasÀ•W‚ğæ“¾
         if (!GetPlayerCanvasPosition(out Vector2 centerPosition))
         {
             Debug.LogWarning(
-                "Player‚Ü‚½‚ÍCanvas‚Ìæ“¾‚É¸”s‚µ‚Ü‚µ‚½B"
+                "Playerã¾ãŸã¯Canvasã®å–å¾—ã«å¤±æ•—ã—ã¾ã—ãŸã€‚"
             );
 
             return;
         }
 
-        // Player‚ÌŠO‘¤‚É4•ûŒü‚Ì‰æ‘œ‚ğ”z’u
         SetInitialPositions(centerPosition);
 
-        // ‰æ‘œ‚ğ•\¦
         SetImagesActive(true);
 
-        // ˆÚ“®ŠJnˆÊ’u‚ğ•Û‘¶
-        SaveStartPositions();
-
-        // ˆÚ“®æ‚ğİ’è
-        SetEndPositions();
-
-        // ˆÚ“®ŠJn
         timer = 0f;
+
         isMoving = true;
+
         hasStarted = true;
 
-        Debug.Log("4•ûŒü‚Ì‰æ‘œ‰‰o‚ğŠJn‚µ‚Ü‚µ‚½B");
+        Debug.Log("4æ–¹å‘ã®ç”»åƒæ¼”å‡ºã‚’é–‹å§‹ã—ã¾ã—ãŸã€‚");
     }
 
-    /// <summary>
-    /// Player‚ÌŠO‘¤‚É4•ûŒü‚Ì‰æ‘œ‚ğ”z’u‚·‚éB
-    /// </summary>
+    // ------------------------------------------------------------
+    // åºƒãŒã‚Šç§»å‹•
+    // ------------------------------------------------------------
+    private void UpdateSpreadMove(float dt)
+    {
+        if (!isMoving)
+            return;
+
+        timer += dt;
+
+        float t = moveDuration <= 0f
+            ? 1f
+            : Mathf.Clamp01(timer / moveDuration);
+
+        float smoothT = Mathf.SmoothStep(0f, 1f, t);
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            Slot slot = slots[i];
+
+            if (slot == null) continue;
+
+            slot.basePos = Vector2.Lerp(
+                slot.startPos,
+                slot.endPos,
+                smoothT
+            );
+        }
+
+        if (t >= 1f)
+        {
+            isMoving = false;
+
+            Debug.Log("4æ–¹å‘ã®ç”»åƒã®ç§»å‹•ãŒå®Œäº†ã—ã¾ã—ãŸã€‚");
+        }
+    }
+
     private void SetInitialPositions(Vector2 centerPosition)
     {
-        // ã
-        if (upImage != null)
-        {
-            upImage.anchoredPosition =
-                centerPosition + Vector2.up * initialOffset;
-        }
+        SetSlotPositions(
+            ArrowDirection.Up,
+            centerPosition,
+            Vector2.up
+        );
 
-        // ‰º
-        if (downImage != null)
-        {
-            downImage.anchoredPosition =
-                centerPosition + Vector2.down * initialOffset;
-        }
+        SetSlotPositions(
+            ArrowDirection.Down,
+            centerPosition,
+            Vector2.down
+        );
 
-        // ¶
-        if (leftImage != null)
-        {
-            leftImage.anchoredPosition =
-                centerPosition + Vector2.left * initialOffset;
-        }
+        SetSlotPositions(
+            ArrowDirection.Left,
+            centerPosition,
+            Vector2.left
+        );
 
-        // ‰E
-        if (rightImage != null)
-        {
-            rightImage.anchoredPosition =
-                centerPosition + Vector2.right * initialOffset;
-        }
+        SetSlotPositions(
+            ArrowDirection.Right,
+            centerPosition,
+            Vector2.right
+        );
     }
 
-    /// <summary>
-    /// ˆÚ“®ŠJnˆÊ’u‚ğ•Û‘¶‚·‚éB
-    /// </summary>
-    private void SaveStartPositions()
+    private void SetSlotPositions(
+        ArrowDirection dir,
+        Vector2 center,
+        Vector2 direction)
     {
-        if (upImage != null)
-            upStartPosition = upImage.anchoredPosition;
+        Slot slot = slots[(int)dir];
 
-        if (downImage != null)
-            downStartPosition = downImage.anchoredPosition;
+        if (slot == null) return;
 
-        if (leftImage != null)
-            leftStartPosition = leftImage.anchoredPosition;
+        slot.startPos = center + direction * initialOffset;
 
-        if (rightImage != null)
-            rightStartPosition = rightImage.anchoredPosition;
+        slot.endPos = slot.startPos + direction * spreadDistance;
+
+        slot.basePos = slot.startPos;
+
+        slot.rect.anchoredPosition = slot.startPos;
     }
 
-    /// <summary>
-    /// 4•ûŒü‚ÌˆÚ“®æ‚ğİ’è‚·‚éB
-    /// </summary>
-    private void SetEndPositions()
+    // ------------------------------------------------------------
+    // ã‚¹ãƒ­ãƒƒãƒˆä½œæˆãƒ»èµ¤è‰²è¡¨ç¤ºç”¨è¤‡è£½ç”»åƒãƒ»ã‚¨ãƒ•ã‚§ã‚¯ãƒˆç”Ÿæˆ
+    // ------------------------------------------------------------
+    private void CreateSlot(
+        ArrowDirection dir,
+        RectTransform rect)
     {
-        upEndPosition =
-            upStartPosition + Vector2.up * spreadDistance;
+        if (rect == null) return;
 
-        downEndPosition =
-            downStartPosition + Vector2.down * spreadDistance;
+        Image image = rect.GetComponent<Image>();
 
-        leftEndPosition =
-            leftStartPosition + Vector2.left * spreadDistance;
+        if (image == null)
+        {
+            Debug.LogWarning(
+                rect.name + " ã« Image ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒã‚ã‚Šã¾ã›ã‚“ã€‚"
+            );
 
-        rightEndPosition =
-            rightStartPosition + Vector2.right * spreadDistance;
+            return;
+        }
+
+        // é’ã„é¸æŠæ ç·šã‚’æº–å‚™
+        Outline outline = rect.GetComponent<Outline>();
+
+        if (outline == null)
+        {
+            outline = rect.gameObject.AddComponent<Outline>();
+        }
+
+        outline.effectDistance =
+            new Vector2(frameThickness, frameThickness);
+
+        outline.effectColor = frameColorA;
+
+        outline.useGraphicAlpha = false;
+
+        outline.enabled = false;
+
+        // èµ¤è‰²è¡¨ç¤ºç”¨ã®è¤‡è£½ç”»åƒã‚’ä½œæˆ
+        GameObject overlayObject = new GameObject(
+            rect.name + "_ColorOverlay",
+            typeof(RectTransform),
+            typeof(CanvasRenderer),
+            typeof(Image)
+        );
+
+        RectTransform overlayRect =
+            overlayObject.GetComponent<RectTransform>();
+
+        overlayRect.SetParent(rect, false);
+
+        overlayRect.anchorMin = Vector2.zero;
+        overlayRect.anchorMax = Vector2.one;
+
+        overlayRect.offsetMin = Vector2.zero;
+        overlayRect.offsetMax = Vector2.zero;
+
+        overlayRect.localScale = Vector3.one;
+        overlayRect.localRotation = Quaternion.identity;
+        overlayRect.localPosition = Vector3.zero;
+
+        Image overlayImage =
+            overlayObject.GetComponent<Image>();
+
+        overlayImage.sprite = image.sprite;
+        overlayImage.color = Color.white;
+
+        overlayImage.type = image.type;
+        overlayImage.preserveAspect = image.preserveAspect;
+
+        overlayImage.raycastTarget = false;
+        overlayImage.maskable = image.maskable;
+
+        overlayImage.material = image.material;
+
+        overlayImage.enabled = false;
+
+        // èµ¤è‰²ã®å±é™ºã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆ
+        GameObject dangerEffect = CreateEffect(
+            dangerEffectPrefab,
+            rect,
+            rect.name + "_DangerEffect"
+        );
+
+        // é’è‰²ã®é¸æŠã‚¨ãƒ•ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆ
+        GameObject selectedEffect = CreateEffect(
+            selectedEffectPrefab,
+            rect,
+            rect.name + "_SelectedEffect"
+        );
+
+        slots[(int)dir] = new Slot
+        {
+            rect = rect,
+            image = image,
+            overlayImage = overlayImage,
+
+            dangerEffectObject = dangerEffect,
+            selectedEffectObject = selectedEffect,
+
+            outline = outline,
+
+            defaultSprite = image.sprite,
+            defaultColor = image.color,
+            defaultScale = rect.localScale
+        };
     }
 
-    /// <summary>
-    /// ‰æ‘œ‚Ì•\¦ó‘Ô‚ğ•ÏX‚·‚éB
-    /// </summary>
+    // ------------------------------------------------------------
+    // ç”»åƒã®è¡¨ç¤ºåˆ‡ã‚Šæ›¿ãˆ
+    // ------------------------------------------------------------
     private void SetImagesActive(bool active)
     {
         if (upImage != null)

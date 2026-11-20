@@ -22,6 +22,15 @@ public class StatusRadar : Graphic
     public float previewLineWidth = 3f;
     public Color previewFillColor = new Color(1f, 0.85f, 0.1f, 0.12f);
 
+
+    [Header("頂点マーカー")]
+    public bool showVertexDots = true;
+    public float vertexDotRadius = 5f;
+    public Color vertexDotColor = Color.white;
+    public Color vertexDotOutlineColor = Color.black;
+    public float vertexDotOutlineWidth = 2f;
+
+
     [Header("外枠")]
     public Color frameColor = Color.black;
     public float lineWidth = 4f;
@@ -194,6 +203,34 @@ public class StatusRadar : Graphic
         for (int i = 0; i < 6; i++)
             DrawLine(vh, frame[i], frame[(i + 1) % 6],
                 frameColor, lineWidth);
+
+
+        // 各ステータスの頂点にマーカーを描画
+        if (showVertexDots)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                // 現在値の頂点
+                Vector2 point = currentPoints[i];
+
+                // 黒い外側の円
+                DrawCircle(
+                    vh,
+                    point,
+                    vertexDotRadius + vertexDotOutlineWidth,
+                    vertexDotOutlineColor
+                );
+
+                // 白い内側の円
+                DrawCircle(
+                    vh,
+                    point,
+                    vertexDotRadius,
+                    vertexDotColor
+                );
+            }
+        }
+
     }
 
     private Vector2[] MakePoints(
@@ -262,6 +299,44 @@ public class StatusRadar : Graphic
         vh.AddTriangle(index, index + 1, index + 2);
         vh.AddTriangle(index, index + 2, index + 3);
     }
+
+
+    private void DrawCircle(
+        VertexHelper vh,
+        Vector2 center,
+        float radius,
+        Color circleColor)
+    {
+        const int segments = 16;
+
+        for (int i = 0; i < segments; i++)
+        {
+            float angle1 =
+                (i * 360f / segments) * Mathf.Deg2Rad;
+
+            float angle2 =
+                ((i + 1) * 360f / segments) * Mathf.Deg2Rad;
+
+            Vector2 p1 = center + new Vector2(
+                Mathf.Cos(angle1),
+                Mathf.Sin(angle1)
+            ) * radius;
+
+            Vector2 p2 = center + new Vector2(
+                Mathf.Cos(angle2),
+                Mathf.Sin(angle2)
+            ) * radius;
+
+            int index = vh.currentVertCount;
+
+            AddVertex(vh, center, circleColor);
+            AddVertex(vh, p1, circleColor);
+            AddVertex(vh, p2, circleColor);
+
+            vh.AddTriangle(index, index + 1, index + 2);
+        }
+    }
+
 }
 
 

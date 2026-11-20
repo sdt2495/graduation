@@ -113,6 +113,7 @@ public class StatusTrade : MonoBehaviour
                 return;
             }
 
+
             selectionUI.SelectLive(
                 button,
                 statusName,
@@ -129,7 +130,7 @@ public class StatusTrade : MonoBehaviour
                         SellStatus(statusName);
                 },
 
-                // 現在値を StatusRadar から取得
+                // 現在値を取得
                 () => GetStatus(statusName),
 
                 // 1回あたりの変化量
@@ -146,10 +147,21 @@ public class StatusTrade : MonoBehaviour
                 statusName,
 
                 // 最大値
-                100f
-            );
+                100f,
 
-            PreviewStatus(statusName, isBuy);
+                // ★レーダーチャートの予測値を更新する処理
+                value =>
+                {
+                    if (float.IsNaN(value))
+                    {
+                        statusRadar.ClearPreview();
+                    }
+                    else
+                    {
+                        ApplyPreview(statusName, value);
+                    }
+                }
+            );
         });
 
         // マウスカーソルの出入りを取得

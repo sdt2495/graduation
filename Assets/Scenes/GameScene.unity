@@ -579,6 +579,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 167447102}
   m_CullTransparentMesh: 1
+--- !u!114 &172281836 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+  m_PrefabInstance: {fileID: 1297870250}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f489e9c7486402b4682509d4b50326ad, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DirectionImageController
 --- !u!1 &207470756
 GameObject:
   m_ObjectHideFlags: 0
@@ -928,6 +939,7 @@ MonoBehaviour:
   battleCommandManager: {fileID: 976136307}
   exclamationMark: {fileID: 1297870251}
   enemyHintUI: {fileID: 1082352435}
+  directionImageController: {fileID: 172281836}
   battleTimeLimit: 7.5
 --- !u!1 &490869624
 GameObject:
@@ -1322,6 +1334,8 @@ MonoBehaviour:
   verticalOffset: 0
   horizontalMoveDistance: 0
   playerMoveRate: 0
+  battleManager: {fileID: 484586750}
+  panelShrink: {fileID: 1297870252}
   zoomCurve:
     serializedVersion: 2
     m_Curve:
@@ -3201,9 +3215,13 @@ PrefabInstance:
       value: Canvas
       objectReference: {fileID: 0}
     - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
-      propertyPath: spreadDistance
-      value: 200
-      objectReference: {fileID: 0}
+      propertyPath: battleManager
+      value: 
+      objectReference: {fileID: 484586750}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: playerSpriteRenderer
+      value: 
+      objectReference: {fileID: 758857480}
     - target: {fileID: 2847188323217654411, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: targetCamera
       value: 
@@ -3213,13 +3231,17 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3928913182251324386, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
-      propertyPath: pivotX
-      value: 0.4
-      objectReference: {fileID: 0}
-    - target: {fileID: 3928913182251324386, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: battleCameraController
       value: 
       objectReference: {fileID: 519420034}
+    - target: {fileID: 8100564039358753737, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
+    - target: {fileID: 8100564039358753737, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: m_RenderMode
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3236,6 +3258,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 782ba5ca11af31541bee4ffc2f9dca80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExclamationMark
+--- !u!114 &1297870252 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3928913182251324386, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+  m_PrefabInstance: {fileID: 1297870250}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54700a651d20bd14e99c20a4c82f2e0f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIPanelShrink
 --- !u!1 &1362386759
 GameObject:
   m_ObjectHideFlags: 0

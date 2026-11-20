@@ -1,87 +1,142 @@
-
+ï»¿
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
-/// ƒpƒlƒ‹‚Ìk¬‰‰o‚ğŠÇ—‚·‚éB
+/// ãƒ‘ãƒãƒ«ã®ç¸®å°æ¼”å‡ºã‚’ç®¡ç†ã™ã‚‹ã€‚
 ///
-/// E‰Šúó‘Ô‚Å‚Í”ñ•\¦
-/// EStartShrink()‚ªŒÄ‚Ño‚³‚ê‚é‚Ü‚Å”ñ•\¦
-/// EŒÄ‚Ño‚³‚ê‚½‚çƒpƒlƒ‹‚ğ•\¦
-/// Ek¬ŠJn‚Æ“¯‚ÉƒJƒƒ‰‚ğƒY[ƒ€
-/// Ek¬I—¹ŒãAw’èŠÔ‚¾‚¯‘Ò‹@
-/// EƒXƒLƒƒƒ“—p‚Ìü‚ğã‚©‚ç‰º‚ÖˆÚ“®
-/// Eü‚ÌˆÚ“®‚ÆSlider‚Ìis“x‚ğ“¯Šú
-/// Eü‚ª‰º’[‚É“’B‚µ‚½‚çƒXƒLƒƒƒ“Š®—¹
+/// ãƒ»åˆæœŸçŠ¶æ…‹ã§ã¯éè¡¨ç¤º
+/// ãƒ»StartShrink()ãŒå‘¼ã³å‡ºã•ã‚Œã‚‹ã¾ã§éè¡¨ç¤º
+/// ãƒ»å‘¼ã³å‡ºã•ã‚ŒãŸã‚‰ãƒ‘ãƒãƒ«ã‚’è¡¨ç¤º
+/// ãƒ»ç¸®å°é–‹å§‹ã¨åŒæ™‚ã«ã‚«ãƒ¡ãƒ©ã‚’ã‚ºãƒ¼ãƒ 
+/// ãƒ»ç¸®å°çµ‚äº†å¾Œã€æŒ‡å®šæ™‚é–“ã ã‘å¾…æ©Ÿ
+/// ãƒ»ã‚¹ã‚­ãƒ£ãƒ³ç”¨ã®ç·šã‚’ä¸Šã‹ã‚‰ä¸‹ã¸ç§»å‹•
+/// ãƒ»ç·šã®ç§»å‹•ã¨Sliderã®é€²è¡Œåº¦ã‚’åŒæœŸ
+/// ãƒ»ç·šãŒä¸‹ç«¯ã«åˆ°é”ã—ãŸã‚‰ã‚¹ã‚­ãƒ£ãƒ³å®Œäº†
+/// ãƒ»æ¶ˆãˆã‚‹ç”»åƒã¯ã‚¹ã‚­ãƒ£ãƒ³ç·šã«åˆã‚ã›ã¦ä¸Šã‹ã‚‰è¡¨ç¤º
+/// ãƒ»æ•µã®æ”»æ’ƒçµ‚äº†æ™‚ã€ã‚«ãƒ¡ãƒ©å¾©å¸°ã¨åŒæ™‚ã«Canvaså…¨ä½“ã‚’æ¶ˆã™
 /// </summary>
 public class UIPanelShrink : MonoBehaviour
 {
-    [Header("‘ÎÛ")]
+    [Header("å¯¾è±¡")]
     [SerializeField] private RectTransform target;
 
-    [Header("ƒTƒCƒY")]
+    [Header("ã‚µã‚¤ã‚º")]
     [SerializeField] private float startWidth = 1200f;
     [SerializeField] private float endWidth = 700f;
     [SerializeField] private float height = 700f;
 
-    [Header("ûkŠÔ")]
+    [Header("åç¸®æ™‚é–“")]
     [SerializeField] private float duration = 0.5f;
 
-    [Header("k¬Šî€")]
+    [Header("ç¸®å°åŸºæº–")]
     [Range(0f, 1f)]
     [SerializeField] private float pivotX = 0.5f;
 
-    [Header("ƒJƒƒ‰§Œä")]
+    [Header("ã‚«ãƒ¡ãƒ©åˆ¶å¾¡")]
     [SerializeField]
     private BattleCameraController battleCameraController;
 
-    [Header("ƒXƒLƒƒƒ“§Œä")]
+    [Header("ã‚¹ã‚­ãƒ£ãƒ³åˆ¶å¾¡")]
     [SerializeField]
     private SliderPercentUI sliderPercentUI;
 
-    [Header("l‹÷‚ÌImage")]
+    [Header("å››éš…ã®Image")]
     [SerializeField] private RectTransform[] cornerImages;
 
-    [Header("Image‚ÌˆÚ“®")]
+    [Header("Imageã®ç§»å‹•")]
     [SerializeField] private float startX = 1400f;
     [SerializeField] private float endX = 750f;
     [SerializeField] private float fixedY = 750f;
 
-    [Header("ƒXƒLƒƒƒ“—p‚Ìü")]
+    [Header("ã‚¹ã‚­ãƒ£ãƒ³ç”¨ã®ç·š")]
     [SerializeField]
     private RectTransform scanLine;
 
-    [Header("ƒXƒLƒƒƒ“ü‚ÌˆÚ“®İ’è")]
+    [Header("ã‚¹ã‚­ãƒ£ãƒ³ç·šã®ç§»å‹•è¨­å®š")]
     [SerializeField] private float scanStartY = 350f;
     [SerializeField] private float scanEndY = -350f;
     [SerializeField] private float scanDuration = 1.5f;
 
-    [Header("ƒXƒLƒƒƒ“ŠJn‚Ü‚Å‚Ì‘Ò‹@ŠÔ")]
+    [Header("ã‚¹ã‚­ãƒ£ãƒ³é–‹å§‹ã¾ã§ã®å¾…æ©Ÿæ™‚é–“")]
+    [Tooltip("åç¸®å®Œäº†ã‹ã‚‰ã®å¾…æ©Ÿ")]
     [SerializeField] private float scanStartDelay = 0.5f;
 
-    [Header("•ûŒü‰æ‘œ§Œä")]
+    [Header("æ–¹å‘ç”»åƒåˆ¶å¾¡")]
     [SerializeField]
     private DirectionImageController directionImageController;
 
-    // k¬Œo‰ßŠÔ
+    [Header("æ¶ˆãˆã‚‹ç”»åƒ")]
+    [SerializeField] private Image scanImage;
+
+    [SerializeField] private float hideDuration = 0.5f;
+
+    [Tooltip("ã‚¹ã‚­ãƒ£ãƒ³å®Œäº†ã‹ã‚‰ä½•ç§’å¾Œã«è‡ªå‹•ã§æ¶ˆã™ã‹ã€‚-1ã§è‡ªå‹•ã§ã¯æ¶ˆã•ãªã„")]
+    [SerializeField] private float hideDelayAfterScan = -1f;
+
+    [Header("ã‚¹ã‚­ãƒ£ãƒ³ç·šã®æ¸›é€Ÿ")]
+    [Range(0f, 0.99f)]
+    [SerializeField] private float slowStart = 0.75f;
+
+    [Range(1f, 4f)]
+    [SerializeField] private float slowStrength = 1.5f;
+
+
+    // =====================================
+    // Canvaså…¨ä½“ã®æ¶ˆæ»…æ¼”å‡º
+    // =====================================
+
+    [Header("Canvaså…¨ä½“ã®æ¶ˆæ»…æ¼”å‡º")]
+
+    [Tooltip("Canvasã®ãƒ«ãƒ¼ãƒˆã«ã‚ã‚‹RectTransform")]
+    [SerializeField] private RectTransform canvasTransform;
+
+    [Header("â‘  æ¨ªå¹…ã‚’ç¸®ã‚ã¦ç¸¦å¹…ã‚’ä¼¸ã°ã™")]
+    [SerializeField] private float firstEffectDuration = 0.2f;
+    [SerializeField] private float firstWidthScale = 0.65f;
+    [SerializeField] private float firstHeightScale = 1.25f;
+
+    [Header("â‘¡ æ¨ªã«ä¼¸ã°ã—ã¦ç¸¦å¹…ã‚’ç¸®ã‚ã‚‹")]
+    [SerializeField] private float secondEffectDuration = 0.25f;
+    [SerializeField] private float secondWidthScale = 1.3f;
+    [SerializeField] private float secondHeightScale = 0.12f;
+
+    [Header("â‘¢ ä¸€æœ¬ã®æ¨ªç·šã«ã™ã‚‹")]
+    [SerializeField] private float thirdEffectDuration = 0.15f;
+    [SerializeField] private float finalWidthScale = 1.2f;
+    [SerializeField] private float finalHeightScale = 0.005f;
+
+    // Canvasã®å…ƒã®ã‚¹ã‚±ãƒ¼ãƒ«
+    private Vector3 canvasOriginalScale;
+
+    // Canvasæ¶ˆæ»…ä¸­ã‹
+    private bool canvasHiding;
+
+    // Canvasæ¶ˆæ»…ã‚³ãƒ«ãƒ¼ãƒãƒ³
+    private Coroutine canvasHideCoroutine;
+
+
+    // =====================================
+    // æ—¢å­˜ã®çŠ¶æ…‹ç®¡ç†
+    // =====================================
+
     private float timer;
-
-    // ƒXƒLƒƒƒ“ü‚ÌŒo‰ßŠÔ
     private float scanTimer;
-
-    // ƒXƒLƒƒƒ“ŠJn‚Ü‚Å‚Ì‘Ò‹@Œo‰ßŠÔ
     private float scanDelayTimer;
+    private float hideTimer;
 
-    // k¬’†‚©‚Ç‚¤‚©
     private bool shrinking;
-
-    // ƒXƒLƒƒƒ“ŠJn‘Ò‚¿‚©‚Ç‚¤‚©
     private bool waitingForScan;
-
-    // ƒXƒLƒƒƒ“ü‚ªˆÚ“®’†‚©‚Ç‚¤‚©
     private bool scanningLine;
-
-    // k¬‚ªŠ®—¹‚µ‚½‚©‚Ç‚¤‚©
     private bool shrinkCompleted;
+    private bool scanFinished;
+
+    private float scanProgress;
+
+    private bool waitingForHide;
+    private bool scanImageHidden;
+
 
     private void Awake()
     {
@@ -90,20 +145,33 @@ public class UIPanelShrink : MonoBehaviour
             target = GetComponent<RectTransform>();
         }
 
-        // ‰Šúó‘Ô‚Å‚ÍƒXƒLƒƒƒ“ü‚ğ”ñ•\¦
+        // Canvasã®åˆæœŸã‚¹ã‚±ãƒ¼ãƒ«ã‚’ä¿å­˜
+        if (canvasTransform != null)
+        {
+            canvasOriginalScale = canvasTransform.localScale;
+        }
+
         if (scanLine != null)
         {
             scanLine.gameObject.SetActive(false);
         }
 
-        // ƒpƒlƒ‹‚ğ”ñ•\¦
+        if (scanImage != null)
+        {
+            scanImage.type = Image.Type.Filled;
+            scanImage.fillMethod = Image.FillMethod.Vertical;
+            scanImage.fillOrigin = (int)Image.OriginVertical.Top;
+            scanImage.fillAmount = 0f;
+        }
+
         gameObject.SetActive(false);
     }
+
 
     private void Update()
     {
         // =====================================
-        // ƒpƒlƒ‹k¬ˆ—
+        // ãƒ‘ãƒãƒ«ç¸®å°å‡¦ç†
         // =====================================
 
         if (shrinking && target != null)
@@ -114,90 +182,71 @@ public class UIPanelShrink : MonoBehaviour
                 ? 1f
                 : Mathf.Clamp01(timer / duration);
 
-            float width = Mathf.Lerp(
-                startWidth,
-                endWidth,
-                t
-            );
+            float width = Mathf.Lerp(startWidth, endWidth, t);
 
-            target.sizeDelta = new Vector2(
-                width,
-                height
-            );
+            target.sizeDelta = new Vector2(width, height);
 
-            // k¬I—¹
             if (t >= 1f)
             {
-                target.sizeDelta = new Vector2(
-                    endWidth,
-                    height
-                );
+                target.sizeDelta = new Vector2(endWidth, height);
 
                 shrinking = false;
                 shrinkCompleted = true;
 
-                // ƒXƒLƒƒƒ“ŠJn‚Ü‚Å‘Ò‹@
                 scanDelayTimer = 0f;
                 waitingForScan = true;
 
-                Debug.Log("ƒpƒlƒ‹k¬I—¹FƒXƒLƒƒƒ“ŠJn‘Ò‹@");
+                Debug.Log("ãƒ‘ãƒãƒ«ç¸®å°çµ‚äº†ï¼šã‚¹ã‚­ãƒ£ãƒ³é–‹å§‹å¾…æ©Ÿ");
             }
         }
 
+
         // =====================================
-        // ƒXƒLƒƒƒ“ŠJn‚Ü‚Å‚Ì‘Ò‹@ˆ—
+        // ã‚¹ã‚­ãƒ£ãƒ³é–‹å§‹ã¾ã§ã®å¾…æ©Ÿå‡¦ç†
         // =====================================
 
         if (waitingForScan)
         {
             scanDelayTimer += Time.deltaTime;
 
-            // w’èŠÔ‚ªŒo‰ß‚µ‚½‚çƒXƒLƒƒƒ“ŠJn
             if (scanDelayTimer >= scanStartDelay)
             {
                 waitingForScan = false;
-
                 StartScanLine();
             }
         }
 
+
         // =====================================
-        // ƒXƒLƒƒƒ“ü‚ÆSlider‚Ì˜A“®ˆ—
+        // ã‚¹ã‚­ãƒ£ãƒ³ç·šã¨Sliderã®é€£å‹•å‡¦ç†
         // =====================================
 
         if (scanningLine && scanLine != null)
         {
             scanTimer += Time.deltaTime;
 
-            // is“xi0`1j
-            float t = scanDuration <= 0f
+            float rawT = scanDuration <= 0f
                 ? 1f
                 : Mathf.Clamp01(scanTimer / scanDuration);
 
-            // ƒXƒLƒƒƒ“ü‚ÌYÀ•W
-            float currentY = Mathf.Lerp(
-                scanStartY,
-                scanEndY,
-                t
-            );
+            float t = ApplyScanEase(rawT);
 
-            // ü‚ğˆÚ“®
+            scanProgress = t;
+
+            float currentY = Mathf.Lerp(scanStartY, scanEndY, t);
+
             scanLine.anchoredPosition = new Vector2(
                 scanLine.anchoredPosition.x,
                 currentY
             );
 
-            // Slider‚Ìis“x‚ğ“¯Šú
             if (sliderPercentUI != null)
             {
                 sliderPercentUI.UpdateScanProgress(t);
             }
 
-            // =================================
-            // ƒXƒLƒƒƒ“I—¹
-            // =================================
-
-            if (t >= 1f)
+            // ã‚¹ã‚­ãƒ£ãƒ³çµ‚äº†
+            if (rawT >= 1f)
             {
                 scanLine.anchoredPosition = new Vector2(
                     scanLine.anchoredPosition.x,
@@ -205,17 +254,15 @@ public class UIPanelShrink : MonoBehaviour
                 );
 
                 scanningLine = false;
+                scanFinished = true;
 
-                // ü‚ğ”ñ•\¦
                 scanLine.gameObject.SetActive(false);
 
-                // Slider‚ğ100%‚É‚µ‚ÄŠ®—¹ˆ—
                 if (sliderPercentUI != null)
                 {
                     sliderPercentUI.CompleteScan();
                 }
 
-                // 4•ûŒü‚Ì‰æ‘œ‰‰o‚ğŠJn
                 if (directionImageController != null)
                 {
                     directionImageController.StartDirectionImages();
@@ -223,59 +270,112 @@ public class UIPanelShrink : MonoBehaviour
                 else
                 {
                     Debug.LogWarning(
-                        "DirectionImageController‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                        "DirectionImageControllerãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
                     );
                 }
 
-                Debug.Log("ƒXƒLƒƒƒ“ü“’BFƒXƒLƒƒƒ“Š®—¹");
+                BeginAutoHide();
+
+                Debug.Log("ã‚¹ã‚­ãƒ£ãƒ³ç·šåˆ°é”ï¼šã‚¹ã‚­ãƒ£ãƒ³å®Œäº†");
             }
         }
+
+
+        // =====================================
+        // æ¶ˆãˆã‚‹ç”»åƒã®è‡ªå‹•éè¡¨ç¤º
+        // =====================================
+
+        if (waitingForHide)
+        {
+            hideTimer += Time.deltaTime;
+
+            if (hideTimer >= hideDelayAfterScan)
+            {
+                waitingForHide = false;
+                HideScanPanel();
+            }
+        }
+
+        UpdateScanFill();
     }
 
+
     /// <summary>
-    /// ƒpƒlƒ‹k¬‚ğŠJn‚·‚éB
-    /// ExclamationMark‚©‚çŒÄ‚Ño‚·B
+    /// ã‚¹ã‚­ãƒ£ãƒ³ã®é€²è¡Œåº¦ã«åˆã‚ã›ã¦ç”»åƒã‚’ä¸Šã‹ã‚‰è¡¨ç¤ºã™ã‚‹ã€‚
+    /// </summary>
+    private void UpdateScanFill()
+    {
+        if (scanImage == null || scanImageHidden) return;
+
+        float fill = 0f;
+
+        if (shrinkCompleted && scanFinished)
+        {
+            fill = 1f;
+        }
+        else if (shrinkCompleted && scanningLine)
+        {
+            fill = scanProgress;
+        }
+
+        scanImage.fillAmount = fill;
+    }
+
+
+    /// <summary>
+    /// ãƒ‘ãƒãƒ«ç¸®å°ã‚’é–‹å§‹ã™ã‚‹ã€‚
     /// </summary>
     public void StartShrink()
     {
-        // “ñd‹N“®–h~
         if (shrinking || shrinkCompleted)
             return;
 
-        // ƒpƒlƒ‹‚ğ•\¦
+        // Canvasã‚’å†è¡¨ç¤º
+        if (canvasTransform != null)
+        {
+            canvasTransform.gameObject.SetActive(true);
+            canvasTransform.localScale = canvasOriginalScale;
+        }
+
+        canvasHiding = false;
+
         gameObject.SetActive(true);
 
         if (target == null)
         {
             Debug.LogWarning(
-                "k¬‘ÎÛ‚ÌRectTransform‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "ç¸®å°å¯¾è±¡ã®RectTransformãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
 
             return;
         }
 
-        // ‰Šú‰»
         timer = 0f;
         scanTimer = 0f;
         scanDelayTimer = 0f;
+        hideTimer = 0f;
+        scanProgress = 0f;
+        scanFinished = false;
+        scanImageHidden = false;
 
         shrinking = true;
         waitingForScan = false;
         scanningLine = false;
+        waitingForHide = false;
 
-        // k¬Šî€‚ğİ’è
-        target.pivot = new Vector2(
-            pivotX,
-            target.pivot.y
-        );
+        target.pivot = new Vector2(pivotX, target.pivot.y);
 
-        // ‰ŠúƒTƒCƒY
-        target.sizeDelta = new Vector2(
-            startWidth,
-            height
-        );
+        target.sizeDelta = new Vector2(startWidth, height);
 
-        // ƒJƒƒ‰ƒY[ƒ€
+        if (scanImage != null)
+        {
+            scanImage.fillAmount = 0f;
+
+            Color c = scanImage.color;
+            c.a = 1f;
+            scanImage.color = c;
+        }
+
         if (battleCameraController != null)
         {
             battleCameraController.StartZoom();
@@ -283,23 +383,60 @@ public class UIPanelShrink : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "BattleCameraController‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "BattleCameraControllerãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
         }
     }
 
+
     /// <summary>
-    /// ƒXƒLƒƒƒ“ü‚ÌˆÚ“®‚ğŠJn‚·‚éB
+    /// æ¶ˆãˆã‚‹ç”»åƒã ã‘ã‚’ãƒ•ã‚§ãƒ¼ãƒ‰ã—ã¦æ¶ˆã™ã€‚
     /// </summary>
+    public void HideScanPanel()
+    {
+        if (scanImage == null || scanImageHidden) return;
+
+        scanImageHidden = true;
+        StartCoroutine(HideScanImageRoutine());
+    }
+
+
+    private IEnumerator HideScanImageRoutine()
+    {
+        float t = 0f;
+        Color c = scanImage.color;
+
+        while (t < hideDuration)
+        {
+            t += Time.deltaTime;
+
+            c.a = 1f - Mathf.Clamp01(t / hideDuration);
+            scanImage.color = c;
+
+            yield return null;
+        }
+
+        scanImage.fillAmount = 0f;
+    }
+
+
+    private void BeginAutoHide()
+    {
+        if (hideDelayAfterScan < 0f) return;
+
+        hideTimer = 0f;
+        waitingForHide = true;
+    }
+
+
     private void StartScanLine()
     {
         if (scanLine == null)
         {
             Debug.LogWarning(
-                "ƒXƒLƒƒƒ“—p‚ÌImage‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "ã‚¹ã‚­ãƒ£ãƒ³ç”¨ã®ImageãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
 
-            // ü‚ª‚È‚¢ê‡‚Í]—ˆ‚ÌƒXƒLƒƒƒ“ŠJn
             if (sliderPercentUI != null)
             {
                 sliderPercentUI.StartScan();
@@ -307,22 +444,25 @@ public class UIPanelShrink : MonoBehaviour
                 sliderPercentUI.CompleteScan();
             }
 
+            scanProgress = 1f;
+            scanFinished = true;
+
+            BeginAutoHide();
+
             return;
         }
 
-        // Œo‰ßŠÔ‚ğ‰Šú‰»
         scanTimer = 0f;
+        scanProgress = 0f;
+        scanFinished = false;
 
-        // ü‚ğã’[‚É”z’u
         scanLine.anchoredPosition = new Vector2(
             scanLine.anchoredPosition.x,
             scanStartY
         );
 
-        // ü‚ğ•\¦
         scanLine.gameObject.SetActive(true);
 
-        // Slider‚à“¯‚ÉŠJn
         if (sliderPercentUI != null)
         {
             sliderPercentUI.StartScan();
@@ -330,13 +470,215 @@ public class UIPanelShrink : MonoBehaviour
         else
         {
             Debug.LogWarning(
-                "SliderPercentUI‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB"
+                "SliderPercentUIãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
             );
         }
 
-        // ˆÚ“®ŠJn
         scanningLine = true;
 
-        Debug.Log("ƒXƒLƒƒƒ“üESlider˜A“®ŠJn");
+        Debug.Log("ã‚¹ã‚­ãƒ£ãƒ³ç·šãƒ»Slideré€£å‹•é–‹å§‹");
+    }
+
+
+    private float ApplyScanEase(float x)
+    {
+        if (x <= slowStart) return x;
+
+        float tail = 1f - slowStart;
+        float u = (x - slowStart) / tail;
+
+        float d = 1f - 1f / slowStrength;
+
+        float eased = u - d * u * u * 0.5f;
+
+        eased /= (1f - d * 0.5f);
+
+        return slowStart + tail * eased;
+    }
+
+
+    // =====================================
+    // Canvasæ¶ˆæ»…æ¼”å‡º
+    // =====================================
+
+    /// <summary>
+    /// ã‚«ãƒ¡ãƒ©ã®å¾©å¸°é–‹å§‹ã«åˆã‚ã›ã¦Canvasã‚’æ¶ˆã™ã€‚
+    /// </summary>
+    public void StartCanvasHide()
+    {
+        if (canvasHiding)
+            return;
+
+        if (canvasTransform == null)
+        {
+            Debug.LogWarning(
+                "CanvasTransformãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
+            );
+            return;
+        }
+
+        canvasHideCoroutine = StartCoroutine(HideCanvasRoutine());
+    }
+
+
+    /// <summary>
+    /// Canvaså…¨ä½“ã‚’4æ®µéšã§å¤‰å½¢ã•ã›ã¦æ¶ˆã™ã€‚
+    /// </summary>
+    private IEnumerator HideCanvasRoutine()
+    {
+        canvasHiding = true;
+
+        Vector3 original = canvasOriginalScale;
+
+        // â‘  æ¨ªå¹…ã‚’ç¸®ã‚ã¦ç¸¦å¹…ã‚’ä¼¸ã°ã™
+        Vector3 firstScale = new Vector3(
+            original.x * firstWidthScale,
+            original.y * firstHeightScale,
+            original.z
+        );
+
+        yield return AnimateCanvasScale(
+            original,
+            firstScale,
+            firstEffectDuration
+        );
+
+
+        // â‘¡ æ¨ªã«ä¼¸ã°ã—ã¦ç¸¦å¹…ã‚’ç¸®ã‚ã‚‹
+        Vector3 secondScale = new Vector3(
+            original.x * secondWidthScale,
+            original.y * secondHeightScale,
+            original.z
+        );
+
+        yield return AnimateCanvasScale(
+            firstScale,
+            secondScale,
+            secondEffectDuration
+        );
+
+
+        // â‘¢ ä¸€æœ¬ã®æ¨ªç·šã«ã™ã‚‹
+        Vector3 finalScale = new Vector3(
+            original.x * finalWidthScale,
+            original.y * finalHeightScale,
+            original.z
+        );
+
+        yield return AnimateCanvasScale(
+            secondScale,
+            finalScale,
+            thirdEffectDuration
+        );
+
+
+        // â‘£ Canvasã‚’éè¡¨ç¤º
+        canvasTransform.localScale = finalScale;
+        canvasTransform.gameObject.SetActive(false);
+
+        canvasHiding = false;
+        canvasHideCoroutine = null;
+
+        Debug.Log("Canvasæ¶ˆæ»…æ¼”å‡ºå®Œäº†");
+    }
+
+
+    /// <summary>
+    /// Canvasã®ã‚¹ã‚±ãƒ¼ãƒ«ã‚’æ»‘ã‚‰ã‹ã«å¤‰æ›´ã™ã‚‹ã€‚
+    /// </summary>
+    private IEnumerator AnimateCanvasScale(
+        Vector3 startScale,
+        Vector3 endScale,
+        float effectDuration)
+    {
+        float elapsed = 0f;
+
+        if (effectDuration <= 0f)
+        {
+            canvasTransform.localScale = endScale;
+            yield break;
+        }
+
+        while (elapsed < effectDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            float t = Mathf.Clamp01(elapsed / effectDuration);
+
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            canvasTransform.localScale = Vector3.Lerp(
+                startScale,
+                endScale,
+                t
+            );
+
+            yield return null;
+        }
+
+        canvasTransform.localScale = endScale;
+    }
+
+
+    // =====================================
+    // æ•µã®æ”»æ’ƒçµ‚äº†
+    // =====================================
+
+    /// <summary>
+    /// æ•µã®æ”»æ’ƒæ¼”å‡ºã‚’çµ‚äº†ã™ã‚‹ã€‚
+    /// ã‚«ãƒ¡ãƒ©å¾©å¸°ã¨Canvasæ¶ˆæ»…ã‚’åŒæ™‚ã«é–‹å§‹ã™ã‚‹ã€‚
+    /// </summary>
+    public void EndEnemyAttack()
+    {
+        shrinking = false;
+        shrinkCompleted = false;
+        waitingForScan = false;
+        scanningLine = false;
+        scanFinished = false;
+        waitingForHide = false;
+        scanImageHidden = false;
+
+        timer = 0f;
+        scanTimer = 0f;
+        scanDelayTimer = 0f;
+        hideTimer = 0f;
+        scanProgress = 0f;
+
+        if (scanLine != null)
+        {
+            scanLine.gameObject.SetActive(false);
+        }
+
+        if (scanImage != null)
+        {
+            scanImage.fillAmount = 0f;
+
+            Color c = scanImage.color;
+            c.a = 1f;
+            scanImage.color = c;
+        }
+
+        if (target != null)
+        {
+            target.sizeDelta = new Vector2(startWidth, height);
+        }
+
+        // ã‚«ãƒ¡ãƒ©å¾©å¸°é–‹å§‹
+        // Canvasæ¶ˆæ»…ã‚‚åŒã˜ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§é–‹å§‹ã™ã‚‹
+        if (battleCameraController != null)
+        {
+            battleCameraController.EndZoom();
+        }
+        else
+        {
+            Debug.LogWarning(
+                "BattleCameraControllerãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚"
+            );
+
+            StartCanvasHide();
+        }
+
+        // ã“ã“ã§ã¯gameObjectã‚’éè¡¨ç¤ºã«ã—ãªã„ã€‚
+        // æ¶ˆæ»…ã‚³ãƒ«ãƒ¼ãƒãƒ³ãŒæœ€å¾Œã¾ã§å‹•ãå¿…è¦ãŒã‚ã‚‹ãŸã‚ã€‚
     }
 }

@@ -369,6 +369,7 @@ public class StatusTrade : MonoBehaviour
         statusRadar.SetStatus(hp, atk, def, cri, tec, other);
     }
 
+
     private void UpdateUI()
     {
         if (MoneyManager.Instance != null)
@@ -392,6 +393,7 @@ public class StatusTrade : MonoBehaviour
         if (tecValueText != null)
             tecValueText.text = "TEC  " + statusRadar.TEC.ToString("F0");
     }
+
 
     private void ShowMessage(string message)
     {
@@ -489,7 +491,7 @@ public class StatusTrade : MonoBehaviour
                 : "+" + sellPrice + "G";
 
             label.text =
-                $"{displayName} {value:0.##}  {priceText}";
+    $"{displayName} {value:F0}  {priceText}";
         }
     }
 

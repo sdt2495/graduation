@@ -16,6 +16,8 @@ public class CommandUI : MonoBehaviour
     [SerializeField] private Transform nextCommandParent;
     [SerializeField] private float spacing = 150f;
 
+    [SerializeField] private GameObject nextCommandGroup;
+
     [Header("“ü—Í’†‚Ì‚Ð‚µŒ`")]
     [SerializeField] private float activeDiamondMoveDuration = 0.15f;
     [SerializeField] private AnimationCurve activeDiamondMoveCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -56,7 +58,7 @@ public class CommandUI : MonoBehaviour
     public void SetCommandUIVisible(bool isVisible)
     {
         commandParent.gameObject.SetActive(isVisible);
-        nextCommandParent.gameObject.SetActive(isVisible);
+        nextCommandGroup.SetActive(isVisible);
     }
 
     /// <summary>
@@ -69,7 +71,9 @@ public class CommandUI : MonoBehaviour
 
         CreateCommandElements(nextCommand, nextCommandParent, nextcommandElements);
 
-        UpdateActiveComand(battleEnemy.GetCurrentIndex());
+        currentActiveIndex = 0;
+
+        UpdateActiveComand(0);
     }
 
     /// <summary>

@@ -20,18 +20,19 @@ public class BattleCommandSlide : MonoBehaviour
 
         // 初期位置を画面下にする
         commandPanel.anchoredPosition = targetPosition + Vector2.down * slideDistance;
-
-        // 出現アニメーション
-        ShowCommand();
     }
 
     /// <summary>
     /// 選択コマンドを下からスライドさせて表示する
     /// </summary>
     /// <exception cref="NotImplementedException"></exception>
-    private void ShowCommand()
+    public void ShowCommand()
     {
         StopAllCoroutines();
+
+        // 再生するたびに画面下へ戻す
+        commandPanel.anchoredPosition = targetPosition + Vector2.down * slideDistance;
+
         StartCoroutine(SlideIn());
     }
 

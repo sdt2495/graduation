@@ -205,10 +205,16 @@ public class Player : MonoBehaviour
         Damage(1);
 
         if(enemy.IsCommandFinished())
-        { 
-            enemy.SetRandomCommands();
+        {
+            // NEXTを現在のコマンドに適用
+            commandUI.ApplyNext(enemy);
+
+            // 新しいNEXTを生成
+            commandUI.UpdateNextCommand();
+
             isCommandFailed = false;
 
+            // 現在のコマンドとNEXTをUIに反映
             commandUI.UpdateCommanedText(enemy);
         }
 

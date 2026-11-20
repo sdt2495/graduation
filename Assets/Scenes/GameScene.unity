@@ -932,6 +932,7 @@ MonoBehaviour:
   spawner: {fileID: 515253255}
   timingMiniGameCaller: {fileID: 0}
   timerText: {fileID: 1469577525}
+  timerUI: {fileID: 1925055271}
   noramlColor: {r: 1, g: 1, b: 1, a: 1}
   warningColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   dangerColor: {r: 1, g: 0, b: 0, a: 1}
@@ -940,6 +941,7 @@ MonoBehaviour:
   exclamationMark: {fileID: 1297870251}
   enemyHintUI: {fileID: 1082352435}
   directionImageController: {fileID: 172281836}
+  commandUI: {fileID: 838218681}
   battleTimeLimit: 7.5
 --- !u!1 &490869624
 GameObject:
@@ -2131,6 +2133,7 @@ MonoBehaviour:
   commandParent: {fileID: 576119644}
   nextCommandParent: {fileID: 1938692528}
   spacing: 130
+  nextCommandGroup: {fileID: 568574652}
   activeDiamondMoveDuration: 0.12
   activeDiamondMoveCurve:
     serializedVersion: 2
@@ -2847,6 +2850,7 @@ MonoBehaviour:
   navigateAction: {fileID: -8784545083839296357, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   submitAction: {fileID: 392368643174621059, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   gameManager: {fileID: 934584212}
+  commandSlide: {fileID: 838218683}
 --- !u!1 &1041358313
 GameObject:
   m_ObjectHideFlags: 0
@@ -3222,6 +3226,34 @@ PrefabInstance:
       propertyPath: playerSpriteRenderer
       value: 
       objectReference: {fileID: 758857480}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: onHit.m_PersistentCalls.m_Calls.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: onHit.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: onHit.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 484586750}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: onHit.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: onHit.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: EndBattle
+      objectReference: {fileID: 0}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: onHit.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: BattleManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2645128280319284434, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
+      propertyPath: onHit.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 2847188323217654411, guid: a748b72d8c4c8624db622625c0730eaa, type: 3}
       propertyPath: targetCamera
       value: 
@@ -4303,7 +4335,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -1
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 050cdfcd88302894fb8b18e9cc825bc7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

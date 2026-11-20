@@ -18,6 +18,7 @@ public class BattleManager : MonoBehaviour
 
     [Header("TimerUI")]
     [SerializeField] private TMP_Text timerText;
+    [SerializeField] private GameObject timerUI;
     [Header("Timerの色設定")]
     [SerializeField] private Color noramlColor = Color.white;
     [SerializeField] private Color warningColor = Color.yellow;
@@ -36,6 +37,8 @@ public class BattleManager : MonoBehaviour
 
     [Header("敵の攻撃(4方向の危険表示)")]
     [SerializeField] private DirectionImageController directionImageController;
+
+    [SerializeField] private CommandUI commandUI;
 
     // 制限時間
     [SerializeField] private float battleTimeLimit = 10.0f;
@@ -80,6 +83,7 @@ public class BattleManager : MonoBehaviour
 
     public void StartBattle()
     {
+        Debug.Log("BattleManager.StartBattle 呼び出し");
         isBattle = true;
         isEndingBattle = false;
         isTimerStarted = false;
@@ -152,7 +156,13 @@ public class BattleManager : MonoBehaviour
         // 敵が倒れていなければ敵の攻撃処理
         Enemy battleEnemy = spawner.GetBattleEnemy();
 
-        if(battleEnemy != null && !battleEnemy.IsDead())
+        // 矢印入力UI・NEXT表示を非表示
+        commandUI.SetCommandUIVisible(false);
+
+        // タイマーUIを非表示
+        timerUI.SetActive(false);
+
+        if (battleEnemy != null && !battleEnemy.IsDead())
         {
             // Enemyの攻撃処理
             yield return StartCoroutine(EnemyAttack());
@@ -167,6 +177,22 @@ public class BattleManager : MonoBehaviour
 
         // 一連の処理が終わったら戦闘終了
         EndBattle();
+
+        // 入力途中で終了していた場合
+        if (!battleEnemy.IsCommandFinished())
+        {
+            // NEXTを現在のコマンドに適用
+            commandUI.ApplyNext(battleEnemy);
+
+            // 新しいNEXTを生成
+            commandUI.UpdateNextCommand();
+
+            // UIを更新
+            commandUI.UpdateCommanedText(battleEnemy);
+        }
+
+        // 次回の入力位置を初期化
+        battleEnemy.ResetCommand();
 
         // コマンド選択画面へ戻る
         battleCommandManager.OnBattleEnded();

@@ -1,5 +1,4 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,7 +9,8 @@ using UnityEngine.UI;
 /// ・StartShrink()が呼び出されるまで非表示
 /// ・呼び出されたらパネルを表示
 /// ・縮小開始と同時にカメラをズーム
-/// ・縮小終了後、指定時間だけ待機
+/// ・縮小終了後、ターゲットマーク(アニメーション)を表示
+/// ・指定時間待機後、ターゲットマークを消してスキャン開始
 /// ・スキャン用の線を上から下へ移動
 /// ・線の移動とSliderの進行度を同期
 /// ・線が下端に到達したらスキャン完了
@@ -50,6 +50,16 @@ public class UIPanelShrink : MonoBehaviour
     [SerializeField] private float endX = 750f;
     [SerializeField] private float fixedY = 750f;
 
+    [Header("ターゲットマーク")]
+    [Tooltip("アニメーション付きのターゲットマーク(縮小完了後に表示、スキャン開始時に非表示)")]
+    [SerializeField] private GameObject targetMark;
+
+    [Tooltip("このAnimatorステートが終わったらスキャンを開始する(ステート名)")]
+    [SerializeField] private string markAnimStateName = "MarkLockOn";
+
+    [Tooltip("万一ステートが見つからない場合に、強制的に進める最大待機時間(秒)")]
+    [SerializeField] private float markWaitTimeout = 5f;
+
     [Header("スキャン用の線")]
     [SerializeField]
     private RectTransform scanLine;
@@ -60,8 +70,8 @@ public class UIPanelShrink : MonoBehaviour
     [SerializeField] private float scanDuration = 1.5f;
 
     [Header("スキャン開始までの待機時間")]
-    [Tooltip("収縮完了からの待機")]
-    [SerializeField] private float scanStartDelay = 0.5f;
+    [Tooltip("ターゲットマークのアニメ終了からスキャン開始までの待機(0で即開始)")]
+    [SerializeField] private float scanStartDelay = 0f;
 
     [Header("方向画像制御")]
     [SerializeField]
@@ -107,6 +117,13 @@ public class UIPanelShrink : MonoBehaviour
     [SerializeField] private float finalWidthScale = 1.2f;
     [SerializeField] private float finalHeightScale = 0.005f;
 
+    private bool waitingForTargetMark;
+private float targetMarkDelayTimer;
+
+[Header("ターゲットマーク表示待機時間")]
+[SerializeField]
+private float targetMarkDelay = 0.5f;
+
     // Canvasの元のスケール
     private Vector3 canvasOriginalScale;
 
@@ -137,6 +154,12 @@ public class UIPanelShrink : MonoBehaviour
     private bool waitingForHide;
     private bool scanImageHidden;
 
+    // ターゲットマークのアニメ待ち
+    private bool waitingForMark;
+    private bool markStateSeen;
+    private float markWaitTimer;
+    private Animator targetMarkAnimator;
+
 
     private void Awake()
     {
@@ -154,6 +177,13 @@ public class UIPanelShrink : MonoBehaviour
         if (scanLine != null)
         {
             scanLine.gameObject.SetActive(false);
+        }
+
+        // ターゲットマークは初期状態で非表示
+        if (targetMark != null)
+        {
+            targetMarkAnimator = targetMark.GetComponent<Animator>();
+            targetMark.SetActive(false);
         }
 
         if (scanImage != null)
@@ -193,10 +223,52 @@ public class UIPanelShrink : MonoBehaviour
                 shrinking = false;
                 shrinkCompleted = true;
 
+                waitingForScan = false;
+                waitingForMark = false;
+
+                // 少し待ってからターゲットマーク表示
+                waitingForTargetMark = true;
+                targetMarkDelayTimer = 0f;
+
+                Debug.Log("パネル縮小終了");
+            }
+        }
+
+        // =====================================
+        // ターゲットマーク表示待機
+        // =====================================
+
+        if (waitingForTargetMark)
+        {
+            targetMarkDelayTimer += Time.deltaTime;
+
+            if (targetMarkDelayTimer >= targetMarkDelay)
+            {
+                waitingForTargetMark = false;
+
+                waitingForMark = true;
+
+                ShowTargetMark();
+
+                Debug.Log("ターゲットマーク表示");
+            }
+        }
+
+
+        // =====================================
+        // ターゲットマークのアニメ終了待ち
+        // =====================================
+
+        if (waitingForMark)
+        {
+            if (IsTargetMarkFinished())
+            {
+                waitingForMark = false;
+
                 scanDelayTimer = 0f;
                 waitingForScan = true;
 
-                Debug.Log("パネル縮小終了：スキャン開始待機");
+                Debug.Log("ターゲットマーク終了：スキャン開始待機");
             }
         }
 
@@ -212,6 +284,9 @@ public class UIPanelShrink : MonoBehaviour
             if (scanDelayTimer >= scanStartDelay)
             {
                 waitingForScan = false;
+
+                // ターゲットマークを消してスキャン開始
+                HideTargetMark();
                 StartScanLine();
             }
         }
@@ -299,6 +374,83 @@ public class UIPanelShrink : MonoBehaviour
         UpdateScanFill();
     }
 
+/// <summary>
+/// ターゲットマークを表示する。
+/// アニメーションを必ず先頭フレームから再生する。
+/// </summary>
+private void ShowTargetMark()
+    {
+        if (targetMark == null)
+            return;
+
+        markStateSeen = false;
+        markWaitTimer = 0f;
+
+        targetMark.SetActive(true);
+
+        if (targetMarkAnimator != null)
+        {
+            // Animatorを初期化
+            targetMarkAnimator.Rebind();
+            targetMarkAnimator.Update(0f);
+
+            // 指定アニメーションを先頭から再生
+            targetMarkAnimator.Play(markAnimStateName, 0, 0f);
+
+            // 即時反映
+            targetMarkAnimator.Update(0f);
+        }
+    }
+
+
+    /// <summary>
+    /// ターゲットマークのアニメが終わったか判定する。
+    /// 指定ステート(markAnimStateName)の再生が最後まで進むか、
+    /// 別のステートへ遷移したら終了とみなす。
+    /// </summary>
+    private bool IsTargetMarkFinished()
+    {
+        // マークやAnimatorが無い場合は待たずに進む
+        if (targetMark == null || targetMarkAnimator == null)
+        {
+            return true;
+        }
+
+        // ステート名が間違っていてもスキャンが止まらないための保険
+        markWaitTimer += Time.deltaTime;
+        if (markWaitTimer >= markWaitTimeout)
+        {
+            Debug.LogWarning(
+                "ターゲットマークのアニメ終了を検知できませんでした。" +
+                "markAnimStateNameがAnimatorのステート名と一致しているか確認してください。"
+            );
+            return true;
+        }
+
+        AnimatorStateInfo info = targetMarkAnimator.GetCurrentAnimatorStateInfo(0);
+
+        if (info.IsName(markAnimStateName))
+        {
+            markStateSeen = true;
+            return info.normalizedTime >= 1f;
+        }
+
+        // 一度対象ステートに入った後、別ステートへ移った = 終了
+        return markStateSeen;
+    }
+
+
+    /// <summary>
+    /// ターゲットマークを非表示にする。
+    /// </summary>
+    private void HideTargetMark()
+    {
+        if (targetMark != null)
+        {
+            targetMark.SetActive(false);
+        }
+    }
+
 
     /// <summary>
     /// スキャンの進行度に合わせて画像を上から表示する。
@@ -362,6 +514,13 @@ public class UIPanelShrink : MonoBehaviour
         waitingForScan = false;
         scanningLine = false;
         waitingForHide = false;
+
+        // ターゲットマークをリセット
+        waitingForMark = false;
+        waitingForTargetMark = false;
+        targetMarkDelayTimer = 0f;
+
+        HideTargetMark();
 
         target.pivot = new Vector2(pivotX, target.pivot.y);
 
@@ -643,6 +802,13 @@ public class UIPanelShrink : MonoBehaviour
         scanDelayTimer = 0f;
         hideTimer = 0f;
         scanProgress = 0f;
+
+        // ターゲットマークが残らないように消す
+        waitingForMark = false;
+        waitingForTargetMark = false;
+        targetMarkDelayTimer = 0f;
+
+        HideTargetMark();
 
         if (scanLine != null)
         {

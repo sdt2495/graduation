@@ -1,4 +1,4 @@
-
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -21,6 +21,15 @@ public class ShopManagerkari : MonoBehaviour
 
     private bool hasRerolled = false;
     private bool hasPurchased = false;
+
+    [Header("選択ボタン演出")]
+    public float moveAmount = 15f;
+    public float moveSpeed = 8f;
+    public Color selectedColor = Color.yellow;
+
+    private RectTransform[] buttonRects;
+    private Vector2[] originalPositions;
+    private Outline[] buttonOutlines;
 
     private string[] effectNames =
     {
@@ -57,6 +66,30 @@ public class ShopManagerkari : MonoBehaviour
 
         hasRerolled = false;
         rerollButton.interactable = true;
+
+        buttonRects = new RectTransform[selectButtons.Length];
+        originalPositions = new Vector2[selectButtons.Length];
+        buttonOutlines = new Outline[selectButtons.Length];
+
+        for (int i = 0; i < selectButtons.Length; i++)
+        {
+            buttonRects[i] = selectButtons[i].GetComponent<RectTransform>();
+
+            originalPositions[i] = buttonRects[i].anchoredPosition;
+
+            // 枠線を追加
+            buttonOutlines[i] = selectButtons[i].gameObject.GetComponent<Outline>();
+
+            if (buttonOutlines[i] == null)
+            {
+                buttonOutlines[i] = selectButtons[i].gameObject.AddComponent<Outline>();
+            }
+
+            buttonOutlines[i].effectColor = selectedColor;
+            buttonOutlines[i].effectDistance = new Vector2(5, 5);
+
+            buttonOutlines[i].enabled = false;
+        }
     }
 
     void Update()
@@ -113,6 +146,15 @@ public class ShopManagerkari : MonoBehaviour
                 () => SelectItem(index)
             );
         }
+
+        // 選択演出をリセット
+        StopAllCoroutines();
+
+        for (int i = 0; i < selectButtons.Length; i++)
+        {
+            buttonOutlines[i].enabled = false;
+            buttonRects[i].anchoredPosition = originalPositions[i];
+        }
     }
 
     void SelectItem(int index)
@@ -129,6 +171,19 @@ public class ShopManagerkari : MonoBehaviour
             " / " + prices[effect] + "コイン";
 
         purchaseButton.interactable = true;
+
+        // 全ボタンの選択枠を解除
+        for (int i = 0; i < selectButtons.Length; i++)
+        {
+            buttonOutlines[i].enabled = false;
+        }
+
+        // 選択したボタンだけ枠を表示
+        buttonOutlines[index].enabled = true;
+
+        // 選択したボタンを上下に動かす
+        StopAllCoroutines();
+        StartCoroutine(MoveButton(index));
     }
 
     public void Purchase()
@@ -208,6 +263,8 @@ public class ShopManagerkari : MonoBehaviour
         purchased[selectedIndex] = true;
         effectTexts[selectedIndex].text = "購入済み";
 
+        buttonOutlines[selectedIndex].enabled = false;
+
         for (int i = 0; i < 3; i++)
         {
             selectButtons[i].interactable = false;
@@ -264,5 +321,52 @@ public class ShopManagerkari : MonoBehaviour
         rerollButton.interactable = false;
 
         Debug.Log("RE-ROLLしました！");
+    }
+
+    IEnumerator MoveButton(int index)
+    {
+        RectTransform rect = buttonRects[index];
+
+        Vector2 original = originalPositions[index];
+        Vector2 target = original + new Vector2(0, moveAmount);
+
+        float time = 0f;
+
+        // 上に移動
+        while (time < 1f)
+        {
+            time += Time.deltaTime * moveSpeed;
+
+            rect.anchoredPosition = Vector2.Lerp(
+                original,
+                target,
+                time
+            );
+
+            yield return null;
+        }
+
+        rect.anchoredPosition = target;
+
+        // 少し待つ
+        yield return new WaitForSeconds(0.1f);
+
+        // 元の位置に戻る
+        time = 0f;
+
+        while (time < 1f)
+        {
+            time += Time.deltaTime * moveSpeed;
+
+            rect.anchoredPosition = Vector2.Lerp(
+                target,
+                original,
+                time
+            );
+
+            yield return null;
+        }
+
+        rect.anchoredPosition = original;
     }
 }

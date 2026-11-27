@@ -267,9 +267,9 @@ public class CommandUI : MonoBehaviour
     {
         nextCommand.Clear();
 
-        int count = Random.Range(1, 4);
+        int count = CommandGenerator.GetCommandCount(PlayerStats.Instance.TEC);
 
-        for(int i = 0; i < count;i++)
+        for (int i = 0; i < count;i++)
         {
             nextCommand.Add((CommandType)Random.Range(0, 4));
         }

@@ -33,6 +33,8 @@ public class PlayerStats : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        IsInitialized = true;
     }
 
     // ‰‰ñ‚¾‚¯‰Šú’l‚ğİ’è‚·‚é

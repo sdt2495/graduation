@@ -24,6 +24,17 @@ public class GameManager : MonoBehaviour
 
     public void Start()
     {
+        // PlayerStats‚Ì‘¶İŠm”F‚Æ‰Šú‰»
+        PlayerStats playerStats = PlayerStats.Instance;
+
+        if (playerStats == null)
+        {
+            GameObject manager = new GameObject("PlayerStatsManager");
+            playerStats = manager.AddComponent<PlayerStats>();
+        }
+
+        playerStats.InitializeIfNeeded(50f);
+
         // StageManager‚ÌQÆ‚ğæ“¾
         if (stageManager == null)
         {

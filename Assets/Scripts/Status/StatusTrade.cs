@@ -41,6 +41,7 @@ public class StatusTrade : MonoBehaviour
         ? MoneyManager.Instance.Money
         : 0;
 
+
     private void Start()
     {
         if (statusRadar == null)
@@ -49,13 +50,15 @@ public class StatusTrade : MonoBehaviour
             return;
         }
 
+        // PlayerStatsがなければ自動生成する
         PlayerStats playerStats = PlayerStats.Instance;
 
         if (playerStats == null)
         {
-            Debug.LogError(
-                "PlayerStats が見つかりません。PlayerStatsManager を設定してください。");
-            return;
+            GameObject manager = new GameObject("PlayerStatsManager");
+            playerStats = manager.AddComponent<PlayerStats>();
+
+            Debug.Log("PlayerStatsManagerを自動生成しました。");
         }
 
         // 初回だけ初期値を設定する
@@ -100,6 +103,7 @@ public class StatusTrade : MonoBehaviour
         ShowMessage("ボタンにカーソルを乗せると結果を予測できます！");
         RefreshStatusButtonLabels();
     }
+
 
 
     private void RegisterButton(

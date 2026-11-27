@@ -205,13 +205,19 @@ public class Enemy : MonoBehaviour
 
     public void SetRandomCommands()
     {
+        if (PlayerStats.Instance == null ||!PlayerStats.Instance.IsInitialized)
+        {
+            Debug.LogError("PlayerStats‚ª‘¶İ‚µ‚È‚¢A‚Ü‚½‚Í‰Šú‰»‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
+            return;
+        }
+
         currentCommaneds.Clear();
         currentIndex = 0;
         missIndex = -1;
 
-        int count = Random.Range(1, 4);
+        int count = CommandGenerator.GetCommandCount(PlayerStats.Instance.TEC);
 
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
             currentCommaneds.Add((CommandType)Random.Range(0, 4));
         }

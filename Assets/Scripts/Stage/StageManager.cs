@@ -2,11 +2,36 @@ using UnityEngine;
 
 public class StageManager : MonoBehaviour
 {
+    public static StageManager Instance { get; private set; }
+
     [Header("ステージ設定")]
     [SerializeField] private StageData[] stages;
 
     // 現在のステージ番号（0から開始）
     private int currentStageIndex = 0;
+
+    private void Awake()
+    {
+        // 既にStageManagerが存在する場合は重複を削除
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
+        // シーン切り替え後も保持
+        DontDestroyOnLoad(gameObject);
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
 
     // 現在のステージ情報を取得
     public StageData GetCurrentStageData()

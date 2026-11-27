@@ -53,9 +53,19 @@ public class Enemy : MonoBehaviour
 
     private Coroutine coroutine;
 
+    /// <summary>
+    /// EnemyDataから各ステータスと画像を設定
+    /// </summary>
+    /// <param name="data"></param>
     public void Initialize(EnemyData data)
     {
         status = new EnemyStatus(data);
+
+        // 敵の画像を設定
+        if (data.enemySprite != null && spriteRenderer != null)
+        {
+            spriteRenderer.sprite = data.enemySprite;
+        }
     }
     // 外部参照用
     public int CurrentHP => status.CurrentHP;

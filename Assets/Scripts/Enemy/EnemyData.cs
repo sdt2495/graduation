@@ -8,4 +8,7 @@ public class EnemyData : ScriptableObject
     [Min(1)] public int maxHP = 100;
     [Min(0)] public int attack = 30;
     [Min(0)] public int defense = 20;
+
+    [Header("Œ©‚½–Ú")]
+    public Sprite enemySprite;
 }

@@ -1,22 +1,21 @@
-using System;
 using UnityEngine;
 
 public enum GamePhase
 {
-    Dialogue,               // 会話パート
-    BattlePreparation,      // コマンド選択待機
-    Battle,                 // 戦闘
-    Upgrade,                // 強化パート
-    StageClear,             // ステージクリア
-    GameOver                // ゲームオーバー
+    Dialogue,
+    BattlePreparation,
+    Battle,
+    Upgrade,
+    StageClear,
+    GameOver
 }
 
 public class GameManager : MonoBehaviour
 {
     [SerializeField] private BattleEnemySpawner enemySpawner;
 
-    [Header("ステージ設定")]
-    [SerializeField] private EnemyData enemyData;
+    [Header("マネージャー設定")]
+    [SerializeField] private StageManager stageManager;
 
     [SerializeField] private BattaleCommandManager commandManager;
     [SerializeField] private BattleManager battleManager;
@@ -25,13 +24,21 @@ public class GameManager : MonoBehaviour
 
     public void Start()
     {
+        // StageManagerの参照を取得
+        if (stageManager == null)
+        {
+            stageManager = StageManager.Instance;
+        }
+
+        if (stageManager == null)
+        {
+            Debug.LogError("StageManagerが見つかりません。");
+            return;
+        }
+
         ChangePhase(GamePhase.Dialogue);
     }
 
-    /// <summary>
-    /// デバック用に追加
-    /// Enterキーで次のPHASEへ移行
-    /// </summary>
     private void Update()
     {
         // デバッグ用：F1キーで準備画面へ移行
@@ -83,6 +90,12 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("戦闘準備開始");
 
+        // StageManagerから敵データを取得
+        EnemyData enemyData = stageManager.GetCurrentEnemyData();
+
+        if (enemyData == null)
+            return;
+
         // 敵を生成
         enemySpawner.SpawnEnemy(enemyData);
 
@@ -93,7 +106,6 @@ public class GameManager : MonoBehaviour
     private void StartBattle()
     {
         Debug.Log("戦闘開始");
-
         battleManager.StartBattle();
     }
 
@@ -114,7 +126,6 @@ public class GameManager : MonoBehaviour
 
     public void StartBattlePhase()
     {
-        // 戦闘準備中の場合だけ戦闘を開始する
         if (currentPhase != GamePhase.BattlePreparation)
             return;
 

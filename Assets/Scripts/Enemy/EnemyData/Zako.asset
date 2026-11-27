@@ -15,3 +15,4 @@ MonoBehaviour:
   maxHP: 100
   attack: 30
   defense: 20
+  enemySprite: {fileID: -4166075106869429360, guid: 52da73bde4bc02e40b2bb78b202dd80c, type: 3}

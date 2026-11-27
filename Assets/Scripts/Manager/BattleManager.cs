@@ -39,6 +39,7 @@ public class BattleManager : MonoBehaviour
     [SerializeField] private DirectionImageController directionImageController;
 
     [SerializeField] private CommandUI commandUI;
+    [SerializeField] private GameManager gameManager;
 
     // §ŒÀŠÔ
     [SerializeField] private float battleTimeLimit = 10.0f;
@@ -288,7 +289,7 @@ public class BattleManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Enemy€–S‚Ìˆ—
+    /// Enemy€–Sˆ—
     /// </summary>
     private void EnemyDeath()
     {
@@ -304,7 +305,7 @@ public class BattleManager : MonoBehaviour
         // í“¬I—¹
         EndBattle();
 
-        // “G€–SŒã‚Ìˆ—
-
+        // ‹­‰»ƒV[ƒ“‚ÖˆÚ“®
+        gameManager.ChangeToUpgradePhase();
     }
 }

@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 public enum GamePhase
 {
     Dialogue,
@@ -47,7 +47,25 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        ChangePhase(GamePhase.Dialogue);
+        // 強化シーンから戻ってきた場合
+        if (stageManager.ConsumeReturningFromUpgrade())
+        {
+            // 次のステージがあるか確認
+            if (stageManager.HasNextStage())
+            {
+                stageManager.NextStage();
+                ChangePhase(GamePhase.Dialogue);
+            }
+            else
+            {
+                ChangePhase(GamePhase.StageClear);
+            }
+        }
+        else
+        {
+            // 通常起動
+            ChangePhase(GamePhase.Dialogue);
+        }
     }
 
     private void Update()
@@ -101,7 +119,7 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("戦闘準備開始");
 
-        // StageManagerから敵データを取得
+        // 現在のステージの敵データを取得
         EnemyData enemyData = stageManager.GetCurrentEnemyData();
 
         if (enemyData == null)
@@ -123,6 +141,10 @@ public class GameManager : MonoBehaviour
     private void StartUpgrade()
     {
         Debug.Log("強化パート開始");
+
+        stageManager.SetReturningFromUpgrade();
+
+        UnityEngine.SceneManagement.SceneManager.LoadScene("StatusRadar");
     }
 
     private void StartStageClear()
@@ -141,5 +163,21 @@ public class GameManager : MonoBehaviour
             return;
 
         ChangePhase(GamePhase.Battle);
+    }
+
+    public void ChangeToUpgradePhase()
+    {
+        if (currentPhase != GamePhase.Battle)
+            return;
+
+        // 次のステージが存在しない場合
+        if (!stageManager.HasNextStage())
+        {
+            ChangePhase(GamePhase.StageClear);
+            return;
+        }
+
+        // 次のステージが存在する場合は強化シーンへ
+        ChangePhase(GamePhase.Upgrade);
     }
 }

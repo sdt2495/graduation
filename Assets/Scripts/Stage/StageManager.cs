@@ -47,7 +47,7 @@ public class StageManager : MonoBehaviour
         return stages[currentStageIndex];
     }
 
-    // 現在の敵データを取得
+    // 現在のステージの敵データを取得
     public EnemyData GetCurrentEnemyData()
     {
         StageData stage = GetCurrentStageData();
@@ -99,5 +99,24 @@ public class StageManager : MonoBehaviour
     public int GetStageCount()
     {
         return stages == null ? 0 : stages.Length;
+    }
+
+    // 強化シーンから戻ってきたか
+    public bool IsReturningFromUpgrade { get; private set; }
+
+    // 強化シーンへ移動する前に呼ぶ
+    public void SetReturningFromUpgrade()
+    {
+        IsReturningFromUpgrade = true;
+    }
+
+    // 復帰状態を取得して解除する
+    public bool ConsumeReturningFromUpgrade()
+    {
+        if (!IsReturningFromUpgrade)
+            return false;
+
+        IsReturningFromUpgrade = false;
+        return true;
     }
 }

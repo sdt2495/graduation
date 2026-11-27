@@ -942,6 +942,7 @@ MonoBehaviour:
   enemyHintUI: {fileID: 1082352435}
   directionImageController: {fileID: 172281836}
   commandUI: {fileID: 838218681}
+  gameManager: {fileID: 934584212}
   battleTimeLimit: 7.5
 --- !u!1 &490869624
 GameObject:

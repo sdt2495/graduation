@@ -694,6 +694,8 @@ MonoBehaviour:
   stages:
   - enemyData: {fileID: 11400000, guid: 5da98f8597a74e54c9e3348692c9d28a, type: 2}
     dialogueCsvName: 
+  - enemyData: {fileID: 11400000, guid: 9e50edc9b3c7ee44ea2535ce2fbcc47f, type: 2}
+    dialogueCsvName: 
 --- !u!1 &1859266990
 GameObject:
   m_ObjectHideFlags: 0

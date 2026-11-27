@@ -9,8 +9,8 @@ using UnityEngine.UI;
 /// ・StartShrink()が呼び出されるまで非表示
 /// ・呼び出されたらパネルを表示
 /// ・縮小開始と同時にカメラをズーム
-/// ・縮小終了後、ターゲットマーク(アニメーション)を表示
-/// ・指定時間待機後、ターゲットマークを消してスキャン開始
+/// ・縮小開始と同時(targetMarkDelay後)にターゲットマーク(アニメーション)を表示
+/// ・縮小完了かつマークのアニメ終了後、指定時間待機してターゲットマークを消しスキャン開始
 /// ・スキャン用の線を上から下へ移動
 /// ・線の移動とSliderの進行度を同期
 /// ・線が下端に到達したらスキャン完了
@@ -51,7 +51,7 @@ public class UIPanelShrink : MonoBehaviour
     [SerializeField] private float fixedY = 750f;
 
     [Header("ターゲットマーク")]
-    [Tooltip("アニメーション付きのターゲットマーク(縮小完了後に表示、スキャン開始時に非表示)")]
+    [Tooltip("アニメーション付きのターゲットマーク(縮小開始と同時に表示、スキャン開始時に非表示)")]
     [SerializeField] private GameObject targetMark;
 
     [Tooltip("このAnimatorステートが終わったらスキャンを開始する(ステート名)")]
@@ -59,6 +59,9 @@ public class UIPanelShrink : MonoBehaviour
 
     [Tooltip("万一ステートが見つからない場合に、強制的に進める最大待機時間(秒)")]
     [SerializeField] private float markWaitTimeout = 5f;
+
+    [Tooltip("縮小開始からターゲットマーク表示までの待機時間(0で縮小と同時に表示)")]
+    [SerializeField] private float targetMarkDelay = 0f;
 
     [Header("スキャン用の線")]
     [SerializeField]
@@ -70,7 +73,7 @@ public class UIPanelShrink : MonoBehaviour
     [SerializeField] private float scanDuration = 1.5f;
 
     [Header("スキャン開始までの待機時間")]
-    [Tooltip("ターゲットマークのアニメ終了からスキャン開始までの待機(0で即開始)")]
+    [Tooltip("縮小完了かつターゲットマークのアニメ終了からスキャン開始までの待機(0で即開始)")]
     [SerializeField] private float scanStartDelay = 0f;
 
     [Header("方向画像制御")]
@@ -117,13 +120,6 @@ public class UIPanelShrink : MonoBehaviour
     [SerializeField] private float finalWidthScale = 1.2f;
     [SerializeField] private float finalHeightScale = 0.005f;
 
-    private bool waitingForTargetMark;
-private float targetMarkDelayTimer;
-
-[Header("ターゲットマーク表示待機時間")]
-[SerializeField]
-private float targetMarkDelay = 0.5f;
-
     // Canvasの元のスケール
     private Vector3 canvasOriginalScale;
 
@@ -153,6 +149,10 @@ private float targetMarkDelay = 0.5f;
 
     private bool waitingForHide;
     private bool scanImageHidden;
+
+    // ターゲットマーク表示までの待機
+    private bool waitingForTargetMark;
+    private float targetMarkDelayTimer;
 
     // ターゲットマークのアニメ待ち
     private bool waitingForMark;
@@ -223,19 +223,15 @@ private float targetMarkDelay = 0.5f;
                 shrinking = false;
                 shrinkCompleted = true;
 
-                waitingForScan = false;
-                waitingForMark = false;
-
-                // 少し待ってからターゲットマーク表示
-                waitingForTargetMark = true;
-                targetMarkDelayTimer = 0f;
+                // ターゲットマークは縮小開始時に再生済み(または再生待ち)。
+                // waitingForMark / waitingForTargetMark はそのまま維持する。
 
                 Debug.Log("パネル縮小終了");
             }
         }
 
         // =====================================
-        // ターゲットマーク表示待機
+        // ターゲットマーク表示待機(縮小開始からの経過)
         // =====================================
 
         if (waitingForTargetMark)
@@ -257,18 +253,22 @@ private float targetMarkDelay = 0.5f;
 
         // =====================================
         // ターゲットマークのアニメ終了待ち
+        // 縮小中も毎フレーム判定を呼ぶ(ステート遷移の見逃し防止)。
+        // スキャンへ進むのは「縮小完了」かつ「アニメ終了」の両方が揃ってから。
         // =====================================
 
         if (waitingForMark)
         {
-            if (IsTargetMarkFinished())
+            bool markFinished = IsTargetMarkFinished();
+
+            if (markFinished && shrinkCompleted)
             {
                 waitingForMark = false;
 
                 scanDelayTimer = 0f;
                 waitingForScan = true;
 
-                Debug.Log("ターゲットマーク終了：スキャン開始待機");
+                Debug.Log("縮小完了＆ターゲットマーク終了：スキャン開始待機");
             }
         }
 
@@ -374,11 +374,12 @@ private float targetMarkDelay = 0.5f;
         UpdateScanFill();
     }
 
-/// <summary>
-/// ターゲットマークを表示する。
-/// アニメーションを必ず先頭フレームから再生する。
-/// </summary>
-private void ShowTargetMark()
+
+    /// <summary>
+    /// ターゲットマークを表示する。
+    /// アニメーションを必ず先頭フレームから再生する。
+    /// </summary>
+    private void ShowTargetMark()
     {
         if (targetMark == null)
             return;
@@ -533,6 +534,22 @@ private void ShowTargetMark()
             Color c = scanImage.color;
             c.a = 1f;
             scanImage.color = c;
+        }
+
+        // 縮小開始と同時にターゲットマークのアニメを開始する
+        if (targetMarkDelay <= 0f)
+        {
+            // 待機なし：即表示
+            waitingForMark = true;
+            ShowTargetMark();
+
+            Debug.Log("ターゲットマーク表示(縮小開始と同時)");
+        }
+        else
+        {
+            // 縮小開始から targetMarkDelay 秒後に表示
+            waitingForTargetMark = true;
+            targetMarkDelayTimer = 0f;
         }
 
         if (battleCameraController != null)

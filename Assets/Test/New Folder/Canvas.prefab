@@ -146,7 +146,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.39215687}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.3137255}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -313,29 +313,30 @@ MonoBehaviour:
   downImage: {fileID: 8422029787325370696}
   leftImage: {fileID: 2415296508658652592}
   rightImage: {fileID: 1970753881401018722}
-  initialOffset: 140
-  spreadDistance: 200
-  moveDuration: 0.25
-  selectedBrighten: 0.2
+  initialOffset: 130
+  spreadDistance: 175
+  moveDuration: 0.5
+  directionMaterial: {fileID: 2100000, guid: de8c088fc742b7f45ae16a763136c48c, type: 2}
+  selectedBrighten: 0.4
   glitchSprite: {fileID: 21300000, guid: 1da7d8099566c7743bc7d6aedd66ba17, type: 3}
   dangerColors:
   - {r: 0.95, g: 0.1, b: 0.3, a: 1}
-  - {r: 1, g: 0.2, b: 0.55, a: 1}
-  - {r: 0.75, g: 0.05, b: 0.2, a: 1}
-  - {r: 1, g: 0.45, b: 0.6, a: 1}
-  noiseInterval: 0.04
-  jitterAmount: 2.5
+  - {r: 0.7647059, g: 0.2, b: 1, a: 1}
+  - {r: 0.6901961, g: 0.08446065, b: 0.22309154, a: 1}
+  - {r: 0.3679245, g: 0.3679245, b: 0.3679245, a: 1}
+  noiseInterval: 0.47
+  jitterAmount: 3.23
   dangerEffectPrefab: {fileID: 0}
   selectedEffectPrefab: {fileID: 0}
   frameColorA: {r: 0.75, g: 0.96, b: 1, a: 1}
   frameColorB: {r: 0.95, g: 1, b: 1, a: 1}
   frameThickness: 4
   frameBlinkSpeed: 6
-  selectPunchScale: 1.35
+  selectPunchScale: 1.5
   selectPunchDuration: 0.18
-  impactPunchScale: 1.5
-  impactFinalScale: 0.8
-  impactPunchDuration: 0.25
+  impactPunchScale: 2.5
+  impactFinalScale: 0.7
+  impactPunchDuration: 0.4
   playerSpriteRenderer: {fileID: 0}
   playerHitColor: {r: 1, g: 0, b: 0, a: 1}
   playerHitFlashDuration: 0.6
@@ -650,7 +651,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -100, y: -90}
+  m_AnchoredPosition: {x: -100, y: -75}
   m_SizeDelta: {x: 1000, y: 650}
   m_Pivot: {x: 0.2, y: 0.4}
 --- !u!222 &1942461755967487366
@@ -722,6 +723,7 @@ MonoBehaviour:
   targetMark: {fileID: 325582068820767742}
   markAnimStateName: MarkLockOn
   markWaitTimeout: 1
+  targetMarkDelay: 0
   scanLine: {fileID: 6948856610608819522}
   scanStartY: 400
   scanEndY: -400
@@ -743,7 +745,6 @@ MonoBehaviour:
   thirdEffectDuration: 0.15
   finalWidthScale: 1.2
   finalHeightScale: 0.005
-  targetMarkDelay: 0.5
 --- !u!225 &7444629849050008128
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -1554,7 +1555,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 10}
   m_SizeDelta: {x: 900, y: 900}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6592580970290605446

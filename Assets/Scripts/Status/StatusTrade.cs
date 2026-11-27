@@ -49,11 +49,34 @@ public class StatusTrade : MonoBehaviour
             return;
         }
 
+        PlayerStats playerStats = PlayerStats.Instance;
+
+        if (playerStats == null)
+        {
+            Debug.LogError(
+                "PlayerStats が見つかりません。PlayerStatsManager を設定してください。");
+            return;
+        }
+
+        // 初回だけ初期値を設定する
         if (initializeTestStats)
         {
-            float value = Mathf.Clamp(initialStatValue, 0f, 100f);
-            statusRadar.SetStatus(value, value, value, value, value, value);
+            playerStats.InitializeIfNeeded(initialStatValue);
         }
+        else
+        {
+            playerStats.InitializeIfNeeded();
+        }
+
+        // 保存済みの値をレーダーチャートに反映
+        statusRadar.SetStatus(
+            playerStats.HP,
+            playerStats.ATK,
+            playerStats.DEF,
+            playerStats.CRI,
+            playerStats.TEC,
+            playerStats.SAN
+        );
 
         RegisterButton("HP Buy", "HP", true);
         RegisterButton("HP Sell", "HP", false);
@@ -345,6 +368,15 @@ public class StatusTrade : MonoBehaviour
 
     private float GetStatus(string name)
     {
+        if (PlayerStats.Instance != null &&
+            PlayerStats.Instance.IsInitialized)
+        {
+            return PlayerStats.Instance.GetStat(name);
+        }
+
+        if (statusRadar == null)
+            return 0f;
+
         switch (name)
         {
             case "HP": return statusRadar.HP;
@@ -352,15 +384,26 @@ public class StatusTrade : MonoBehaviour
             case "DEF": return statusRadar.DEF;
             case "CRI": return statusRadar.CRI;
             case "TEC": return statusRadar.TEC;
-            case "Other": return statusRadar.Other;
+            case "Other":
+            case "SAN": return statusRadar.Other;
             default: return 0f;
         }
     }
 
     private void SetStatus(string name, float value)
     {
+        if (statusRadar == null)
+            return;
+
         value = Mathf.Clamp(value, 0f, 100f);
 
+        // 共通データを更新
+        if (PlayerStats.Instance != null)
+        {
+            PlayerStats.Instance.SetStat(name, value);
+        }
+
+        // レーダーチャートにも反映
         float hp = statusRadar.HP;
         float atk = statusRadar.ATK;
         float def = statusRadar.DEF;
@@ -376,6 +419,7 @@ public class StatusTrade : MonoBehaviour
             case "CRI": cri = value; break;
             case "TEC": tec = value; break;
             case "Other": other = value; break;
+            case "SAN": other = value; break;
         }
 
         statusRadar.SetStatus(hp, atk, def, cri, tec, other);

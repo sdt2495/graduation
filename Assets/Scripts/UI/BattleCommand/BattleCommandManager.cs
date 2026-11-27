@@ -153,19 +153,8 @@ public class BattaleCommandManager : MonoBehaviour
         // タイマーは非表示
         timerUI.SetActive(false);
 
-        Enemy battleEnemy = spawner.GetBattleEnemy();
-
-        // Enemyのコマンド位置を初期化
-        battleEnemy.ResetCommand();
-
-        // NEXTコマンドを生成
-        commandUI.SetInitialNextCommands();
-
-        // 現在のコマンドとNEXTコマンドをUIに反映
-        commandUI.UpdateCommanedText(battleEnemy);
-
-        // 矢印UIを表示
-        commandUI.SetCommandUIVisible(true);
+        // 矢印UIは非表示
+        commandUI.SetCommandUIVisible(false);
 
         // ボタン選択を初期化
         selectCommandIndex = 0;
@@ -178,6 +167,7 @@ public class BattaleCommandManager : MonoBehaviour
             buttonRect.anchoredPosition.y,
             selectFrame.localPosition.z
         );
+
         // 選択コマンドのスライドアニメーション
         commandSlide.ShowCommand();
     }
@@ -192,6 +182,7 @@ public class BattaleCommandManager : MonoBehaviour
         battleCommandUI.SetActive(false);
         timerUI.SetActive(true);
 
+        // 戦闘開始
         gameManager.StartBattlePhase();
 
         if (!battleManager.IsBattle())
@@ -199,7 +190,21 @@ public class BattaleCommandManager : MonoBehaviour
             battleManager.StartBattle();
         }
 
+        Enemy battleEnemy = spawner.GetBattleEnemy();
+
+        // Enemyのコマンド位置を初期化
+        battleEnemy.ResetCommand();
+
+        // NEXTコマンドを生成
+        commandUI.SetInitialNextCommands();
+
+        // 現在のコマンドとNEXTコマンドをUIに反映
+        commandUI.UpdateCommanedText(battleEnemy);
+
+        // 矢印UIを表示
         commandUI.SetCommandUIVisible(true);
+
+        // プレイヤーのコマンド入力を有効化
         player.SetCommandInput(true);
     }
 
@@ -222,8 +227,8 @@ public class BattaleCommandManager : MonoBehaviour
     /// </summary>
     public void OnBattleEnded()
     {
-        // コマンドUIを表示
-        commandUI.SetCommandUIVisible(true);
+        // コマンドUIを非表示
+        commandUI.SetCommandUIVisible(false);
 
         // タイマーUIを非表示
         timerUI.SetActive(false);

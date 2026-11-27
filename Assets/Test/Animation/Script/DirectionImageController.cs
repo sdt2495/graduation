@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,10 +34,10 @@ public enum BeatPhase
 ///
 /// ・PlayerをTagから取得
 /// ・4方向の画像をPlayerの周囲に配置
-/// ・危険方向は赤色の複製画像で表示
-/// ・選択方向は青色の枠線で表示
+/// ・Direction Material（UI/DirectionGlitch）を設定した場合は
+///   危険方向の赤グリッチ・選択方向の水色枠線/明るさをシェーダーで描画
+/// ・Direction Materialが未設定の場合は従来のSprite重ね+Outline方式で描画
 /// ・赤色・青色の光るエフェクトPrefabに対応
-/// ・選択枠線は点滅
 /// ・選択時に拡大演出
 /// ・着弾時に拡大して小さくなる演出
 /// ・被弾時はPlayer本体だけを赤く点滅
@@ -64,12 +63,16 @@ public class DirectionImageController : MonoBehaviour
     [SerializeField] private float spreadDistance = 50f;
     [SerializeField] private float moveDuration = 0.4f;
 
+    [Header("シェーダー表示")]
+    [Tooltip("UI/DirectionGlitchシェーダーのマテリアル。設定すると赤グリッチ/水色枠線をシェーダーで描く。空なら従来方式")]
+    [SerializeField] private Material directionMaterial;
+
     [Header("選択時の明るさ")]
     [Tooltip("元画像の色を白に近づける割合。0で変化なし")]
     [Range(0f, 1f)]
     [SerializeField] private float selectedBrighten = 0.2f;
 
-    [Header("危険表示（赤系グリッチ）")]
+    [Header("危険表示（赤系グリッチ）※従来方式用")]
     [SerializeField] private Sprite glitchSprite;
 
     [SerializeField]
@@ -91,17 +94,19 @@ public class DirectionImageController : MonoBehaviour
     [Tooltip("選択方向に表示する青色エフェクトPrefab")]
     [SerializeField] private GameObject selectedEffectPrefab;
 
-    [Header("選択枠線（青色）")]
+    [Header("選択枠線（白に近い水色）")]
     [SerializeField]
-    private Color frameColorA = new Color(0.05f, 0.45f, 1f, 1f);
+    private Color frameColorA = new Color(0.70f, 0.92f, 1f, 1f);
 
     [SerializeField]
-    private Color frameColorB = new Color(0.2f, 0.8f, 1f, 1f);
+    private Color frameColorB = new Color(0.92f, 0.99f, 1f, 1f);
 
-    [SerializeField] private float frameThickness = 5f;
+    [Tooltip("従来方式（Outline）の太さ。シェーダー方式ではマテリアルのFrame Widthで調整")]
+    [SerializeField] private float frameThickness = 6f;
     [SerializeField] private float frameBlinkSpeed = 6f;
 
     [Header("選択した瞬間の演出")]
+    [Tooltip("選択した瞬間に一瞬大きくなる倍率。最後は1倍(普通の大きさ)に戻る")]
     [SerializeField] private float selectPunchScale = 1.35f;
     [SerializeField] private float selectPunchDuration = 0.18f;
 
@@ -151,6 +156,13 @@ public class DirectionImageController : MonoBehaviour
 
     public BeatPhase Phase { get; private set; } = BeatPhase.Idle;
 
+    // シェーダープロパティID
+    private static readonly int DangerId = Shader.PropertyToID("_Danger");
+    private static readonly int SelectedId = Shader.PropertyToID("_Selected");
+    private static readonly int BrightenId = Shader.PropertyToID("_Brighten");
+    private static readonly int FrameColorAId = Shader.PropertyToID("_FrameColorA");
+    private static readonly int FrameColorBId = Shader.PropertyToID("_FrameColorB");
+
     // ------------------------------------------------------------
     // 1方向ぶんの画像情報
     // ------------------------------------------------------------
@@ -159,8 +171,11 @@ public class DirectionImageController : MonoBehaviour
         public RectTransform rect;
         public Image image;
 
-        // 危険方向表示用の複製画像
+        // 危険方向表示用の複製画像（従来方式）
         public Image overlayImage;
+
+        // シェーダー方式用に複製したマテリアル（nullなら従来方式）
+        public Material material;
 
         // 光るエフェクト
         public GameObject dangerEffectObject;
@@ -245,6 +260,18 @@ public class DirectionImageController : MonoBehaviour
         CreateSlot(ArrowDirection.Right, rightImage);
 
         SetImagesActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        // 方向ごとに複製したマテリアルを破棄
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] != null && slots[i].material != null)
+            {
+                Destroy(slots[i].material);
+            }
+        }
     }
 
     private void Update()
@@ -650,7 +677,10 @@ public class DirectionImageController : MonoBehaviour
     public void SelectDirection(ArrowDirection direction)
     {
         if (!IsInputOpen)
+        {
+            Debug.Log("[DIC] 入力受付外のため無視: Phase=" + Phase);
             return;
+        }
 
         if (selectedDirection.HasValue &&
             selectedDirection.Value == direction)
@@ -664,9 +694,11 @@ public class DirectionImageController : MonoBehaviour
         }
 
         selectedDirection = direction;
+        Debug.Log("[DIC] 選択: " + direction + " / brighten=" + selectedBrighten);
 
         SetSelected(direction, true);
 
+        // 選択した瞬間に一瞬大きくなって、普通の大きさ(1倍)に戻る
         Slot slot = slots[(int)direction];
 
         if (slot != null)
@@ -725,13 +757,17 @@ public class DirectionImageController : MonoBehaviour
             slot.isDanger = true;
             slot.dangerColor = PickDangerColor();
 
-            slot.overlayImage.sprite =
-                glitchSprite != null
-                ? glitchSprite
-                : slot.defaultSprite;
+            // 従来方式のときだけ複製Imageで赤色表示
+            if (slot.material == null)
+            {
+                slot.overlayImage.sprite =
+                    glitchSprite != null
+                    ? glitchSprite
+                    : slot.defaultSprite;
 
-            slot.overlayImage.color = slot.dangerColor;
-            slot.overlayImage.enabled = true;
+                slot.overlayImage.color = slot.dangerColor;
+                slot.overlayImage.enabled = true;
+            }
 
             // 赤色の危険エフェクトを表示
             SetEffectActive(
@@ -838,6 +874,13 @@ public class DirectionImageController : MonoBehaviour
             slot.image.sprite = slot.defaultSprite;
             slot.image.color = slot.defaultColor;
 
+            // シェーダー方式の状態をリセット
+            if (slot.material != null)
+            {
+                slot.material.SetFloat(DangerId, 0f);
+                slot.material.SetFloat(SelectedId, 0f);
+            }
+
             // 赤色表示用の複製画像を非表示
             slot.overlayImage.enabled = false;
             slot.overlayImage.sprite = slot.defaultSprite;
@@ -854,7 +897,7 @@ public class DirectionImageController : MonoBehaviour
                 false
             );
 
-            // 青色枠線を非表示
+            // 枠線を非表示
             slot.outline.enabled = false;
 
             slot.rect.localScale = slot.defaultScale;
@@ -874,12 +917,21 @@ public class DirectionImageController : MonoBehaviour
         Slot slot = slots[(int)dir];
 
         if (slot == null)
+        {
+            Debug.LogWarning("[DIC] Slotが未作成です: " + dir);
             return;
+        }
 
         slot.isSelected = selected;
 
-        // 既存の青色枠線
-        slot.outline.enabled = selected;
+        // 従来方式のときだけOutlineで枠線を表示
+        if (slot.material == null)
+        {
+            slot.outline.effectDistance =
+                new Vector2(frameThickness, frameThickness);
+            slot.outline.effectColor = frameColorA;
+            slot.outline.enabled = selected;
+        }
 
         // 青色エフェクトの表示・非表示
         SetEffectActive(
@@ -898,7 +950,48 @@ public class DirectionImageController : MonoBehaviour
     // ------------------------------------------------------------
     private void UpdateVisual(Slot slot, bool reroll)
     {
-        slot.image.color = slot.defaultColor;
+        // ---------- シェーダー方式 ----------
+        if (slot.material != null)
+        {
+            // 小刻みな震えはC#側で位置をずらす
+            if (slot.isDanger && reroll)
+            {
+                slot.jitter = new Vector2(
+                    UnityEngine.Random.Range(-jitterAmount, jitterAmount),
+                    UnityEngine.Random.Range(-jitterAmount, jitterAmount)
+                );
+            }
+
+            slot.material.SetFloat(DangerId, slot.isDanger ? 1f : 0f);
+            slot.material.SetFloat(SelectedId, slot.isSelected ? 1f : 0f);
+            slot.material.SetFloat(BrightenId, selectedBrighten);
+            slot.material.SetColor(FrameColorAId, frameColorA);
+            slot.material.SetColor(FrameColorBId, frameColorB);
+
+            slot.overlayImage.enabled = false;
+
+            return;
+        }
+
+        // ---------- 従来方式（Sprite重ね + Outline） ----------
+
+        // 選択中は元の色を白に近づけて少し明るくする
+        if (slot.isSelected)
+        {
+            Color bright = Color.Lerp(
+                slot.defaultColor,
+                Color.white,
+                selectedBrighten
+            );
+
+            bright.a = slot.defaultColor.a;
+
+            slot.image.color = bright;
+        }
+        else
+        {
+            slot.image.color = slot.defaultColor;
+        }
 
         if (slot.isDanger)
         {
@@ -926,6 +1019,9 @@ public class DirectionImageController : MonoBehaviour
                 Time.time * frameBlinkSpeed,
                 1f
             );
+
+            slot.outline.effectDistance =
+                new Vector2(frameThickness, frameThickness);
 
             slot.outline.effectColor =
                 Color.Lerp(frameColorA, frameColorB, k);
@@ -1241,7 +1337,7 @@ public class DirectionImageController : MonoBehaviour
             return;
         }
 
-        // 青い選択枠線を準備
+        // 選択枠線を準備（従来方式用）
         Outline outline = rect.GetComponent<Outline>();
 
         if (outline == null)
@@ -1258,7 +1354,7 @@ public class DirectionImageController : MonoBehaviour
 
         outline.enabled = false;
 
-        // 赤色表示用の複製画像を作成
+        // 赤色表示用の複製画像を作成（従来方式用）
         GameObject overlayObject = new GameObject(
             rect.name + "_ColorOverlay",
             typeof(RectTransform),
@@ -1293,9 +1389,19 @@ public class DirectionImageController : MonoBehaviour
         overlayImage.raycastTarget = false;
         overlayImage.maskable = image.maskable;
 
+        // ※マテリアルの複製より前に元のマテリアルをコピーする
         overlayImage.material = image.material;
 
         overlayImage.enabled = false;
+
+        // シェーダー方式：方向ごとにマテリアルを複製して差し替える
+        Material slotMaterial = null;
+
+        if (directionMaterial != null)
+        {
+            slotMaterial = new Material(directionMaterial);
+            image.material = slotMaterial;
+        }
 
         // 赤色の危険エフェクトを生成
         GameObject dangerEffect = CreateEffect(
@@ -1316,6 +1422,8 @@ public class DirectionImageController : MonoBehaviour
             rect = rect,
             image = image,
             overlayImage = overlayImage,
+
+            material = slotMaterial,
 
             dangerEffectObject = dangerEffect,
             selectedEffectObject = selectedEffect,

@@ -203,22 +203,57 @@ public class BattleManager : MonoBehaviour
     {
         isBattle = false;
     }
-    
+
+
     /// <summary>
-    /// コマンド入力に成功時敵にダメージを与える
+    /// コマンド入力成功時に敵へダメージを与える
     /// </summary>
     public void CompleteCommand()
     {
-        Enemy enemy = spawner.GetBattleEnemy();
+        Enemy battleEnemy = spawner.GetBattleEnemy();
 
-        enemy.Damage(1);
-
-        if(enemy.IsDead())
+        if (battleEnemy == null || battleEnemy.IsDead())
         {
-            enemy.Die();
+            return;
+        }
+
+        if (PlayerStats.Instance == null ||
+            !PlayerStats.Instance.IsInitialized)
+        {
+            Debug.LogError("PlayerStatsが存在しない、または初期化されていません。");
+            return;
+        }
+
+        // プレイヤーATK
+        float atk = PlayerStats.Instance.ATK;
+
+        // 敵DEF
+        float enemyDef = battleEnemy.Defense;
+
+        // 現在の入力列の倍率
+        float multiplier = battleEnemy.GetCurrentDamageMultiplier();
+
+        // ダメージ計算
+        int damage = ArrowDamageCalculator.CalculateDamage(
+            atk,
+            enemyDef,
+            multiplier
+        );
+
+        Debug.Log(
+            $"攻撃成功：ATK={atk:F1}, DEF={enemyDef:F1}, " +
+            $"入力列倍率=×{multiplier:F2}, ダメージ={damage}"
+        );
+
+        battleEnemy.Damage(damage);
+
+        if (battleEnemy.IsDead())
+        {
+            battleEnemy.Die();
             EnemyDeath();
         }
     }
+
 
     /// <summary>
     /// Enemyの攻撃終了を通知する

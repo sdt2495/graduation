@@ -17,6 +17,9 @@ public class GameManager : MonoBehaviour
     [Header("マネージャー設定")]
     [SerializeField] private StageManager stageManager;
 
+    [Header("会話管理")]
+    [SerializeField] private GameFlowManager gameFlowManager;
+
     [Header("背景")]
     [SerializeField] private SpriteRenderer backgroundRenderer;
 
@@ -118,6 +121,25 @@ public class GameManager : MonoBehaviour
     private void StartDialogue()
     {
         Debug.Log("会話パート開始");
+
+        //string dialogueName = stageManager.GetCurrentDialogue();
+
+        //if (string.IsNullOrEmpty(dialogueName))
+        //{
+        //    Debug.LogError("会話CSV名が設定されていません。");
+        //    return;
+        //}
+
+        //if (gameFlowManager == null)
+        //{
+        //    Debug.LogError("GameFlowManagerが設定されていません。");
+        //    return;
+        //}
+
+        //gameFlowManager.PlayConversation(dialogueName, () =>
+        //{
+        //    ChangePhase(GamePhase.BattlePreparation);
+        //});
     }
 
     private void StartBattlePreparation()

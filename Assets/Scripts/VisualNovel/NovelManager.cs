@@ -222,7 +222,7 @@ public class NovelManager : MonoBehaviour
         SetMessageWindow(true);
 
         // 次へマーク更新
-        UpdateNextMark();
+        NextMark();
 
         // 会話開始
         AdvanceMessage();
@@ -516,19 +516,27 @@ public class NovelManager : MonoBehaviour
     #region Update()
     void Update()
     {
+        // 設定画面が開いている間は処理を停止
+        if (ConfigSceneController.IsConfigOpen)
+            return;
+
         // 状態遷移
         switch (state)
         {
             case NovelState.Normal:
 
+                // 通常時の入力処理
                 UpdateInput();
+                // オート・スキップの更新
                 UpdateAutoMode();
 
                 break;
 
             case NovelState.BackLog:
 
-                UpdateBackLogInput(); // バックログ中の操作
+                // バックログ中の操作
+                UpdateBackLogInput();
+
                 break;
         }
     }

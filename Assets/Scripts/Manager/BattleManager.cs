@@ -169,8 +169,19 @@ public class BattleManager : MonoBehaviour
             yield return StartCoroutine(EnemyAttack());
         }
 
+        // “G‚ÌUŒ‚Œã‚Éƒ_ƒ[ƒWŒvZ
+        if (battleEnemy != null && !battleEnemy.IsDead())
+        {
+            int damage = battleEnemy.CalculateDamageToPlayer();
+
+            Debug.Log($"“G‚ÌUŒ‚FATK={battleEnemy.Attack}, " +
+                      $"Player DEF={PlayerStats.Instance.DEF}, ƒ_ƒ[ƒW={damage}");
+
+            player.Damage(damage);
+        }
+
         // “G‚ÌUŒ‚Œã‚ÉƒvƒŒƒCƒ„[‚ª“|‚ê‚½ê‡‚àl—¶
-        if(player.IsDead())
+        if (player.IsDead())
         {
             EndBattle();
             yield break;

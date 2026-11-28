@@ -175,27 +175,27 @@ public class Enemy : MonoBehaviour
     /// <returns></returns>
     public CheckResult Check(CommandType inputcommaned)
     {
+        // 入力列が空、または入力が終了している場合
+        if (currentIndex < 0 || currentIndex >= currentCommaneds.Count)
+        {
+            Debug.LogWarning("入力可能なコマンドがありません。");
+            return CheckResult.Miss;
+        }
+
         if (inputcommaned == currentCommaneds[currentIndex])
         {
             currentIndex++;
 
-            // 全成功
             if (currentIndex >= currentCommaneds.Count)
             {
                 return CheckResult.Complete;
             }
 
-            // 途中成功
             return CheckResult.Success;
         }
 
-        // ミスした場所を記録
         missIndex = currentIndex;
-
-        // この入力列でMISSしたことを記録
         hasMissed = true;
-
-        // ミスしたコマンドをスキップ
         currentIndex++;
 
         return CheckResult.Miss;
@@ -221,7 +221,7 @@ public class Enemy : MonoBehaviour
         currentIndex = 0;
         missIndex = -1;
 
-        int count = ArrowDamageCalculator.GetRandomArrowCount(PlayerStats.Instance.TEC);
+        int count = CommandGenerator.GetCommandCount(PlayerStats.Instance.TEC);
 
         for (int i = 0; i < count; i++)
         {
@@ -232,13 +232,13 @@ public class Enemy : MonoBehaviour
     public void SetCommands(List<CommandType> commands)
     {
         currentCommaneds.Clear();
+
+        // NEXTのコマンドを現在のコマンドとして設定
+        currentCommaneds.AddRange(commands);
+
         currentIndex = 0;
         missIndex = -1;
         hasMissed = false;
-
-        int count = ArrowDamageCalculator.GetRandomArrowCount(
-            PlayerStats.Instance.TEC
-        );
     }
 
     public List<CommandType> GetCommands() { return currentCommaneds; }
@@ -256,6 +256,23 @@ public class Enemy : MonoBehaviour
     public bool IsCommandFinished()
     {
         return currentIndex >= currentCommaneds.Count;
+    }
+
+    /// <summary>
+    /// プレイヤーに与えるダメージを計算する
+    /// </summary>
+    public int CalculateDamageToPlayer()
+    {
+        if (PlayerStats.Instance == null ||
+            !PlayerStats.Instance.IsInitialized)
+        {
+            Debug.LogError("PlayerStatsが存在しない、または初期化されていません。");
+            return 0;
+        }
+
+        int playerDefense = Mathf.RoundToInt(PlayerStats.Instance.DEF);
+
+        return status.CalculateDamage(playerDefense);
     }
 
     /// <summary>

@@ -222,7 +222,7 @@ public class NovelManager : MonoBehaviour
         SetMessageWindow(true);
 
         // 次へマーク更新
-        NextMark();
+        UpdateNextMark();
 
         // 会話開始
         AdvanceMessage();

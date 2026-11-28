@@ -8,7 +8,11 @@ public class ShopManagerkari : MonoBehaviour
     public GameObject shopPanel;
 
     public TMP_Text coinText;
-    public TMP_Text[] effectTexts;
+
+    [Header("商品表示")]
+    public TMP_Text[] itemNameTexts;
+    public TMP_Text[] effectNameTexts;
+    public TMP_Text[] priceTexts;
 
     public Button[] selectButtons;
     public Button purchaseButton;
@@ -31,13 +35,29 @@ public class ShopManagerkari : MonoBehaviour
     private Vector2[] originalPositions;
     private Outline[] buttonOutlines;
 
+    private string[] itemNames =
+    {
+         "均衡調律",
+         "大丈夫だ。問題ない",
+         "あったまってきた",
+         "背水の陣",
+         "狂乱",
+         "黄金律",
+         "指数関数",
+         "完璧主義",
+         "攻撃こそ最大の防御"
+    };
+
     private string[] effectNames =
     {
-        "ATK+6",
-        "HP+7",
-        "DEF+90",
-        "CRI+7",
-        "ATK+999999"
+       "すべてのステータスを6増加させる",
+       "１連の入力に成功すると、テクニックが3ずつ増加していく、失敗すると半減する、また戦闘が終わると増加数値は０となる",
+       "現在HPが30以下の時に発動、攻撃力+30、クリティカルダメ―ジ+50％増加する",
+       "獲得時、SANが30低下する、SANの減少量に対して、攻撃力、クリティカルダメージが伸びる(SAN-1(SANは100の想定)につき、攻撃力+1、クリティカルダメージ+2%)",
+       "所持goldに比例して、攻撃力が上がる(所持gold5に対して攻撃力1)",
+       "コンボが一定数に到達すると発動し固定のダメージを与える、発動タイミングは10、15、18、20~以降は毎回発動する",
+       "一定数コンボを繋がないと与えるダメージが70%減少する、コンボが10を超えたらそれ以降の倍率が『×3.0』になる(通常×1.0　 ×1.05　× 1.1 　×1.2の順)",
+       "コンボ数が5の倍数に達するたびに、0.35秒入力受付時間が延長される"
     };
 
     private int[] prices = { 100, 100, 150, 150, 500000 };
@@ -133,9 +153,14 @@ public class ShopManagerkari : MonoBehaviour
             purchased[i] = false;
             currentEffects[i] = availableEffects[i];
 
-            effectTexts[i].text =
-                effectNames[currentEffects[i]] +
-                "\n価格: " + prices[currentEffects[i]] + "コイン";
+            int effect = currentEffects[i];
+
+            itemNameTexts[i].text = itemNames[effect];
+
+            effectNameTexts[i].text = effectNames[effect];
+
+            priceTexts[i].text =
+                "価格: " + prices[effect] + "コイン";
 
             int index = i;
 
@@ -261,7 +286,12 @@ public class ShopManagerkari : MonoBehaviour
         rerollButton.interactable = false;
 
         purchased[selectedIndex] = true;
-        effectTexts[selectedIndex].text = "購入済み";
+
+        itemNameTexts[selectedIndex].text = "購入済み";
+
+        effectNameTexts[selectedIndex].text = "";
+
+        priceTexts[selectedIndex].text = "";
 
         buttonOutlines[selectedIndex].enabled = false;
 

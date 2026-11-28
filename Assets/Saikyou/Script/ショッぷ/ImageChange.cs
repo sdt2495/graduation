@@ -19,6 +19,9 @@ public class ImageChange : MonoBehaviour
     private bool isChanging = false;
     private bool showingPanel = false;
 
+    [Header("登場位置調整")]
+    public float startOffsetX = 150f;
+
     void Start()
     {
         spriteRect = spriteImage.GetComponent<RectTransform>();
@@ -29,20 +32,17 @@ public class ImageChange : MonoBehaviour
         panel.gameObject.SetActive(false);
     }
 
-    // Sprite → Panel
     public void ChangeToPanel()
     {
         if (!isChanging && !showingPanel)
             StartCoroutine(SlideChange(true));
     }
 
-    // Panel → Sprite
     public void ChangeToSprite()
     {
         if (!isChanging && showingPanel)
             StartCoroutine(SlideChange(false));
     }
-
 
     public void ChangeImage()
     {
@@ -51,34 +51,34 @@ public class ImageChange : MonoBehaviour
         StartCoroutine(SlideChange(!showingPanel));
     }
 
-
     IEnumerator SlideChange(bool toPanel)
     {
         isChanging = true;
 
-        // 表示する側を有効化
         if (toPanel)
         {
             panel.gameObject.SetActive(true);
             panel.anchoredPosition =
-                panelOriginalPos + Vector2.right * moveDistance;
+                panelOriginalPos + new Vector2(
+                    moveDistance - startOffsetX, 0
+                );
         }
         else
         {
             spriteImage.gameObject.SetActive(true);
             spriteRect.anchoredPosition =
-                spriteOriginalPos + Vector2.right * moveDistance;
+                spriteOriginalPos + new Vector2(
+                    -moveDistance - startOffsetX, 0
+                );
         }
 
         float time = 0f;
 
         Color spriteColor = spriteImage.color;
-        Color panelColor = GetPanelGraphicColor();
 
         while (time < duration)
         {
             time += Time.deltaTime;
-
             float t = Mathf.Clamp01(time / duration);
 
             if (toPanel)
@@ -97,7 +97,9 @@ public class ImageChange : MonoBehaviour
                 // Panelは右から中央へ
                 panel.anchoredPosition =
                     Vector2.Lerp(
-                        panelOriginalPos + Vector2.right * moveDistance,
+                        panelOriginalPos + new Vector2(
+                            moveDistance - startOffsetX, 0
+                        ),
                         panelOriginalPos,
                         t
                     );
@@ -119,7 +121,9 @@ public class ImageChange : MonoBehaviour
                 // Spriteは左から中央へ
                 spriteRect.anchoredPosition =
                     Vector2.Lerp(
-                        spriteOriginalPos + Vector2.left * moveDistance,
+                        spriteOriginalPos + new Vector2(
+                            -moveDistance - startOffsetX, 0
+                        ),
                         spriteOriginalPos,
                         t
                     );
@@ -131,7 +135,7 @@ public class ImageChange : MonoBehaviour
             yield return null;
         }
 
-        // 最終位置を設定
+        // 最終位置
         spriteRect.anchoredPosition = spriteOriginalPos;
         panel.anchoredPosition = panelOriginalPos;
 
@@ -146,16 +150,6 @@ public class ImageChange : MonoBehaviour
 
         showingPanel = toPanel;
         isChanging = false;
-    }
-
-    Color GetPanelGraphicColor()
-    {
-        Graphic g = panel.GetComponent<Graphic>();
-
-        if (g != null)
-            return g.color;
-
-        return Color.white;
     }
 
     void SetPanelAlpha(float alpha)

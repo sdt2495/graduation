@@ -2558,6 +2558,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   enemySpawner: {fileID: 515253255}
   stageManager: {fileID: 0}
+  gameFlowManager: {fileID: 0}
   backgroundRenderer: {fileID: 1716793978}
   commandManager: {fileID: 976136307}
   battleManager: {fileID: 484586750}

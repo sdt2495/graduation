@@ -11,4 +11,5 @@ public class EnemyData : ScriptableObject
 
     [Header("Œ©‚½–Ú")]
     public Sprite enemySprite;
+    public Sprite backgroundSprite;
 }

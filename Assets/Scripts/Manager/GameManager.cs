@@ -17,6 +17,9 @@ public class GameManager : MonoBehaviour
     [Header("マネージャー設定")]
     [SerializeField] private StageManager stageManager;
 
+    [Header("背景")]
+    [SerializeField] private SpriteRenderer backgroundRenderer;
+
     [SerializeField] private BattaleCommandManager commandManager;
     [SerializeField] private BattleManager battleManager;
 
@@ -54,6 +57,7 @@ public class GameManager : MonoBehaviour
             if (stageManager.HasNextStage())
             {
                 stageManager.NextStage();
+                SetCurrentStageBackground();
                 ChangePhase(GamePhase.Dialogue);
             }
             else
@@ -64,6 +68,7 @@ public class GameManager : MonoBehaviour
         else
         {
             // 通常起動
+            SetCurrentStageBackground();
             ChangePhase(GamePhase.Dialogue);
         }
     }
@@ -155,6 +160,36 @@ public class GameManager : MonoBehaviour
     private void StartGameOver()
     {
         Debug.Log("ゲームオーバー");
+    }
+
+    public void SetBackground(EnemyData data)
+    {
+        if (data == null || backgroundRenderer == null)
+        {
+            Debug.LogWarning("背景の設定に失敗しました。");
+            return;
+        }
+
+        if (data.backgroundSprite == null)
+        {
+            Debug.LogWarning("EnemyDataに背景画像が設定されていません。");
+            return;
+        }
+
+        backgroundRenderer.sprite = data.backgroundSprite;
+    }
+
+    private void SetCurrentStageBackground()
+    {
+        EnemyData enemyData = stageManager.GetCurrentEnemyData();
+
+        if (enemyData == null)
+        {
+            Debug.LogError("現在のステージのEnemyDataがありません。");
+            return;
+        }
+
+        enemySpawner.SetBackground(enemyData);
     }
 
     public void StartBattlePhase()

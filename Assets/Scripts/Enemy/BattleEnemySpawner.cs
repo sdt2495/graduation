@@ -16,6 +16,9 @@ public class BattleEnemySpawner : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool spawnOnStart = false;
 
+    [Header("”wŒi")]
+    [SerializeField] private SpriteRenderer backgroundRenderer;
+
     //private void Start()
     //{
     //    if(spawnOnStart)
@@ -40,6 +43,23 @@ public class BattleEnemySpawner : MonoBehaviour
         battleEnemy.SetRandomCommands();
 
         player.SetEnemy(battleEnemy);
+    }
+
+    public void SetBackground(EnemyData data)
+    {
+        if (data == null || backgroundRenderer == null)
+        {
+            Debug.LogWarning("”wŒi‚Ìİ’è‚É¸”s‚µ‚Ü‚µ‚½B");
+            return;
+        }
+
+        if (data.backgroundSprite == null)
+        {
+            Debug.LogWarning("EnemyData‚É”wŒi‰æ‘œ‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB");
+            return;
+        }
+
+        backgroundRenderer.sprite = data.backgroundSprite;
     }
 
     public Enemy GetBattleEnemy()

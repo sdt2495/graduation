@@ -1103,7 +1103,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 515253253}
-  - component: {fileID: 515253254}
   - component: {fileID: 515253255}
   m_Layer: 0
   m_Name: EnemySpawner
@@ -1127,26 +1126,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &515253254
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 515253252}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 677c1970505935d49b1ad85b104dcd62, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
-  spawnPoint: {fileID: 470591276}
-  enemyPrefab: {fileID: 5640618988908233305, guid: e376c2de5ebbb294d993720a95fe8140, type: 3}
-  player: {fileID: 758857482}
-  battlePoint: {fileID: 470591276}
-  nextPoint: {fileID: 849627675}
-  commandUI: {fileID: 838218681}
-  waveUI: {fileID: 324588979}
-  maxWave: 10
 --- !u!114 &515253255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1165,6 +1144,7 @@ MonoBehaviour:
   hpManager: {fileID: 838218682}
   canvas: {fileID: 855068726}
   spawnOnStart: 1
+  backgroundRenderer: {fileID: 1716793978}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -2565,6 +2545,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   enemySpawner: {fileID: 515253255}
   stageManager: {fileID: 0}
+  backgroundRenderer: {fileID: 1716793978}
   commandManager: {fileID: 976136307}
   battleManager: {fileID: 484586750}
 --- !u!4 &934584213

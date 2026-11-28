@@ -23,6 +23,8 @@ public class Enemy : MonoBehaviour
 {
     private List<CommandType> currentCommaneds = new List<CommandType>();
     private int currentIndex = 0;
+    // 現在の入力列ですでにMISSしたか
+    private bool hasMissed = false;
 
     // ミスしたコマンドのindex
     private int missIndex = -1;
@@ -163,6 +165,7 @@ public class Enemy : MonoBehaviour
     {
         currentIndex = 0;
         missIndex = -1;
+        hasMissed = false;
     }
 
     /// <summary>
@@ -188,6 +191,9 @@ public class Enemy : MonoBehaviour
 
         // ミスした場所を記録
         missIndex = currentIndex;
+
+        // この入力列でMISSしたことを記録
+        hasMissed = true;
 
         // ミスしたコマンドをスキップ
         currentIndex++;
@@ -215,7 +221,7 @@ public class Enemy : MonoBehaviour
         currentIndex = 0;
         missIndex = -1;
 
-        int count = CommandGenerator.GetCommandCount(PlayerStats.Instance.TEC);
+        int count = ArrowDamageCalculator.GetRandomArrowCount(PlayerStats.Instance.TEC);
 
         for (int i = 0; i < count; i++)
         {
@@ -226,10 +232,13 @@ public class Enemy : MonoBehaviour
     public void SetCommands(List<CommandType> commands)
     {
         currentCommaneds.Clear();
-        currentCommaneds.AddRange(commands);
-
         currentIndex = 0;
         missIndex = -1;
+        hasMissed = false;
+
+        int count = ArrowDamageCalculator.GetRandomArrowCount(
+            PlayerStats.Instance.TEC
+        );
     }
 
     public List<CommandType> GetCommands() { return currentCommaneds; }
@@ -247,5 +256,21 @@ public class Enemy : MonoBehaviour
     public bool IsCommandFinished()
     {
         return currentIndex >= currentCommaneds.Count;
+    }
+
+    /// <summary>
+    /// 現在の入力列で適用するダメージ倍率
+    /// MISS後の成功は入力列倍率を適用しない
+    /// </summary>
+    public float GetCurrentDamageMultiplier()
+    {
+        if (hasMissed)
+        {
+            return 1f;
+        }
+
+        return ArrowDamageCalculator.GetLengthMultiplier(
+            currentCommaneds.Count
+        );
     }
 }
